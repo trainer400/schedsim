@@ -4,98 +4,76 @@ import Scheduler
 import Cpu
 
 
-# The idea of this function was based on SchedSim v1:
-# https://github.com/HEAPLab/schedsim/blob/master/SchedIo.py
 def import_file(file_path, output_file):
     scheduler = None
     root_node = ET.parse(file_path).getroot()
-    if root_node.tag == 'simulation':
-        if root_node[1].tag == 'software':
-            count_scheduler = 0
-            for scheduler in root_node[1]:
-                if scheduler.tag == 'scheduler':
-                    count_scheduler += 1
-                    if count_scheduler == 1:
-                        _scheduler = scheduler
-                        if _scheduler.attrib['algorithm'] == 'RR':
-                            if 'quantum' in _scheduler.attrib:
-                                quantum = _scheduler.attrib['quantum']
-                                scheduler = Scheduler.RoundRobin(output_file, quantum)
-                            else:
-                                raise Exception(
-                                    'non "quantum" attribute are defined in the file')
-                        if _scheduler.attrib['algorithm'] == 'FIFO':
-                            scheduler = Scheduler.FIFO(output_file)
-                        if _scheduler.attrib['algorithm'] == 'SJF':
-                            scheduler = Scheduler.SJF(output_file)
-                        if _scheduler.attrib['algorithm'] == 'HRRN':
-                            scheduler = Scheduler.HRRN(output_file)
-                        if _scheduler.attrib['algorithm'] == 'SRTF':
-                            scheduler = Scheduler.SRTF(output_file)
-                    elif count_scheduler > 1:
-                        raise Exception(
-                            'more than one scheduler is defined in the file')
-            if count_scheduler == 0:
-                raise Exception(
-                            'non scheduler is defined in the file')
 
-        if root_node[1].tag == 'software':
-            if scheduler:
-                task_root = root_node[1][0]
-                count_task = 0
-                for task_leaf in task_root:
-                    _real_time = False
-                    if task_leaf.attrib['real-time'] == 'true':
-                        _real_time = True
-                    _type = task_leaf.attrib['type']
-                    _id = int(task_leaf.attrib['id'])
-                    _period = -1
-                    _activation = -1
-                    _deadline = -1
-                    _wcet = int(task_leaf.attrib['wcet'])
-                    if task_leaf.attrib['type'] == 'periodic':
-                        _period = int(task_leaf.attrib['period'])
-                    if task_leaf.attrib['type'] == 'sporadic':
-                        _activation = int(task_leaf.attrib['activation'])
-                    if task_leaf.attrib['real-time'] == 'true':
-                        _deadline = int(task_leaf.attrib['deadline'])
+    # Parsing scheduler
+    for node in root_node.findall('./software/scheduler'):
+        if scheduler is not None:
+            raise Exception('More than one scheduler is defined in the file')
+        algorithm = node.attrib.get('algorithm')
+        if algorithm == 'RR':
+            quantum = node.attrib.get('quantum')
+            if quantum is None:
+                raise Exception('No "quantum" attribute defined in the file')
+            scheduler = Scheduler.RoundRobin(output_file, quantum)
+        elif algorithm == 'FIFO':
+            scheduler = Scheduler.FIFO(output_file)
+        elif algorithm == 'SJF':
+            scheduler = Scheduler.SJF(output_file)
+        elif algorithm == 'HRRN':
+            scheduler = Scheduler.HRRN(output_file)
+        elif algorithm == 'SRTF':
+            scheduler = Scheduler.SRTF(output_file)
+        else:
+            raise Exception(f'Invalid scheduler algorithm: {algorithm}')
 
-                    if _id < 0 or _wcet <= 0 or _period <= 0 and (_deadline <= 0 and not _deadline == -1):
-                        raise Exception(
-                            'non positive values are saved in the file')
-                    if (_wcet > _period != -1) or (_deadline != -1 and _deadline < _wcet):
-                        raise Exception(
-                            'inconsistent values saved in the file')
+    if scheduler is None:
+        raise Exception('No scheduler is defined in the file')
+    
+    
+    # Parsing tasks
+    for node in root_node.findall('./software/tasks/task'):
+        _real_time = node.attrib.get('real-time', 'false') == 'true'
+        _type = node.attrib['type']
+        _id = int(node.attrib['id'])
+        _period = int(node.attrib.get('period', -1))
+        _activation = int(node.attrib.get('activation', -1))
+        _deadline = int(node.attrib.get('deadline', -1))
+        _wcet = int(node.attrib['wcet'])
 
-                    task = Task.Task(_real_time, _type, _id, _period, _activation, _deadline, _wcet)
-                    scheduler.tasks.append(task)
-                    count_task += 1
-                if count_task == 0:
-                    raise Exception(
-                        'non task recognized in the file')
-            else:
-                raise Exception(
-                    'non scheduler recognized in the file')
+        if _id < 0 or _wcet <= 0 or (_type == 'periodic' and _period <= 0) or (_type == 'sporadic' and _activation <= 0):
+            raise Exception('Non-positive values are saved in the file')
 
-        if root_node[0].tag == 'time':
-            time = root_node[0].attrib
-            scheduler.start = int(time['start'])
-            scheduler.end = int(time['end'])
+        if (_wcet > _period != -1) or (_deadline != -1 and _deadline < _wcet):
+            raise Exception('Inconsistent values are saved in the file')
 
-        if root_node[2].tag == 'hardware':
-            core_root = root_node[2][0]
-            count_cores = 0
-            for core_leaf in core_root:
-                _id = core_leaf.attrib['id']
-                core = Cpu.Core(_id)
-                if core_leaf.attrib['speed']:
-                    core.speed = core_leaf.attrib['speed']
-                scheduler.cores.append(core)
-                count_cores += 1
+        task = Task.Task(_real_time, _type, _id, _period, _activation, _deadline, _wcet)
+        scheduler.tasks.append(task)
 
-            if count_cores == 0:
-                raise Exception(
-                    'non cores recognized in the file')
+    if not scheduler.tasks:
+        raise Exception('No tasks recognized in the file')
+
+    # Parsing time
+    time_node = root_node.find('./time')
+    if time_node is not None:
+        scheduler.start = int(time_node.attrib['start'])
+        scheduler.end = int(time_node.attrib['end'])
+        if scheduler.end < scheduler.start :
+            raise Exception('Error in time definition')#chiedi se non deve fare nulla o lanciare eccezzione
+
+    # Parsing hardware
+    for node in root_node.findall('./hardware/cpus/pe'):
+        _id = node.attrib['id']
+        core = Cpu.Core(_id)
+        core_speed = node.attrib.get('speed')
+        if core_speed:
+            core.speed = core_speed
+        scheduler.cores.append(core)
+
+    if not scheduler.cores:
+        raise Exception('No cores recognized in the file')
 
     return scheduler
 
