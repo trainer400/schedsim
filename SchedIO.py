@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 import Task
 import Scheduler
 import Cpu
+import math
 
 
 def import_file(file_path, output_file):
@@ -51,6 +52,7 @@ def import_file(file_path, output_file):
 
         task = Task.Task(_real_time, _type, _id, _period, _activation, _deadline, _wcet)
         scheduler.tasks.append(task)
+
 
     if not scheduler.tasks:
         raise Exception('No tasks recognized in the file')
