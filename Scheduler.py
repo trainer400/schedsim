@@ -159,16 +159,16 @@ class Preemptive(Scheduler):
             event.task.first_time_executing = False
 
 
-def equals(self, time):  # TODO with hash
+def equals(self, time):  #TODO with hash
     return False
     #print(time, len(self.fifo_finish_events))
-    if self.finish_events.task.id != self.fifo_finish_events[time].task.id:
+    if self.finish_events != self.fifo_finish_events:
         return False
-    if self.deadline_events != self.fifo_deadline_events[time]:
+    if self.deadline_events != self.fifo_deadline_events:
         return False
-    if self.arrival_events != self.fifo_arrival_events[time]:
+    if self.arrival_events != self.fifo_arrival_events:
         return False
-    if self.start_events != self.fifo_start_events[time]:
+    if self.start_events != self.fifo_start_events:
         return False
     return True
 
@@ -190,11 +190,12 @@ class FIFO(NonPreemptive):
             self.find_deadline_events(time)
             self.find_arrival_event(time)
             self.find_start_events(time)
+            
             self.fifo_finish_events.append(self.finish_events)
             self.fifo_deadline_events.append(self.deadline_events)
             self.fifo_arrival_events.append(self.arrival_events)
             self.fifo_start_events.append(self.start_events)
-            if time == 14:
+            '''if time == 14:
                 print('finish')
                 for ev in self.start_events:
                     print(ev.task.id)
@@ -206,7 +207,7 @@ class FIFO(NonPreemptive):
                     print(ev.task.id)
                 print('start')
                 for ev in self.start_events:
-                    print(ev.task.id)
+                    print(ev.task.id)'''
             time += 1
 
         #self.output_file.terminate_write()
@@ -219,7 +220,7 @@ class FIFO(NonPreemptive):
         self.deadline_event = self.fifo_deadline_events[time - 1]
         self.arrival_events = self.fifo_arrival_events[time - 1]
         self.start_events = self.fifo_start_events[time - 1]
-
+        
         '''print(time, self.end)
         print('finish')
         for ev in self.start_events:
@@ -236,6 +237,10 @@ class FIFO(NonPreemptive):
 
         while(time <= self.end):
             print('time ' + str(time))
+            
+            # Check if there are just some element saved in the output, maintain the value between [0,time]
+            self.output_file.clean(time)
+            
             self.find_finish_events(time)
             self.find_deadline_events(time)
             if(time == new_task.activation):
@@ -246,13 +251,18 @@ class FIFO(NonPreemptive):
                     self.arrival_events = self.fifo_arrival_events[time]
                     self.arrival_events.append(event)
                     self.arrival_events.sort(key=lambda x: x.timestamp)
+
             self.find_arrival_event(time)
             self.find_start_events(time)
             if time % 1 == 0:
                 for ev in self.start_events:
                     print(ev.task.id)
-            if (equals(self, time)):
-                 break
+            #print(self.finish_events == self.fifo_finish_events
+            self.start_events= self.deadline_events
+            
+            #check if the actual time is equal to which is just calculate
+            #if (equals(self, time)):
+            #    break
             self.fifo_finish_events = self.finish_events
             self.fifo_deadline_events = self.deadline_events
             self.fifo_arrival_events = self.arrival_events

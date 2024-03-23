@@ -9,6 +9,7 @@ if __name__ == "__main__":
         scheduler = SchedIO.import_file(input_path, output_path)
         scheduler.execute()
         new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
+        #new_task = Task.Task(True,'sporadic',6,None, 0,100,10)
         scheduler.new_task(new_task)
     else:
         raise Exception(
