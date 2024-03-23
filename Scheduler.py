@@ -160,16 +160,27 @@ class Preemptive(Scheduler):
 
 
 def equals(self, time):  #TODO with hash
-    return False
+    #return False
     #print(time, len(self.fifo_finish_events))
-    if self.finish_events != self.fifo_finish_events:
+    # Check if time is within the valid range
+    if time < 0 or time >= len(self.fifo_finish_events):
         return False
-    if self.deadline_events != self.fifo_deadline_events:
+    if time < 0 or time >= len(self.fifo_deadline_events):
         return False
-    if self.arrival_events != self.fifo_arrival_events:
+    if time < 0 or time >= len(self.fifo_arrival_events):
         return False
-    if self.start_events != self.fifo_start_events:
+    if time < 0 or time >= len(self.fifo_start_events):
         return False
+
+    # Check if the states are equal at the given time
+    if self.finish_events != self.fifo_finish_events[time]:
+            return False
+    if self.deadline_events != self.fifo_deadline_events[time]:
+            return False
+    if self.arrival_events != self.fifo_arrival_events[time]:
+            return False
+    if self.start_events != self.fifo_start_events[time]:
+            return False
     return True
 
 
@@ -261,8 +272,8 @@ class FIFO(NonPreemptive):
             self.start_events= self.deadline_events
             
             #check if the actual time is equal to which is just calculate
-            #if (equals(self, time)):
-            #    break
+            if (equals(self, time)):
+                break
             self.fifo_finish_events = self.finish_events
             self.fifo_deadline_events = self.deadline_events
             self.fifo_arrival_events = self.arrival_events
