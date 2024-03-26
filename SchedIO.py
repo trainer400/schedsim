@@ -91,6 +91,23 @@ class SchedulerEventWriter:
             str(scheduler_event.timestamp) + ',' + str(scheduler_event.task.id) + ',' +
             str(scheduler_event.job) + ',' + str(scheduler_event.processor) + ',' +
             str(scheduler_event.type) + ',' + str(scheduler_event.extra) + '\n')
+        
+    def clean(self, time):
+        # Create a list for save the element in the range [0,time]
+        events = []
+        # Open the file of output and read it to save the element, where is valid events_time<=time
+        with open(self.out.name, 'r') as f:
+            for line in f:
+                parts = line.strip().split(',')
+                event_time = int(parts[0])
+                if event_time <= time:
+                    events.append(line)
+                    
+        # Override in the file the element which have the event_time>time with the list "events"
+        self.terminate_write
+        self.out = open(self.out.name, 'w')
+        self.out.writelines(events)
+        
 
     def terminate_write(self):
         self.out.close()
