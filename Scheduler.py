@@ -81,7 +81,6 @@ class Scheduler:
                 helper_list.append(event)
         self.deadline_events = helper_list
 
-
 class NonPreemptive(Scheduler):
 
     def __init__(self, output_file):
@@ -161,7 +160,10 @@ class Preemptive(Scheduler):
 
 def equals(self, time):  #TODO with hash
     #return False
+<<<<<<< Updated upstream
     #print(time, len(self.fifo_finish_events))
+=======
+>>>>>>> Stashed changes
     # Check if time is within the valid range
     if time < 0 or time >= len(self.fifo_finish_events):
         return False
@@ -207,8 +209,8 @@ class FIFO(NonPreemptive):
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
-
         time = self.start
+
         while time <= self.end:
             self.find_finish_events(time)
             self.find_deadline_events(time)
@@ -223,6 +225,14 @@ class FIFO(NonPreemptive):
             time += 1
 
         #self.output_file.terminate_write()
+    
+    def add_time(self, add_t):
+        # Check if add_t is stricly positive
+        if add_t > 0:
+            # Update self.end with new new time add_t
+            self.end +=add_t 
+        else:
+            print("The new value add_t is not stricly positive.")
 
     def new_task(self, new_task):
         self.executing = None
@@ -277,10 +287,17 @@ class FIFO(NonPreemptive):
 
             if (equals(self, time)):
                 break
+<<<<<<< Updated upstream
             self.fifo_finish_events = self.finish_events
             self.fifo_deadline_events = self.deadline_events
             self.fifo_arrival_events = self.arrival_events
             self.fifo_start_events = self.start_events
+=======
+            self.fifo_finish_events[time] = self.finish_events
+            self.fifo_deadline_events[time] = self.deadline_events
+            self.fifo_arrival_events[time] = self.arrival_events
+            self.fifo_start_events[time] = self.start_events
+>>>>>>> Stashed changes
             time += 1
         self.output_file.terminate_write()
 
