@@ -22,6 +22,16 @@ class Scheduler:
         self.fifo_finish_events = []
         self.fifo_deadline_events = []
         self.fifo_start_events = []
+        
+        self.srtf_arrival_events = []
+        self.srtf_finish_events = []
+        self.srtf_deadline_events = []
+        self.srtf_start_events = []
+        
+        self.rr_finish_events = []
+        self.rr_deadline_events = [] 
+        self.rr_arrival_events =[]
+        self.rr_start_events = []
 
         self.output_file = SchedIO.SchedulerEventWriter(output_file)
 
@@ -226,16 +236,7 @@ class FIFO(NonPreemptive):
 
         #self.output_file.terminate_write()
 
-    def add_time(self, add_t):
-        # Check if add_t is stricly positive
-        if add_t > 0:
-            # Update self.end with new new time add_t
-            self.end +=add_t 
-        else:
-            print("The new value add_t is not stricly positive.")
-        
     def new_task(self, new_task):
-        self.executing = None
         new_task.core = self.cores[0].id
         time = 0
         if new_task.type == 'sporadic' and new_task.activation > 0:
@@ -364,14 +365,13 @@ class SRTF(Preemptive):
                 # Create deadline event:
                 if event.task.first_time_executing:
                     self.create_deadline_event(event)
-
-            '''print(f'EXECUTING {self.executing.task.id}:{self.executing.remaining_time}')
+            #print("time= " + str(time))
+            print(f'EXECUTING {self.executing.task.id}:{self.executing.remaining_time}')
             print(f'BEST REM {self.start_events[0].task.id}:{self.start_events[0].remaining_time}')
-            print(f'LEN STARTS {len(self.start_events)}')'''
+            print(f'LEN STARTS {len(self.start_events)}')
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
-
         time = self.start
         while time <= self.end:
             self.find_finish_events(time)
@@ -381,9 +381,61 @@ class SRTF(Preemptive):
             self.choose_executed(time)
             if self.executing:
                 self.executing.executing_time += 1
+                
+            self.srtf_finish_events.append(self.finish_events)
+            self.srtf_deadline_events.append(self.deadline_events)
+            self.srtf_arrival_events.append(self.arrival_events)
+            self.srtf_start_events.append(self.start_events)
+            
             time += 1
 
+    def new_task(self, new_task):
+        new_task.core = self.cores[0].id
+        time = 0
+        if new_task.type == 'sporadic' and new_task.activation > 0:
+            time = new_task.activation
+            # Go back in time
+            self.finish_events = self.srtf_finish_events[time - 1] #TODO index 0
+            self.deadline_events = self.srtf_deadline_events[time - 1]
+            self.arrival_events = self.srtf_arrival_events[time - 1]
+            self.start_events = self.srtf_start_events[time - 1]
+        else:
+            self.finish_events = []
+            self.deadline_events = []
+            self.arrival_events = []
+            self.start_events = []
+            self.tasks.append(new_task)
+            self.arrival_events = self.get_all_arrivals()
 
+        self.output_file.clean(time)
+        while(time <= self.end):
+            print("Time:", time)
+            self.find_finish_events(time)
+            self.find_deadline_events(time)
+            if time == new_task.activation and time > 0 and new_task.type == 'sporadic':
+                self.tasks.append(new_task)
+                new_task.init = new_task.activation
+                event = SchedEvent.ScheduleEvent(new_task.activation, new_task,
+                                                     SchedEvent.EventType.activation.value)
+                self.arrival_events = self.srtf_arrival_events[time]
+                self.arrival_events.append(event)
+            else:
+                self.find_arrival_event(time-1)
+            
+            self.calculate_remaining_time()
+            self.choose_executed(time)
+            if self.executing:
+                self.executing.executing_time += 1
+            if (equals(self, time)):
+                break
+            
+            self.srtf_finish_events[time] = self.finish_events
+            self.srtf_deadline_events[time] = self.deadline_events
+            self.srtf_arrival_events[time] = self.arrival_events
+            self.srtf_start_events[time] = self.start_events
+            time += 1
+                
+                
 class RoundRobin(Preemptive):
 
     def __init__(self, output_file, quantum):
@@ -440,4 +492,54 @@ class RoundRobin(Preemptive):
             self.quantum_counter += 1
             if self.executing:
                 self.executing.executing_time += 1
+                
+            self.rr_finish_events.append(self.finish_events)
+            self.rr_deadline_events.append(self.deadline_events)
+            self.rr_arrival_events.append(self.arrival_events)
+            self.rr_start_events.append(self.start_events)
             time += 1
+            
+    def new_task(self, new_task):
+        new_task.core = self.cores[0].id
+        time = 0
+        if new_task.type == 'sporadic' and new_task.activation > 0:
+            time = new_task.activation
+            # Go back in time
+            self.finish_events = self.rr_finish_events[time - 1] #TODO index 0
+            self.deadline_events = self.rr_deadline_events[time - 1]
+            self.arrival_events = self.rr_arrival_events[time - 1]
+            self.start_events = self.rr_start_events[time - 1]
+        else:
+            self.finish_events = []
+            self.deadline_events = []
+            self.arrival_events = []
+            self.start_events = []
+            self.tasks.append(new_task)
+            self.arrival_events = self.get_all_arrivals()
+
+        self.output_file.clean(time)
+        while(time <= self.end):
+            self.find_finish_events(time)
+            self.find_deadline_events(time)
+            if time == new_task.activation and time > 0 and new_task.type == 'sporadic':
+                self.tasks.append(new_task)
+                new_task.init = new_task.activation
+                event = SchedEvent.ScheduleEvent(new_task.activation, new_task,
+                                                     SchedEvent.EventType.activation.value)
+                self.arrival_events = self.rr_arrival_events[time]
+                self.arrival_events.append(event)
+                #self.arrival_events.sort(key=lambda x: x.timestamp)
+            else:
+                self.find_arrival_event(time-1)
+            self.choose_executed(time)
+            self.quantum_counter += 1
+            if self.executing:
+                self.executing.executing_time += 1
+            if (equals(self, time)):
+                 break
+            self.rr_finish_events[time] = self.finish_events
+            self.rr_deadline_events[time] = self.deadline_events
+            self.rr_arrival_events[time] = self.arrival_events
+            self.rr_start_events[time] = self.start_events
+            time += 1
+

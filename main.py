@@ -12,7 +12,7 @@ if __name__ == "__main__":
         output_path = sys.argv[2]
         test(input_path, output_path)
         scheduler = SchedIO.import_file(input_path, output_path)
-        print("Do you want to add some seconds?")
+        '''print("Do you want to add some seconds?")
         while True:
             seconds = input()
             if seconds.lower() == "next":
@@ -27,7 +27,7 @@ if __name__ == "__main__":
                     raise ValueError("The number of seconds must be between 0 and 100")
             except ValueError:
                 print("Invalid value, please try again or type 'Next' to skip the execution:")
-
+        '''
         scheduler.execute()
 
         '''while(True):
@@ -55,9 +55,11 @@ if __name__ == "__main__":
         #new_task = Task.Task(False, 'sporadic', 4, None, 10, None, 15)
         #scheduler.new_task(new_task)
 
-        new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
-        #new_task = Task.Task(True,'sporadic',6,None, 0,100,10)
+        new_task = Task.Task(True, 'sporadic', 5, None, 5, 100, 1)
         scheduler.new_task(new_task)
+        new_task = Task.Task(True,'sporadic',6,None, 0,100,10)
+        scheduler.new_task(new_task)
+
     else:
         raise Exception(
             'Insufficient arguments. The name of the input and output files are required')
