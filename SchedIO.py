@@ -2,8 +2,6 @@ import xml.etree.ElementTree as ET
 import Task
 import Scheduler
 import Cpu
-import math
-
 
 def import_file(file_path, output_file):
     scheduler = None
@@ -36,7 +34,7 @@ def import_file(file_path, output_file):
     
     # Parsing tasks
     for node in root_node.findall('./software/tasks/task'):
-        _real_time = node.attrib.get('real-time', 'false') == 'true'
+        _real_time = node.attrib.get('real_time', 'false') == 'true'
         _type = node.attrib['type']
         _id = int(node.attrib['id'])
         _period = int(node.attrib.get('period', -1))
@@ -44,7 +42,8 @@ def import_file(file_path, output_file):
         _deadline = int(node.attrib.get('deadline', -1))
         _wcet = int(node.attrib['wcet'])
 
-        if _id < 0 or _wcet <= 0 or (_type == 'periodic' and _period <= 0) or (_type == 'sporadic' and _activation <= 0):
+        #print(_real_time, _type, _id, _period, _activation, _deadline, _wcet)
+        if _id < 0 or _wcet <= 0 or (_type == 'periodic' and _period <= 0) or (_type == 'sporadic' and _activation < 0):
             raise Exception('Non-positive values are saved in the file')
 
         if (_wcet > _period != -1) or (_deadline != -1 and _deadline < _wcet):
@@ -93,6 +92,7 @@ class SchedulerEventWriter:
             str(scheduler_event.type) + ',' + str(scheduler_event.extra) + '\n')
         
     def clean(self, time):
+        self.out.close()
         # Create a list for save the element in the range [0,time]
         events = []
         # Open the file of output and read it to save the element, where is valid events_time<=time
@@ -100,14 +100,10 @@ class SchedulerEventWriter:
             for line in f:
                 parts = line.strip().split(',')
                 event_time = int(parts[0])
-                if event_time <= time:
+                if event_time < time:
                     events.append(line)
-                    
-        # Override in the file the element which have the event_time>time with the list "events"
-        self.terminate_write
         self.out = open(self.out.name, 'w')
         self.out.writelines(events)
-        
 
     def terminate_write(self):
         self.out.close()

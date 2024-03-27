@@ -104,6 +104,9 @@ class NonPreemptive(Scheduler):
     def find_start_events(self, time):
         helper_list = []
         for event in self.start_events:
+            v2 = self.executing
+            if v2 != None:
+                v2 = self.executing.task.id
             if event.timestamp == time and self.executing is None:
                 self.output_file.add_scheduler_event(event)
                 self.executing = event
@@ -160,8 +163,7 @@ class Preemptive(Scheduler):
 
 
 def equals(self, time):  #TODO with hash
-    #return False
-    #print(time, len(self.fifo_finish_events))
+    return False
     # Check if time is within the valid range
     if time < 0 or time >= len(self.fifo_finish_events):
         return False
@@ -227,7 +229,6 @@ class FIFO(NonPreemptive):
     def new_task(self, new_task):
         self.executing = None
         new_task.core = self.cores[0].id
-
         time = 0
         if new_task.type == 'sporadic' and new_task.activation > 0:
             time = new_task.activation
@@ -244,45 +245,28 @@ class FIFO(NonPreemptive):
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
 
+        self.output_file.clean(time)
         while(time <= self.end):
-            if time == 1:
-                debug(self, time)
-                
-        time = new_task.activation
-        # Go back in time
-        self.finish_events = self.fifo_finish_events[time - 1]
-        self.deadline_event = self.fifo_deadline_events[time - 1]
-        self.arrival_events = self.fifo_arrival_events[time - 1]
-        self.start_events = self.fifo_start_events[time - 1]
-
-        while(time <= self.end):
-            print('time ' + str(time))
-            
-            # Check if there are just some element saved in the output, maintain the value between [0,time]
-            self.output_file.clean(time)
-            
             self.find_finish_events(time)
             self.find_deadline_events(time)
-            if(time == new_task.activation):
-                if new_task.type == 'sporadic':
-                    new_task.init = new_task.activation
-                    event = SchedEvent.ScheduleEvent(new_task.activation, new_task,
+            if time == new_task.activation and time > 0 and new_task.type == 'sporadic':
+                self.tasks.append(new_task)
+                new_task.init = new_task.activation
+                event = SchedEvent.ScheduleEvent(new_task.activation, new_task,
                                                      SchedEvent.EventType.activation.value)
-                    self.arrival_events = self.fifo_arrival_events[time]
-                    self.arrival_events.append(event)
-                    self.arrival_events.sort(key=lambda x: x.timestamp)
-
-            self.find_arrival_event(time)
+                self.arrival_events = self.fifo_arrival_events[time]
+                self.arrival_events.append(event)
+                #self.arrival_events.sort(key=lambda x: x.timestamp)
+            else:
+                self.find_arrival_event(time)
             self.find_start_events(time)
-
             if (equals(self, time)):
-                break
-            self.fifo_finish_events = self.finish_events
-            self.fifo_deadline_events = self.deadline_events
-            self.fifo_arrival_events = self.arrival_events
-            self.fifo_start_events = self.start_events
+                 break
+            self.fifo_finish_events[time] = self.finish_events
+            self.fifo_deadline_events[time] = self.deadline_events
+            self.fifo_arrival_events[time] = self.arrival_events
+            self.fifo_start_events[time] = self.start_events
             time += 1
-        self.output_file.terminate_write()
 
 class SJF(NonPreemptive):
 

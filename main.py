@@ -14,7 +14,7 @@ if __name__ == "__main__":
         scheduler = SchedIO.import_file(input_path, output_path)
         scheduler.execute()
 
-        while(True):
+        '''while(True):
             real_time = input()
             real_time = bool(real_time)
             _type = input()
@@ -32,13 +32,13 @@ if __name__ == "__main__":
             wcet = input()
             wcet = int(wcet)
             new_task = Task.Task(real_time, _type, _id, period, activation, deadline, wcet)
-            scheduler.new_task(new_task)
+            scheduler.new_task(new_task)'''
 
         #new_task = Task.Task(True, 'periodic', 5, 20, 0, 100, 5)
         #new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
         #new_task = Task.Task(False, 'sporadic', 4, None, 10, None, 15)
         #scheduler.new_task(new_task)
-        
+
         new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
         #new_task = Task.Task(True,'sporadic',6,None, 0,100,10)
         scheduler.new_task(new_task)
