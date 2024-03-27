@@ -12,6 +12,22 @@ if __name__ == "__main__":
         output_path = sys.argv[2]
         test(input_path, output_path)
         scheduler = SchedIO.import_file(input_path, output_path)
+        print("Do you want to add some seconds?")
+        while True:
+            seconds = input()
+            if seconds.lower() == "next":
+                print("Skipping the execution")
+                break  # Exits the loop
+            try:
+                seconds = int(seconds)
+                if 0 <= seconds <= 100:
+                    scheduler.add_time(seconds)
+                    break  # Exits the loop
+                else:
+                    raise ValueError("The number of seconds must be between 0 and 100")
+            except ValueError:
+                print("Invalid value, please try again or type 'Next' to skip the execution:")
+
         scheduler.execute()
 
         '''while(True):

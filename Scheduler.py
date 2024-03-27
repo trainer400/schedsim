@@ -226,6 +226,14 @@ class FIFO(NonPreemptive):
 
         #self.output_file.terminate_write()
 
+    def add_time(self, add_t):
+        # Check if add_t is stricly positive
+        if add_t > 0:
+            # Update self.end with new new time add_t
+            self.end +=add_t 
+        else:
+            print("The new value add_t is not stricly positive.")
+        
     def new_task(self, new_task):
         self.executing = None
         new_task.core = self.cores[0].id
