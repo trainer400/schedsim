@@ -287,17 +287,10 @@ class FIFO(NonPreemptive):
 
             if (equals(self, time)):
                 break
-<<<<<<< Updated upstream
             self.fifo_finish_events = self.finish_events
             self.fifo_deadline_events = self.deadline_events
             self.fifo_arrival_events = self.arrival_events
             self.fifo_start_events = self.start_events
-=======
-            self.fifo_finish_events[time] = self.finish_events
-            self.fifo_deadline_events[time] = self.deadline_events
-            self.fifo_arrival_events[time] = self.arrival_events
-            self.fifo_start_events[time] = self.start_events
->>>>>>> Stashed changes
             time += 1
         self.output_file.terminate_write()
 
