@@ -172,7 +172,7 @@ class Preemptive(Scheduler):
             event.task.first_time_executing = False
 
 
-def equals(self, time):  #TODO with hash
+def equals(self, time):  # TODO with hash
     return False
     # Check if time is within the valid range
     if time < 0 or time >= len(self.fifo_finish_events):
@@ -186,14 +186,15 @@ def equals(self, time):  #TODO with hash
 
     # Check if the states are equal at the given time
     if self.finish_events != self.fifo_finish_events[time]:
-            return False
+        return False
     if self.deadline_events != self.fifo_deadline_events[time]:
-            return False
+        return False
     if self.arrival_events != self.fifo_arrival_events[time]:
-            return False
+        return False
     if self.start_events != self.fifo_start_events[time]:
-            return False
+        return False
     return True
+
 
 def debug(self, time):
     print('time ' + str(time))
@@ -226,7 +227,7 @@ class FIFO(NonPreemptive):
             self.find_deadline_events(time)
             self.find_arrival_event(time)
             self.find_start_events(time)
-            
+
             self.fifo_finish_events.append(self.finish_events)
             self.fifo_deadline_events.append(self.deadline_events)
             self.fifo_arrival_events.append(self.arrival_events)
@@ -234,15 +235,37 @@ class FIFO(NonPreemptive):
 
             time += 1
 
-        #self.output_file.terminate_write()
+        # self.output_file.terminate_write()
+
+    def add_time(self, add_time):
+        time = self.end
+        self.end += add_time
+        self.finish_events = self.fifo_finish_events[time]
+        self.deadline_events = self.fifo_deadline_events[time]
+        self.arrival_events = self.fifo_arrival_events[time]
+        self.start_events = self.fifo_start_events[time]
+        time += 1
+        while time <= self.end:
+            self.find_finish_events(time)
+            self.find_deadline_events(time)
+            self.find_arrival_event(time)
+            self.find_start_events(time)
+
+            self.fifo_finish_events.append(self.finish_events)
+            self.fifo_deadline_events.append(self.deadline_events)
+            self.fifo_arrival_events.append(self.arrival_events)
+            self.fifo_start_events.append(self.start_events)
+
+            time += 1
 
     def new_task(self, new_task):
+        self.executing = None
         new_task.core = self.cores[0].id
         time = 0
         if new_task.type == 'sporadic' and new_task.activation > 0:
             time = new_task.activation
             # Go back in time
-            self.finish_events = self.fifo_finish_events[time - 1] #TODO index 0
+            self.finish_events = self.fifo_finish_events[time - 1]  # TODO index 0
             self.deadline_events = self.fifo_deadline_events[time - 1]
             self.arrival_events = self.fifo_arrival_events[time - 1]
             self.start_events = self.fifo_start_events[time - 1]
@@ -255,22 +278,22 @@ class FIFO(NonPreemptive):
             self.arrival_events = self.get_all_arrivals()
 
         self.output_file.clean(time)
-        while(time <= self.end):
+        while (time <= self.end):
             self.find_finish_events(time)
             self.find_deadline_events(time)
             if time == new_task.activation and time > 0 and new_task.type == 'sporadic':
                 self.tasks.append(new_task)
                 new_task.init = new_task.activation
                 event = SchedEvent.ScheduleEvent(new_task.activation, new_task,
-                                                     SchedEvent.EventType.activation.value)
+                                                 SchedEvent.EventType.activation.value)
                 self.arrival_events = self.fifo_arrival_events[time]
                 self.arrival_events.append(event)
-                #self.arrival_events.sort(key=lambda x: x.timestamp)
+                # self.arrival_events.sort(key=lambda x: x.timestamp)
             else:
                 self.find_arrival_event(time)
             self.find_start_events(time)
             if (equals(self, time)):
-                 break
+                break
             self.fifo_finish_events[time] = self.finish_events
             self.fifo_deadline_events[time] = self.deadline_events
             self.fifo_arrival_events[time] = self.arrival_events
