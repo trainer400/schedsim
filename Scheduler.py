@@ -29,6 +29,18 @@ class Scheduler:
         self.fifo_start_events = []
         self.fifo_executing = []
 
+        self.sjf_arrival_events = []
+        self.sjf_finish_events = []
+        self.sjf_deadline_events = []
+        self.sjf_start_events = []
+        self.sjf_executing = []
+
+        self.hrrn_arrival_events = []
+        self.hrrn_finish_events = []
+        self.hrrn_deadline_events = []
+        self.hrrn_start_events = []
+        self.hrrn_executing = []
+
         self.srtf_arrival_events = []
         self.srtf_finish_events = []
         self.srtf_deadline_events = []
@@ -249,7 +261,6 @@ class FIFO(NonPreemptive):
 
         time = self.start
         while time <= self.end:
-            debug(self, time)
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
@@ -262,10 +273,6 @@ class FIFO(NonPreemptive):
             self.fifo_executing.append(self.executing)
 
             time += 1
-
-        #debug2(self, 20)
-        #debug2(self, 56)
-        # self.output_file.terminate_write()
 
     def add_time(self, add_time):
         time = self.end
@@ -317,7 +324,6 @@ class FIFO(NonPreemptive):
             self.arrival_events = self.get_all_arrivals()
 
         self.output_file.clean(time)
-        print(new_task.activation)
         while (time <= self.end):
             self.find_finish_events(time)
             self.find_deadline_events(time)
@@ -334,6 +340,7 @@ class FIFO(NonPreemptive):
     def terminate(self):
         self.output_file.terminate_write()
 
+
 class SJF(NonPreemptive):
 
     def __init__(self, output_file):
@@ -348,29 +355,39 @@ class SJF(NonPreemptive):
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
-            #Sort by wcet
-            self.start_events.sort(key=lambda x: x.task.wcet)
             self.find_start_events(time)
 
-            self.finish_events_at_time.append(self.finish_events)
-            self.deadline_events_at_time.append(self.deadline_events)
-            self.arrival_events_at_time.append(self.arrival_events)
-            self.start_events_at_time.append(self.start_events)
+            self.sjf_finish_events.append(self.finish_events)
+            self.sjf_deadline_events.append(self.deadline_events)
+            self.sjf_arrival_events.append(self.arrival_events)
+            self.sjf_start_events.append(self.start_events)
+            self.sjf_executing.append(self.executing)
 
             time += 1
 
     def new_task(self, new_task):
-        self.executing = None
         new_task.core = self.cores[0].id
         time = 0
         if new_task.type == 'sporadic' and new_task.activation > 0:
             time = new_task.activation
             # Go back in time
-            self.finish_events = self.finish_events_at_time[time - 1]  # TODO index 0
-            self.deadline_events = self.deadline_events_at_time[time - 1]
-            self.arrival_events = self.arrival_events_at_time[time - 1]
-            self.start_events = self.start_events_at_time[time - 1]
+            self.finish_events = self.sjf_finish_events[time - 1]
+            self.deadline_events = self.sjf_deadline_events[time - 1]
+            self.arrival_events = self.sjf_arrival_events[time - 1]
+            self.start_events = self.sjf_start_events[time - 1]
+            self.executing = self.sjf_executing[time - 1]
+            self.tasks.append(new_task)
+            new_task.init = new_task.activation
+            event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value)
+            for t in range(time - 1):
+                self.sjf_arrival_events[t].append(event)
+                # Sort by wcet
+                self.start_events.sort(key=lambda x: x.task.wcet)
+            self.arrival_events.append(event)
+            # Sort by wcet
+            self.start_events.sort(key=lambda x: x.task.wcet)
         else:
+            self.executing = None
             self.finish_events = []
             self.deadline_events = []
             self.arrival_events = []
@@ -382,27 +399,22 @@ class SJF(NonPreemptive):
         while (time <= self.end):
             self.find_finish_events(time)
             self.find_deadline_events(time)
-            if time == new_task.activation and time > 0 and new_task.type == 'sporadic':
-                self.tasks.append(new_task)
-                new_task.init = new_task.activation
-                event = SchedEvent.ScheduleEvent(new_task.activation, new_task,
-                                                 SchedEvent.EventType.activation.value)
-                self.arrival_events = self.arrival_events_at_time[time]
-                self.arrival_events.append(event)
-            else:
-                self.find_arrival_event(time)
-
-            #self.start_events.sort(key=lambda x: x.task.wcet)
+            self.find_arrival_event(time)
             self.find_start_events(time)
             if (equals(self, time)):
                 break
-            self.finish_events_at_time[time] = self.finish_events
-            self.deadline_events_at_time[time] = self.deadline_events
-            self.arrival_events_at_time[time] = self.arrival_events
-            self.start_events_at_time[time] = self.start_events
+            self.sjf_finish_events[time] = self.finish_events
+            self.sjf_deadline_events[time] = self.deadline_events
+            self.sjf_arrival_events[time] = self.arrival_events
+            self.sjf_start_events[time] = self.start_events
             time += 1
 
+    def terminate(self):
+        self.output_file.terminate_write()
 
+
+# Sort by response ratio:
+# self.start_events.sort(key=lambda x: x.response_ratio, reverse=True)
 class HRRN(NonPreemptive):
 
     def __init__(self, output_file):
@@ -417,10 +429,58 @@ class HRRN(NonPreemptive):
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
-            self.calculate_responsive_ratio(time)
-            # Sort by response ratio:
-            self.start_events.sort(key=lambda x: x.response_ratio, reverse=True)
             self.find_start_events(time)
+
+            self.hrrn_finish_events.append(self.finish_events)
+            self.hrrn_deadline_events.append(self.deadline_events)
+            self.hrrn_arrival_events.append(self.arrival_events)
+            self.hrrn_start_events.append(self.start_events)
+            self.hrrn_executing.append(self.executing)
+
+            time += 1
+
+    def new_task(self, new_task):
+        new_task.core = self.cores[0].id
+        time = 0
+        if new_task.type == 'sporadic' and new_task.activation > 0:
+            time = new_task.activation
+            # Go back in time
+            self.finish_events = self.hrrn_finish_events[time - 1]
+            self.deadline_events = self.hrrn_deadline_events[time - 1]
+            self.arrival_events = self.hrrn_arrival_events[time - 1]
+            self.start_events = self.hrrn_start_events[time - 1]
+            self.executing = self.hrrn_executing[time - 1]
+            self.tasks.append(new_task)
+            new_task.init = new_task.activation
+            event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value)
+            for t in range(time - 1):
+                self.hrrn_arrival_events[t].append(event)
+                # Sort by wcet
+                self.start_events.sort(key=lambda x: x.task.wcet)
+            self.arrival_events.append(event)
+            # Sort by wcet
+            self.start_events.sort(key=lambda x: x.task.wcet)
+        else:
+            self.executing = None
+            self.finish_events = []
+            self.deadline_events = []
+            self.arrival_events = []
+            self.start_events = []
+            self.tasks.append(new_task)
+            self.arrival_events = self.get_all_arrivals()
+
+        self.output_file.clean(time)
+        while (time <= self.end):
+            self.find_finish_events(time)
+            self.find_deadline_events(time)
+            self.find_arrival_event(time)
+            self.find_start_events(time)
+            if (equals(self, time)):
+                break
+            self.hrrn_finish_events[time] = self.finish_events
+            self.hrrn_deadline_events[time] = self.deadline_events
+            self.hrrn_arrival_events[time] = self.arrival_events
+            self.hrrn_start_events[time] = self.start_events
             time += 1
 
     def calculate_responsive_ratio(self, time):
@@ -429,6 +489,9 @@ class HRRN(NonPreemptive):
                 w = time - event.init
                 c = event.task.wcet
                 event.response_ratio = (w + c)/c
+
+    def terminate(self):
+        self.output_file.terminate_write()
 
 
 class SRTF(Preemptive):

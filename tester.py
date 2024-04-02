@@ -114,11 +114,8 @@ if __name__ == "__main__":
     test_scheduler2 = SchedIO.import_file("examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.txt")
     test_scheduler2.execute()
 
-    print(time_end)
-    print('-----------------------------')
     for new_task in new_tasks:
         test_scheduler2.new_task(new_task)
-        print(new_task.id, new_task.activation, new_task.real_time, new_task.deadline, new_task.wcet)
     test_scheduler2.terminate()
 
     compare_files("examples/Outputs/test_output1.txt", "examples/Outputs/test_output2.txt")
