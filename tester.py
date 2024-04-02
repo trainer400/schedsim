@@ -6,9 +6,20 @@ import random
 MAX_TIME_END = 100
 MAX_PERIOD = 50
 MAX_WCET = 40
+TASKS_NUMS = 20
 NEW_TASKS_NUMS = 5
 
+def compare_files(file1, file2):
+    with open(file1, 'r') as f1, open(file2, 'r') as f2:
+        content_file1 = f1.read()
+        content_file2 = f2.read()
+    if content_file1 == content_file2:
+        print("Correct")
+    else:
+        print("Not correct")
+
 if __name__ == "__main__":
+    scheduling_algorithm = "FIFO"
     time_start = 0  # TODO random
     time_end = random.randint(0, MAX_TIME_END)
     simulation1 = ET.Element("simulation")
@@ -25,7 +36,7 @@ if __name__ == "__main__":
     tasks2.tail = "\n"
     new_tasks = []
 
-    for task in range(1, 21):
+    for task in range(1, TASKS_NUMS + 1):
         real_time = random.randint(0, 1)
         real_time_str = ''
         if real_time == 0:
@@ -43,7 +54,7 @@ if __name__ == "__main__":
             type = 'sporadic'
             activation = random.randint(0, time_end)
             deadline = random.randint(activation, MAX_TIME_END)
-            wcet = random.randint(1, deadline)
+            wcet = random.randint(1, deadline - activation)
         else:
             type = 'periodic'
             period = random.randint(1, MAX_PERIOD)
@@ -54,33 +65,33 @@ if __name__ == "__main__":
             if real_time:
                 add_task1 = ET.SubElement(tasks1, "task", real_time=real_time_str, type="sporadic", id=str(id), activation=str(activation), deadline=str(deadline), wcet=str(wcet))
                 add_task1.tail = "\n"
-                if task <= 20 - NEW_TASKS_NUMS:
+                if task <= TASKS_NUMS - NEW_TASKS_NUMS:
                     add_task2 = ET.SubElement(tasks2, "task", real_time=real_time_str, type="sporadic", id=str(id), activation=str(activation), deadline=str(deadline), wcet=str(wcet))
                     add_task2.tail = "\n"
                 else:
-                    new_task = Task.Task(real_time, type, task, -1, activation, deadline, wcet)
+                    new_task = Task.Task(real_time, type, task, None, activation, deadline, wcet)
                     new_tasks.append(new_task)
             else:
                 add_task1 = ET.SubElement(tasks1, "task", real_time=real_time_str, type="sporadic", id=str(id), activation=str(activation), wcet=str(wcet))
                 add_task1.tail = "\n"
-                if task <= 20 - NEW_TASKS_NUMS:
+                if task <= TASKS_NUMS - NEW_TASKS_NUMS:
                     add_task2 = ET.SubElement(tasks2, "task", real_time=real_time_str, type="sporadic", id=str(id), activation=str(activation), wcet=str(wcet))
                     add_task2.tail = "\n"
                 else:
-                    new_task = Task.Task(real_time, type, task, -1, activation, -1, wcet)
+                    new_task = Task.Task(real_time, type, task, None, activation, deadline, wcet)
                     new_tasks.append(new_task)
         else:
             add_task1 = ET.SubElement(tasks1, "task", real_time=real_time_str, type="periodic", id=str(id), period=str(period), deadline=str(deadline), wcet=str(wcet))
             add_task1.tail = "\n"
-            if task <= 20 - NEW_TASKS_NUMS:
+            if task <= TASKS_NUMS - NEW_TASKS_NUMS:
                 add_task2 = ET.SubElement(tasks2, "task", real_time=real_time_str, type="periodic", id=str(id), period=str(period), deadline=str(deadline), wcet=str(wcet))
                 add_task2.tail = "\n"
             else:
-                new_task = Task.Task(real_time, type, task, period, -1, deadline, wcet)
+                new_task = Task.Task(real_time, type, task, period, None, deadline, wcet)
                 new_tasks.append(new_task)
-    scheduler1 = ET.SubElement(software1, "scheduler", algorithm="FIFO")
+    scheduler1 = ET.SubElement(software1, "scheduler", algorithm=scheduling_algorithm)
     scheduler1.tail = "\n"
-    scheduler2 = ET.SubElement(software2, "scheduler", algorithm="FIFO")
+    scheduler2 = ET.SubElement(software2, "scheduler", algorithm=scheduling_algorithm)
     scheduler2.tail = "\n"
     hardware1 = ET.SubElement(simulation1, "hardware")
     hardware2 = ET.SubElement(simulation2, "hardware")
@@ -99,8 +110,15 @@ if __name__ == "__main__":
 
     test_scheduler1 = SchedIO.import_file("examples/Inputs/test_input1.xml", "examples/Outputs/test_output1.txt")
     test_scheduler1.execute()
+    test_scheduler1.terminate()
     test_scheduler2 = SchedIO.import_file("examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.txt")
     test_scheduler2.execute()
 
+    print(time_end)
+    print('-----------------------------')
     for new_task in new_tasks:
         test_scheduler2.new_task(new_task)
+        print(new_task.id, new_task.activation, new_task.real_time, new_task.deadline, new_task.wcet)
+    test_scheduler2.terminate()
+
+    compare_files("examples/Outputs/test_output1.txt", "examples/Outputs/test_output2.txt")
