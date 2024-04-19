@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Server App</title>
+</head>
+<body>
+    <h1>Client Server App</h1>
+    <button id="getDataBtn">Ottieni dati dal server</button>
+    <div id="dataContainer"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#getDataBtn').click(function() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/data',
+                    success: function(response) {
+                        $('#dataContainer').text(response.data);
+                    },
+                    error: function(error) {
+                        console.log('Errore:', error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
