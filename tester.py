@@ -19,7 +19,7 @@ def compare_files(file1, file2):
         print("Not correct")
 
 if __name__ == "__main__":
-    scheduling_algorithm = "FIFO"
+    scheduling_algorithm = "SRTF"
     time_start = 0  # TODO random
     time_end = random.randint(0, MAX_TIME_END)
     simulation1 = ET.Element("simulation")
@@ -53,8 +53,8 @@ if __name__ == "__main__":
         if type == 0:
             type = 'sporadic'
             activation = random.randint(0, time_end)
-            deadline = random.randint(activation, MAX_TIME_END)
-            wcet = random.randint(1, deadline - activation)
+            deadline = random.randint(activation + 1, MAX_TIME_END)
+            wcet = random.randint(1, max(1, deadline - activation))
         else:
             type = 'periodic'
             period = random.randint(1, MAX_PERIOD)
@@ -115,6 +115,7 @@ if __name__ == "__main__":
     test_scheduler2.execute()
 
     for new_task in new_tasks:
+        print(new_task.id)
         test_scheduler2.new_task(new_task)
     test_scheduler2.terminate()
 
