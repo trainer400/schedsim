@@ -15,7 +15,8 @@ class EventType(Enum):
 
 class ScheduleEvent:
 
-    def __init__(self, timestamp, task, _type):
+    def __init__(self, timestamp, task, _type, id):
+        self.id = id
         self.timestamp = timestamp
         self.task = task
         self.job = 0

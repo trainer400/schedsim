@@ -4,10 +4,11 @@ import Task
 import random
 
 MAX_TIME_END = 100
-MAX_PERIOD = 50
-MAX_WCET = 40
+MAX_PERIOD = 10
+MAX_WCET = 15
+MAX_QUANTUM = 10
 TASKS_NUMS = 20
-NEW_TASKS_NUMS = 5
+NEW_TASKS_NUMS = 4
 
 def compare_files(file1, file2):
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
@@ -19,7 +20,7 @@ def compare_files(file1, file2):
         print("Not correct")
 
 if __name__ == "__main__":
-    scheduling_algorithm = "SRTF"
+    scheduling_algorithm = "FIFO"
     time_start = 0  # TODO random
     time_end = random.randint(0, MAX_TIME_END)
     simulation1 = ET.Element("simulation")
@@ -89,10 +90,17 @@ if __name__ == "__main__":
             else:
                 new_task = Task.Task(real_time, type, task, period, None, deadline, wcet)
                 new_tasks.append(new_task)
-    scheduler1 = ET.SubElement(software1, "scheduler", algorithm=scheduling_algorithm)
-    scheduler1.tail = "\n"
-    scheduler2 = ET.SubElement(software2, "scheduler", algorithm=scheduling_algorithm)
-    scheduler2.tail = "\n"
+    if scheduling_algorithm != "RR":
+        scheduler1 = ET.SubElement(software1, "scheduler", algorithm=scheduling_algorithm)
+        scheduler1.tail = "\n"
+        scheduler2 = ET.SubElement(software2, "scheduler", algorithm=scheduling_algorithm)
+        scheduler2.tail = "\n"
+    else:
+        quantum = random.randint(1, MAX_QUANTUM)
+        scheduler1 = ET.SubElement(software1, "scheduler", algorithm=scheduling_algorithm, quantum=str(quantum))
+        scheduler1.tail = "\n"
+        scheduler2 = ET.SubElement(software2, "scheduler", algorithm=scheduling_algorithm, quantum=str(quantum))
+        scheduler2.tail = "\n"
     hardware1 = ET.SubElement(simulation1, "hardware")
     hardware2 = ET.SubElement(simulation2, "hardware")
     cpus1 = ET.SubElement(hardware1, "cpus")
@@ -116,7 +124,12 @@ if __name__ == "__main__":
 
     for new_task in new_tasks:
         print(new_task.id)
+        print(new_task.activation)
+        print(new_task.finish)
         test_scheduler2.new_task(new_task)
     test_scheduler2.terminate()
+
+    for task in new_tasks:
+        print(task.id, task.activation, task.type)
 
     compare_files("examples/Outputs/test_output1.txt", "examples/Outputs/test_output2.txt")
