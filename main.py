@@ -1,6 +1,6 @@
 import sys
 import SchedIO
-import Task
+import Task,subprocess
 
 def test(input_path, output_path):
     scheduler = SchedIO.import_file(input_path, output_path)
@@ -12,6 +12,7 @@ if __name__ == "__main__":
         output_path = sys.argv[2]
         test(input_path, output_path)
         scheduler = SchedIO.import_file(input_path, output_path)
+<<<<<<< Updated upstream
         print("Do you want to add some seconds?")
         while True:
             seconds = input()
@@ -31,6 +32,14 @@ if __name__ == "__main__":
         
         scheduler.execute()
         
+=======
+        #scheduler.execute()
+
+
+        # Chiamata al controller come se fosse da riga di comando
+        command = f'python3 controller.py {input_path} {output_path}'
+        subprocess.run(command, shell=True, check=True)
+>>>>>>> Stashed changes
         '''while(True):
             real_time = input()
             real_time = bool(real_time)
