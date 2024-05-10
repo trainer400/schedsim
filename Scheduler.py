@@ -1,3 +1,4 @@
+import math
 import copy
 from abc import *
 import SchedEvent
@@ -19,6 +20,7 @@ class Scheduler:
         self.deadline_events = []
         self.start_events = []
 
+        self.time_list = []
         self.arrival_events_at_time = []
         self.finish_events_at_time = []
         self.deadline_events_at_time = []
@@ -85,7 +87,6 @@ class Scheduler:
         helper_list = []
         for event in self.deadline_events:
             if event.timestamp == time:
-                print('BBBBBBBBBBBBBBBBBBBB')
                 self.output_file.add_scheduler_event(event)
             elif event.timestamp > time:
                 helper_list.append(event)
@@ -155,9 +156,10 @@ class Preemptive(Scheduler):
                 finish_event.job = self.executing.job
                 self.output_file.add_scheduler_event(finish_event)
                 # Delete from start_events:
-                for event in self.start_events:
+                '''for event in self.start_events:
                     if event.id == self.executing.id:
-                        self.start_events.remove(event)
+                        self.start_events.remove(event)'''
+                self.start_events.remove(self.executing)
                 # Free execute:
                 self.executing = None
 
@@ -171,30 +173,8 @@ class Preemptive(Scheduler):
             event.task.first_time_executing = False
 
 
-def equals(self, time):  # TODO with hash
-    return False
-    # Check if time is within the valid range
-    if time < 0 or time >= len(self.fifo_finish_events):
-        return False
-    if time < 0 or time >= len(self.fifo_deadline_events):
-        return False
-    if time < 0 or time >= len(self.fifo_arrival_events):
-        return False
-    if time < 0 or time >= len(self.fifo_start_events):
-        return False
-
-    # Check if the states are equal at the given time
-    if self.finish_events != self.fifo_finish_events[time]:
-        return False
-    if self.deadline_events != self.fifo_deadline_events[time]:
-        return False
-    if self.arrival_events != self.fifo_arrival_events[time]:
-        return False
-    if self.start_events != self.fifo_start_events[time]:
-        return False
-    return True
-
 def debug(self, time):
+    return
     print('-------------------------')
     print('time ' + str(time))
     print('finish')
@@ -214,7 +194,35 @@ def debug(self, time):
         print('None')
     else:
         print(self.executing.task.id, self.executing.remaining_time, self.executing.executing_time, self.executing.task.first_time_executing)
-        #remaining time
+
+def search_pos(self, time):
+    for i in range(len(self.time_list) - 1):
+        if self.time_list[i] <= time and self.time_list[i + 1] > time:
+            return i
+    return len(self.time_list) - 1
+
+def delete(self, time):
+    if(self.time_list[-1] >= time):
+        self.time_list.pop()
+        self.arrival_events_at_time.pop()
+        self.finish_events_at_time.pop()
+        self.deadline_events_at_time.pop()
+        self.start_events_at_time.pop()
+        self.executing_at_time.pop()
+        delete(self, time)
+
+def reset(self):
+    self.executing = None
+    self.finish_events = []
+    self.deadline_events = []
+    self.arrival_events = []
+    self.start_events = []
+    self.time_list = []
+    self.finish_events_at_time = []
+    self.deadline_events_at_time = []
+    self.arrival_events_at_time = []
+    self.start_events_at_time = []
+
 
 class FIFO(NonPreemptive):
 
@@ -224,22 +232,26 @@ class FIFO(NonPreemptive):
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
-
+        size = int(math.sqrt(self.end))
+        count = size - 1
         time = self.start
         while time <= self.end:
             debug(self, time)
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
-            if self.executing:
-                self.executing_at_time.append(copy.deepcopy(self.executing))
-            else:
-                self.executing_at_time.append(None)
-
-            self.finish_events_at_time.append(copy.deepcopy(self.finish_events))
-            self.deadline_events_at_time.append(copy.deepcopy(self.deadline_events))
-            self.arrival_events_at_time.append(copy.deepcopy(self.arrival_events))
-            self.start_events_at_time.append(copy.deepcopy(self.start_events))
+            count += 1
+            if count == size:
+                self.time_list.append(time)
+                if self.executing:
+                    self.executing_at_time.append(True)
+                else:
+                    self.executing_at_time.append(False)
+                self.finish_events_at_time.append(copy.deepcopy(self.finish_events))
+                self.deadline_events_at_time.append(copy.deepcopy(self.deadline_events))
+                self.arrival_events_at_time.append(copy.deepcopy(self.arrival_events))
+                self.start_events_at_time.append(copy.deepcopy(self.start_events))
+                count = 0
             time += 1
         debug(self, time)
 
@@ -247,53 +259,53 @@ class FIFO(NonPreemptive):
     def new_task(self, new_task):
         new_task.core = self.cores[0].id
         time = 0
+        size = int(math.sqrt(self.end))
+        count = 0
         if new_task.type == 'sporadic' and new_task.activation > 0:
             time = new_task.activation
-            # Go back in time
-            self.finish_events = copy.deepcopy(self.finish_events_at_time[time - 1])
-            self.deadline_events = copy.deepcopy(self.deadline_events_at_time[time - 1])
-            self.arrival_events = copy.deepcopy(self.arrival_events_at_time[time - 1])
-            self.start_events = copy.deepcopy(self.start_events_at_time[time - 1])
-            self.executing = copy.deepcopy(self.executing_at_time[time - 1])
+            pos = search_pos(self, time - 1)
+            self.finish_events = copy.deepcopy(self.finish_events_at_time[pos])
+            self.deadline_events = copy.deepcopy(self.deadline_events_at_time[pos])
+            self.arrival_events = copy.deepcopy(self.arrival_events_at_time[pos])
+            self.start_events = copy.deepcopy(self.start_events_at_time[pos])
+            self.executing = copy.deepcopy(self.executing_at_time[pos])
             if self.executing:
-                for event in self.start_events:
-                    if event.id == self.executing.id:
-                        self.executing = event
+                self.executing = self.start_events[0]
             self.tasks.append(new_task)
             new_task.init = new_task.activation
             event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
-            for t in range(time):
-                self.arrival_events_at_time[t].append(copy.deepcopy(event))
-                self.arrival_events_at_time[t].sort(key=lambda x: x.timestamp)
+            for p in range(pos + 1):
+                self.arrival_events_at_time[p].append(copy.deepcopy(event))
             self.arrival_events.append(event)
-            self.arrival_events.sort(key=lambda x: x.timestamp)
+            # Sort by timestamp
+            self.start_events.sort(key=lambda x: x.timestamp)
+            delete(self, time)
+            time = self.time_list[pos] + 1
         else:
-            self.executing = None
-            self.finish_events = []
-            self.deadline_events = []
-            self.arrival_events = []
-            self.start_events = []
+            reset(self)
+            self.event_id = 0
             self.tasks.append(new_task)
-            for task in self.tasks:
-                task.first_time_executing = True
-                task.finish = False
             self.arrival_events = self.get_all_arrivals()
-
+            count = size - 1
         self.output_file.clean(time)
-        while (time <= self.end):
+        while time <= self.end:
             debug(self, time)
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
-            if self.executing:
-                self.executing_at_time[time] = copy.deepcopy(self.executing)
-            else:
-                self.executing_at_time[time] = None
-            self.finish_events_at_time[time] = copy.deepcopy(self.finish_events)
-            self.deadline_events_at_time[time] = copy.deepcopy(self.deadline_events)
-            self.arrival_events_at_time[time] = copy.deepcopy(self.arrival_events)
-            self.start_events_at_time[time] = copy.deepcopy(self.start_events)
+            count += 1
+            if count == size:
+                self.time_list.append(time)
+                if self.executing:
+                    self.executing_at_time.append(True)
+                else:
+                    self.executing_at_time.append(False)
+                self.finish_events_at_time.append(copy.deepcopy(self.finish_events))
+                self.deadline_events_at_time.append(copy.deepcopy(self.deadline_events))
+                self.arrival_events_at_time.append(copy.deepcopy(self.arrival_events))
+                self.start_events_at_time.append(copy.deepcopy(self.start_events))
+                count = 0
             time += 1
         debug(self, time)
 
@@ -316,6 +328,8 @@ class SJF(NonPreemptive):
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
+            # Sort by wcet
+            self.start_events.sort(key=lambda x: x.task.wcet)
             if self.executing:
                 self.executing_at_time.append(copy.deepcopy(self.executing))
             else:
@@ -341,17 +355,16 @@ class SJF(NonPreemptive):
             self.start_events = copy.deepcopy(self.start_events_at_time[time - 1])
             self.executing = copy.deepcopy(self.executing_at_time[time - 1])
             if self.executing:
-                for event in self.start_events:
+                self.executing = self.start_events[0]
+                '''for event in self.start_events:
                     if event.id == self.executing.id:
-                        self.executing = event
+                        self.executing = event'''
             self.tasks.append(new_task)
             new_task.init = new_task.activation
             event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
             for t in range(time):
                 self.arrival_events_at_time[t].append(copy.deepcopy(event))
-                # Sort by wcet
-                self.start_events.sort(key=lambda x: x.task.wcet)
             self.arrival_events.append(event)
             # Sort by wcet
             self.start_events.sort(key=lambda x: x.task.wcet)
@@ -362,9 +375,9 @@ class SJF(NonPreemptive):
             self.arrival_events = []
             self.start_events = []
             self.tasks.append(new_task)
-            for task in self.tasks:
+            '''for task in self.tasks:
                 task.first_time_executing = True
-                task.finish = False
+                task.finish = False'''
             self.arrival_events = self.get_all_arrivals()
 
         self.output_file.clean(time)
@@ -373,6 +386,8 @@ class SJF(NonPreemptive):
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
+            # Sort by wcet
+            self.start_events.sort(key=lambda x: x.task.wcet)
             if self.executing:
                 self.executing_at_time[time] = copy.deepcopy(self.executing)
             else:
@@ -404,6 +419,8 @@ class HRRN(NonPreemptive):
             self.find_deadline_events(time)
             self.find_arrival_event(time)
             self.calculate_responsive_ratio(time)
+            # Sort by response ratio:
+            self.start_events.sort(key=lambda x: x.response_ratio, reverse=True)
             if self.executing:
                 self.executing_at_time.append(copy.deepcopy(self.executing))
             else:
@@ -428,17 +445,16 @@ class HRRN(NonPreemptive):
             self.start_events = copy.deepcopy(self.start_events_at_time[time - 1])
             self.executing = copy.deepcopy(self.executing_at_time[time - 1])
             if self.executing:
-                for event in self.start_events:
+                self.executing = self.start_events[0]
+                '''for event in self.start_events:
                     if event.id == self.executing.id:
-                        self.executing = event
+                        self.executing = event'''
             self.tasks.append(new_task)
             new_task.init = new_task.activation
             event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
             for t in range(time):
                 self.arrival_events_at_time[t].append(copy.deepcopy(event))
-                # Sort by response ratio:
-                self.start_events.sort(key=lambda x: x.response_ratio, reverse=True)
             self.arrival_events.append(event)
             # Sort by response ratio:
             self.start_events.sort(key=lambda x: x.response_ratio, reverse=True)
@@ -449,9 +465,9 @@ class HRRN(NonPreemptive):
             self.arrival_events = []
             self.start_events = []
             self.tasks.append(new_task)
-            for task in self.tasks:
+            '''for task in self.tasks:
                 task.first_time_executing = True
-                task.finish = False
+                task.finish = False'''
             self.arrival_events = self.get_all_arrivals()
 
         self.output_file.clean(time)
@@ -461,6 +477,8 @@ class HRRN(NonPreemptive):
             self.find_deadline_events(time)
             self.find_arrival_event(time)
             self.calculate_responsive_ratio(time)
+            # Sort by response ratio:
+            self.start_events.sort(key=lambda x: x.response_ratio, reverse=True)
             if self.executing:
                 self.executing_at_time[time] = copy.deepcopy(self.executing)
             else:
@@ -503,7 +521,6 @@ class SRTF(Preemptive):
                 self.output_file.add_scheduler_event(event)
                 self.executing = event
                 # Create deadline event:
-                print('AAAAAAAAAAAAAAAAAAAAAA0')
                 self.create_deadline_event(event)
             # Change of task:
             elif self.executing.remaining_time > self.start_events[0].remaining_time and \
@@ -520,9 +537,7 @@ class SRTF(Preemptive):
                 self.output_file.add_scheduler_event(event)
                 self.executing = event
                 # Create deadline event:
-                print(event.task.id, event.task.first_time_executing)
                 if event.task.first_time_executing:
-                    print('AAAAAAAAAAAAAAAAAAAAAAA1')
                     self.create_deadline_event(event)
 
     def execute(self):
@@ -561,9 +576,10 @@ class SRTF(Preemptive):
             self.start_events = copy.deepcopy(self.start_events_at_time[time - 1])
             self.executing = copy.deepcopy(self.executing_at_time[time - 1])
             if self.executing:
-                for event in self.start_events:
+                self.executing = self.start_events[0]
+                '''for event in self.start_events:
                     if event.id == self.executing.id:
-                        self.executing = event
+                        self.executing = event'''
             self.tasks.append(new_task)
             new_task.init = new_task.activation
             event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)

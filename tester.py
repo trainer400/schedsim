@@ -8,7 +8,7 @@ MAX_PERIOD = 10
 MAX_WCET = 15
 MAX_QUANTUM = 10
 TASKS_NUMS = 20
-NEW_TASKS_NUMS = 4
+NEW_TASKS_NUMS = 10
 
 def compare_files(file1, file2):
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
@@ -22,7 +22,7 @@ def compare_files(file1, file2):
 if __name__ == "__main__":
     scheduling_algorithm = "FIFO"
     time_start = 0  # TODO random
-    time_end = random.randint(0, MAX_TIME_END)
+    time_end = random.randint(1, MAX_TIME_END)
     simulation1 = ET.Element("simulation")
     time1 = ET.SubElement(simulation1, "time", start="0", end=str(time_end))
     time1.tail = "\n"
@@ -53,13 +53,13 @@ if __name__ == "__main__":
         wcet = None
         if type == 0:
             type = 'sporadic'
-            activation = random.randint(0, time_end)
+            activation = random.randint(0, time_end - 1)
             deadline = random.randint(activation + 1, MAX_TIME_END)
-            wcet = random.randint(1, max(1, deadline - activation))
+            wcet = random.randint(1, max(1, deadline - 1))
         else:
             type = 'periodic'
             period = random.randint(1, MAX_PERIOD)
-            deadline = random.randint(0, MAX_TIME_END)
+            deadline = random.randint(1, MAX_TIME_END)
             wcet = random.randint(1, max(1, min(period, deadline)))
         id = task
         if type == 'sporadic':
