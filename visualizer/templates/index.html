@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCHEDSIM</title>
+    <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}"> <!-- Aggiungi il link al file CSS -->
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>SCHEDSIM</h1>
+
+            <div class="top-buttons">
+                <button id="executeBtn">START</button>
+                <button id="newTaskBtn">NEW TASK</button>
+            </div>
+
+            <div class="graph-execution-and-form-container">
+                <!-- Div per il grafico -->
+                <div class="graph-execution">
+                    <img src="{{ url_for('static', filename='sched.png') }}" alt="Graph Image" style="max-width: 100%;">
+                </div>
+                
+                <!-- Form per caricare un file XML -->
+                <form id="xmlForm" enctype="multipart/form-data">
+                    <!-- Aggiungi un pulsante per selezionare un file -->
+                    <label for="xmlFile" class="fileLabel">Select XML File</label>
+                    <input type="file" name="xmlFile" id="xmlFile" accept=".xml">
+                    <!-- Aggiungi un pulsante per caricare il file -->
+                    <button type="submit" id="uploadBtn">Upload</button>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        // Funzione per gestire l'invio del form per il caricamento del file XML
+        $('#xmlForm').submit(function(event) {
+            event.preventDefault(); // Evita il comportamento predefinito del form
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '/upload_xml',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    alert('XML File uploaded successfully!');
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    alert('Error occurred while uploading XML file.');
+                }
+            });
+        });
+
+        // Funzione per eseguire la funzione Python
+        $('#executeBtn').click(function() {
+            $.ajax({
+                url: '/execute_function',
+                type: 'POST',
+                success: function(response) {
+                    alert(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    alert('Error occurred while executing function.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

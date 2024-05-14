@@ -1,0 +1,69 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content {
+    width: 100%;
+    background-color: hsl(0, 100%, 62%);
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #15c45e; /* Aggiungi il colore di sfondo rosa */
+    display: flex; /* Usiamo flexbox per il layout interno */
+    flex-direction: column; /* Impostiamo la direzione del layout su colonna */
+}
+
+.graph-execution {
+    width: 66.67%; /* Occupa il 66.67% della larghezza della .content */
+    background-color: #f0f0f0; /* Aggiungi un colore di sfondo */
+    padding: 10px; /* Aggiungi spaziatura interna */
+    border-radius: 5px; /* Aggiungi bordi arrotondati */
+}
+
+.button-container {
+    width: 33.33%; /* Occupa il 33.33% della larghezza della .content */
+    background-color: #ffcccc; /* Aggiungi il colore di sfondo rosa */
+    padding: 10px; /* Aggiungi spaziatura interna */
+    border-radius: 5px; /* Aggiungi bordi arrotondati */
+    margin-top: 10px; /* Aggiungi margine superiore */
+}
+.graph-execution-and-form-container {
+    display: flex;
+}
+
+.graph-execution {
+    width: 50%; /* Occupa il 50% della larghezza del contenitore */
+}
+
+#xmlForm {
+    width: 50%; /* Occupa il 50% della larghezza del contenitore */
+    padding-left: 10px; /* Aggiunge un po' di spazio tra il grafico e il form */
+}
+
+.top-buttons {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.top-buttons button {
+    width: 100px;
+    height: 100px;
+    background-color: pink; /* Colore rosa */
+    color: white; /* Testo bianco */
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.fileLabel {
+    display: block;
+    margin-bottom: 10px;
+}
+
+button {
+    width: 100%;
+    margin-bottom: 10px;
+}
+

@@ -92,7 +92,6 @@ class Scheduler:
                 helper_list.append(event)
         self.deadline_events = helper_list
 
-
 class NonPreemptive(Scheduler):
 
     def __init__(self, output_file):
@@ -173,6 +172,34 @@ class Preemptive(Scheduler):
             event.task.first_time_executing = False
 
 
+
+def equals(self, time):  #TODO with hash
+    #return False
+
+    #print(time, len(self.fifo_finish_events))
+
+    # Check if time is within the valid range
+    if time < 0 or time >= len(self.fifo_finish_events):
+        return False
+    if time < 0 or time >= len(self.fifo_deadline_events):
+        return False
+    if time < 0 or time >= len(self.fifo_arrival_events):
+        return False
+    if time < 0 or time >= len(self.fifo_start_events):
+        return False
+
+    # Check if the states are equal at the given time
+    if self.finish_events != self.fifo_finish_events[time]:
+            return False
+    if self.deadline_events != self.fifo_deadline_events[time]:
+            return False
+    if self.arrival_events != self.fifo_arrival_events[time]:
+            return False
+    if self.start_events != self.fifo_start_events[time]:
+            return False
+    return True
+
+
 def debug(self, time):
     return
     print('-------------------------')
@@ -232,9 +259,11 @@ class FIFO(NonPreemptive):
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
+
         size = int(math.sqrt(self.end))
         count = size - 1
         time = self.start
+
         while time <= self.end:
             debug(self, time)
             self.find_finish_events(time)
@@ -255,6 +284,16 @@ class FIFO(NonPreemptive):
             time += 1
         debug(self, time)
 
+
+        #self.output_file.terminate_write()
+    
+    def add_time(self, add_t):
+        # Check if add_t is stricly positive
+        if add_t > 0:
+            # Update self.end with new new time add_t
+            self.end +=add_t 
+        else:
+            print("The new value add_t is not stricly positive.")
 
     def new_task(self, new_task):
         new_task.core = self.cores[0].id
