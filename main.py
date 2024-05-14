@@ -2,17 +2,12 @@ import sys
 import SchedIO
 import Task,subprocess
 
-def test(input_path, output_path):
-    scheduler = SchedIO.import_file(input_path, output_path)
-    scheduler.execute()
-
 if __name__ == "__main__":
     if len(sys.argv) == 3:
         input_path = sys.argv[1]
         output_path = sys.argv[2]
-        test(input_path, output_path)
         scheduler = SchedIO.import_file(input_path, output_path)
-<<<<<<< Updated upstream
+
         print("Do you want to add some seconds?")
         while True:
             seconds = input()
@@ -32,14 +27,14 @@ if __name__ == "__main__":
         
         scheduler.execute()
         
-=======
+
         #scheduler.execute()
 
 
         # Chiamata al controller come se fosse da riga di comando
         command = f'python3 controller.py {input_path} {output_path}'
         subprocess.run(command, shell=True, check=True)
->>>>>>> Stashed changes
+
         '''while(True):
             real_time = input()
             real_time = bool(real_time)
@@ -61,14 +56,18 @@ if __name__ == "__main__":
             scheduler.new_task(new_task)'''
 
         #new_task = Task.Task(True, 'periodic', 5, 20, 0, 100, 5)
-        #new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
+        new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
         #new_task = Task.Task(False, 'sporadic', 4, None, 10, None, 15)
         #scheduler.new_task(new_task)
-        
+
         new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
         #new_task = Task.Task(True,'sporadic',6,None, 0,100,10)
         scheduler.new_task(new_task)
         
+
+        #scheduler.add_time(40)
+
+
     else:
         raise Exception(
             'Insufficient arguments. The name of the input and output files are required')
