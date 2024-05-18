@@ -2,16 +2,32 @@ import sys
 import SchedIO
 import Task,subprocess
 
-def test(input_path, output_path):
-    scheduler = SchedIO.import_file(input_path, output_path)
-    scheduler.execute()
-
 if __name__ == "__main__":
     if len(sys.argv) == 3:
         input_path = sys.argv[1]
         output_path = sys.argv[2]
-        test(input_path, output_path)
         scheduler = SchedIO.import_file(input_path, output_path)
+
+        print("Do you want to add some seconds?")
+        while True:
+            seconds = input()
+            if seconds.lower() == "next":
+                print("Skipping the execution")
+                break  # Exits the loop
+            try:
+                seconds = int(seconds)
+                if 0 <= seconds <= 100:
+                    scheduler.add_time(seconds)
+                    break  # Exits the loop
+                else:
+                    raise ValueError("The number of seconds must be between 0 and 100")
+            except ValueError:
+                print("Invalid value, please try again or type 'Next' to skip the execution:")
+
+        
+        scheduler.execute()
+        
+
         #scheduler.execute()
 
 
@@ -39,14 +55,18 @@ if __name__ == "__main__":
             scheduler.new_task(new_task)'''
 
         #new_task = Task.Task(True, 'periodic', 5, 20, 0, 100, 5)
-        #new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
+        new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
         #new_task = Task.Task(False, 'sporadic', 4, None, 10, None, 15)
         #scheduler.new_task(new_task)
-        
+
         new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
         #new_task = Task.Task(True,'sporadic',6,None, 0,100,10)
         scheduler.new_task(new_task)
         
+
+        #scheduler.add_time(40)
+
+
     else:
         raise Exception(
             'Insufficient arguments. The name of the input and output files are required')
