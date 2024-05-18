@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCHEDSIM</title>
-    <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}"> <!-- Aggiungi il link al file CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- Aggiungi il link al file CSS -->
 </head>
 <body>
     <div class="container">
@@ -16,10 +16,19 @@
                 <button id="newTaskBtn">NEW TASK</button>
             </div>
 
+            <!-- Form per creare una nuova task (inizialmente nascosto) -->
+            <form id="newTaskForm" class="hidden">
+                <label for="taskName">Task Name</label>
+                <input type="text" id="taskName" name="taskName">
+                <label for="taskDescription">Task Description</label>
+                <textarea id="taskDescription" name="taskDescription"></textarea>
+                <button type="submit" id="createTaskBtn">Create Task</button>
+            </form>
+
             <div class="graph-execution-and-form-container">
                 <!-- Div per il grafico -->
                 <div class="graph-execution">
-                    <img src="{{ url_for('static', filename='sched.png') }}" alt="Graph Image" style="max-width: 100%;">
+                    <img src="{{ url_for('static', filename='sched.png') }}" alt="Graph Image">
                 </div>
                 
                 <!-- Form per caricare un file XML -->
@@ -37,6 +46,33 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        // Aggiungi evento click al bottone "NEW TASK"
+        $('#newTaskBtn').click(function() {
+            $('#newTaskForm').removeClass('hidden'); // Mostra il form per la nuova task
+        });
+
+        // Gestisci l'invio del form per la creazione di una nuova task
+        $('#newTaskForm').submit(function(event) {
+            event.preventDefault(); // Evita il comportamento predefinito del form
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '/create_task',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    alert('Task created successfully!');
+                    $('#newTaskForm').addClass('hidden'); // Nascondi il form dopo aver creato la task
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    alert('Error occurred while creating task.');
+                }
+            });
+        });
+
         // Funzione per gestire l'invio del form per il caricamento del file XML
         $('#xmlForm').submit(function(event) {
             event.preventDefault(); // Evita il comportamento predefinito del form

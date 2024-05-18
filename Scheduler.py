@@ -160,10 +160,6 @@ class Preemptive(Scheduler):
 
 def equals(self, time):  #TODO with hash
     #return False
-<<<<<<< Updated upstream
-    #print(time, len(self.fifo_finish_events))
-=======
->>>>>>> Stashed changes
     # Check if time is within the valid range
     if time < 0 or time >= len(self.fifo_finish_events):
         return False
