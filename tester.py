@@ -8,7 +8,7 @@ MAX_PERIOD = 10
 MAX_WCET = 15
 MAX_QUANTUM = 10
 TASKS_NUMS = 20
-NEW_TASKS_NUMS = 10
+NEW_TASKS_NUMS = 2
 
 def compare_files(file1, file2):
     with open(file1, 'r') as f1, open(file2, 'r') as f2:

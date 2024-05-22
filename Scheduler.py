@@ -36,6 +36,8 @@ class Scheduler:
 
         self.quantum_counter_at_time = []
 
+        self.quantum_counter_list = []
+
         self.output_file = SchedIO.SchedulerEventWriter(output_file)
 
         self.cores = []
@@ -226,6 +228,12 @@ def reset(self):
     self.deadline_events_list = []
     self.arrival_events_list = []
     self.start_events_list = []
+    if self.name == 'SRTF' or self.name == 'RoundRobin':
+        for task in self.tasks:
+            task.first_time_executing = True
+            task.finish = False
+    if self.name == 'RoundRobin':
+        self.quantum_counter = 0
 
 
 class FIFO(NonPreemptive):
@@ -495,10 +503,7 @@ class SRTF(Preemptive):
                 if event.task.first_time_executing:
                     self.create_deadline_event(event)
 
-    def execute(self):
-        self.arrival_events = self.get_all_arrivals()
-
-        time = self.start
+    def compute(self, time, count):
         while time <= self.end:
             debug(self, time)
             self.find_finish_events(time)
@@ -508,73 +513,64 @@ class SRTF(Preemptive):
             self.choose_executed(time)
             if self.executing:
                 self.executing.executing_time += 1
-                self.executing_at_time.append(copy.deepcopy(self.executing))
             else:
                 self.executing_at_time.append(None)
-            self.finish_events_at_time.append(copy.deepcopy(self.finish_events))
-            self.deadline_events_at_time.append(copy.deepcopy(self.deadline_events))
-            self.arrival_events_at_time.append(copy.deepcopy(self.arrival_events))
-            self.start_events_at_time.append(copy.deepcopy(self.start_events))
+            count += 1
+            if count == self.size:
+                self.time_list.append(time)
+                if self.executing:
+                    self.executing_list.append(copy.deepcopy(self.executing))
+                else:
+                    self.executing_list.append(None)
+                self.finish_events_list.append(copy.deepcopy(self.finish_events))
+                self.deadline_events_list.append(copy.deepcopy(self.deadline_events))
+                self.arrival_events_list.append(copy.deepcopy(self.arrival_events))
+                self.start_events_list.append(copy.deepcopy(self.start_events))
+                count = 0
             time += 1
         debug(self, time)
 
+    def execute(self):
+        self.arrival_events = self.get_all_arrivals()
+
+        self.size = int(math.sqrt(self.end))
+        count = self.size - 1
+        time = self.start
+        self.compute(time, count)
 
     def new_task(self, new_task):
         new_task.core = self.cores[0].id
+        count = 0
         time = 0
         if new_task.type == 'sporadic' and new_task.activation > 0:
             time = new_task.activation
-            # Go back in time
-            self.finish_events = copy.deepcopy(self.finish_events_at_time[time - 1])
-            self.deadline_events = copy.deepcopy(self.deadline_events_at_time[time - 1])
-            self.arrival_events = copy.deepcopy(self.arrival_events_at_time[time - 1])
-            self.start_events = copy.deepcopy(self.start_events_at_time[time - 1])
-            self.executing = copy.deepcopy(self.executing_at_time[time - 1])
+            pos = search_pos(self, time - 1)
+            self.finish_events = copy.deepcopy(self.finish_events_list[pos])
+            self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
+            self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
+            self.start_events = copy.deepcopy(self.start_events_list[pos])
+            self.executing = copy.deepcopy(self.executing_list[pos])
             if self.executing:
                 self.executing = self.start_events[0]
-                '''for event in self.start_events:
-                    if event.id == self.executing.id:
-                        self.executing = event'''
             self.tasks.append(new_task)
             new_task.init = new_task.activation
             event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
-            for t in range(time):
-                self.arrival_events_at_time[t].append(copy.deepcopy(event))
-                self.arrival_events_at_time[t].sort(key=lambda x: x.timestamp)
+            for p in range(pos + 1):
+                self.arrival_events_list[p].append(copy.deepcopy(event))
             self.arrival_events.append(event)
             self.arrival_events.sort(key=lambda x: x.timestamp)
+            delete(self, time)
+            time = self.time_list[pos] + 1
         else:
-            self.executing = None
-            self.finish_events = []
-            self.deadline_events = []
-            self.arrival_events = []
-            self.start_events = []
+            reset(self)
+            self.event_id = 0
             self.tasks.append(new_task)
-            for task in self.tasks:
-                task.first_time_executing = True
-                task.finish = False
             self.arrival_events = self.get_all_arrivals()
+            count = self.size - 1
 
         self.output_file.clean(time)
-        while (time <= self.end):
-            debug(self, time)
-            self.find_finish_events(time)
-            self.find_deadline_events(time)
-            self.find_arrival_event(time)
-            self.calculate_remaining_time()
-            self.choose_executed(time)
-            if self.executing:
-                self.executing.executing_time += 1
-                self.executing_at_time[time] = copy.deepcopy(self.executing)
-            else:
-                self.executing_at_time[time] = None
-            self.finish_events_at_time[time] = copy.deepcopy(self.finish_events)
-            self.deadline_events_at_time[time] = copy.deepcopy(self.deadline_events)
-            self.arrival_events_at_time[time] = copy.deepcopy(self.arrival_events)
-            self.start_events_at_time[time] = copy.deepcopy(self.start_events)
-            time += 1
-        debug(self, time)
+        self.compute(time, count)
 
     def terminate(self):
         self.output_file.terminate_write()
