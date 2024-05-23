@@ -4,11 +4,11 @@ import Task
 import random
 
 MAX_TIME_END = 100
-MAX_PERIOD = 10
-MAX_WCET = 15
+MAX_PERIOD = 20
+MAX_WCET = 10
 MAX_QUANTUM = 10
-TASKS_NUMS = 20
-NEW_TASKS_NUMS = 2
+TASKS_NUMS = 10
+NEW_TASKS_NUMS = 5
 
 def compare_files(file1, file2):
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
@@ -22,9 +22,11 @@ def compare_files(file1, file2):
 if __name__ == "__main__":
     scheduling_algorithm = "FIFO"
     time_start = 0  # TODO random
+    add_time = random.randint(1, MAX_TIME_END)
     time_end = random.randint(1, MAX_TIME_END)
+    print(time_end, add_time)
     simulation1 = ET.Element("simulation")
-    time1 = ET.SubElement(simulation1, "time", start="0", end=str(time_end))
+    time1 = ET.SubElement(simulation1, "time", start="0", end=str(time_end + add_time))
     time1.tail = "\n"
     software1 = ET.SubElement(simulation1, "software")
     tasks1 = ET.SubElement(software1, "tasks")
@@ -122,11 +124,16 @@ if __name__ == "__main__":
     test_scheduler2 = SchedIO.import_file("examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.txt")
     test_scheduler2.execute()
 
+    count = 0
     for new_task in new_tasks:
+        if count == 2:
+            test_scheduler2.add_time(add_time)
         print(new_task.id)
         print(new_task.activation)
         print(new_task.finish)
         test_scheduler2.new_task(new_task)
+        count += 1
+    #test_scheduler2.add_time(add_time)
     test_scheduler2.terminate()
 
     for task in new_tasks:
