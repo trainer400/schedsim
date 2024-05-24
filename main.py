@@ -7,7 +7,7 @@ if __name__ == "__main__":
         input_path = sys.argv[1]
         output_path = sys.argv[2]
         scheduler = SchedIO.import_file(input_path, output_path)
-
+        '''
         print("Do you want to add some seconds?")
         while True:
             seconds = input()
@@ -24,7 +24,7 @@ if __name__ == "__main__":
             except ValueError:
                 print("Invalid value, please try again or type 'Next' to skip the execution:")
 
-        
+        '''
         scheduler.execute()
         
 
@@ -32,8 +32,8 @@ if __name__ == "__main__":
 
 
         # Chiamata al controller come se fosse da riga di comando
-        command = f'python3 controller.py {input_path} {output_path}'
-        subprocess.run(command, shell=True, check=True)
+        #command = f'python3 controller.py {input_path} {output_path}'
+        #subprocess.run(command, shell=True, check=True)
         '''while(True):
             real_time = input()
             real_time = bool(real_time)

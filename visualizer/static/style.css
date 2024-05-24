@@ -1,10 +1,6 @@
 body {
     background-color: #f5f5f5;
     font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
 }
 
@@ -12,35 +8,103 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 90%;
-    max-width: 1200px;
+    height: 100vh;
+    width: 100%;
 }
 
 .content {
-    width: 100%;
-    background-color: #15c45e;
+    width: 90%; /* Riduci la larghezza al 90% per una migliore estetica */
+    background-color: #fff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 h1 {
-    color: white;
+    color: #333;
     margin-bottom: 20px;
 }
 
-.top-buttons {
+.button-container {
     display: flex;
     justify-content: space-between;
-    width: 100%;
     margin-bottom: 20px;
 }
 
-.top-buttons button {
-    width: 48%;
+.button-container button, .button-container label {
+    flex-grow: 1;
+    padding: 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.button-container button:hover, .button-container label:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+.button-container button:active, .button-container label:active {
+    transform: scale(0.95);
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.graph-execution-and-form-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.graph-execution {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.graph-execution img {
+    max-width: 100%;
+    border-radius: 5px;
+}
+
+#newTaskForm {
+    width: 100%;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+#newTaskForm label {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.hidden {
+    display: none;
+}
+
+#newTaskForm input, #newTaskForm select, #newTaskForm textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#newTaskForm button {
+    width: 100%;
     padding: 15px;
     background-color: #28a745;
     color: white;
@@ -51,97 +115,11 @@ h1 {
     transition: background-color 0.3s, transform 0.3s;
 }
 
-.top-buttons button:hover {
+#newTaskForm button:hover {
     background-color: #218838;
     transform: scale(1.05);
 }
 
-.top-buttons button:active {
+#newTaskForm button:active {
     transform: scale(0.95);
-}
-
-.graph-execution-and-form-container {
-    display: flex;
-    width: 100%;
-}
-
-.graph-execution {
-    width: 50%;
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.graph-execution img {
-    max-width: 100%;
-    border-radius: 5px;
-}
-
-#xmlForm {
-    width: 50%;
-    padding-left: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.fileLabel {
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: #333;
-}
-
-input[type="file"] {
-    margin-bottom: 10px;
-}
-
-button {
-    padding: 10px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-}
-
-button:hover {
-    transform: scale(1.05);
-}
-
-button:active {
-    transform: scale(0.95);
-}
-
-.hidden {
-    display: none;
-}
-
-#newTaskForm {
-    width: 100%;
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-}
-
-#newTaskForm label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #333;
-}
-
-#newTaskForm input, #newTaskForm textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
 }
