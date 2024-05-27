@@ -1,40 +1,56 @@
+/* Stile generale del body */
 body {
-    background-color: #f5f5f5;
-    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
+    font-family: 'Arial', sans-serif;
     margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+/* Stile del contenitore principale */
 .container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
 }
 
+/* Stile del contenuto */
 .content {
-    width: 90%; /* Riduci la larghezza al 90% per una migliore estetica */
+    width: 90%;
     background-color: #fff;
-    padding: 20px;
+    padding: 30px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
+/* Stile dell'header */
 h1 {
     color: #333;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    font-size: 3rem;
+    text-align: center;
+    text-transform: uppercase; /* Trasforma il testo in maiuscolo */
+    letter-spacing: 2px; /* Aggiunge spaziatura tra le lettere */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Aggiunge un'ombra leggera */
+    font-weight: bold; /* Rende il testo più spesso */
 }
 
+/* Stile dei pulsanti */
 .button-container {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .button-container button, .button-container label {
     flex-grow: 1;
+    margin-right: 10px;
     padding: 15px;
-    background-color: #28a745;
+    background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
@@ -42,10 +58,11 @@ h1 {
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .button-container button:hover, .button-container label:hover {
-    background-color: #218838;
+    background-color: #45a049;
     transform: scale(1.05);
 }
 
@@ -53,10 +70,19 @@ h1 {
     transform: scale(0.95);
 }
 
+/* Stile degli input file */
 input[type="file"] {
     display: none;
 }
 
+.custom-file-upload {
+    border: 2px solid #4CAF50;
+    padding: 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Stile del contenitore della grafica e del modulo */
 .graph-execution-and-form-container {
     display: flex;
     flex-direction: column;
@@ -65,61 +91,79 @@ input[type="file"] {
 
 .graph-execution {
     background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
 }
 
 .graph-execution img {
     max-width: 100%;
-    border-radius: 5px;
-}
-
-#newTaskForm {
-    width: 100%;
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-}
-
-#newTaskForm label {
-    display: block;
-    margin-bottom: 10px;
-    color: #333;
+    border-radius: 8px;
 }
 
 .hidden {
     display: none;
 }
 
-#newTaskForm input, #newTaskForm select, #newTaskForm textarea {
-    width: 100%;
-    padding: 10px;
+/* Stile del form "newTask" */
+#newTaskForm {
+    width: 90%;
+    max-width: 600px;
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 30px auto; /* Centrato verticalmente e orizzontalmente */
+    box-sizing: border-box;
+}
+
+
+#newTaskForm label {
+    display: block;
     margin-bottom: 15px;
+    color: #333;
+}
+
+#newTaskForm input[type="number"],
+#newTaskForm input[type="text"],
+#newTaskForm select,
+#newTaskForm textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
 }
 
 #newTaskForm button {
     width: 100%;
     padding: 15px;
-    background-color: #28a745;
+    background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 #newTaskForm button:hover {
-    background-color: #218838;
+    background-color: #45a049;
     transform: scale(1.05);
 }
 
 #newTaskForm button:active {
     transform: scale(0.95);
+}
+
+/* Footer */
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
 }

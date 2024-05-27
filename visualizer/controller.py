@@ -1,6 +1,12 @@
 from flask import Flask, render_template, request, jsonify
 import os
-import subprocess
+import sys
+
+# Aggiungi la cartella padre al sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import SchedIO
+import Scheduler,Task
 
 app = Flask(__name__)
 
@@ -25,26 +31,33 @@ def upload_xml():
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     xml_file.save(save_path)
 
-    return 'XML File uploaded successfully!', 200
+    return jsonify({'message': 'XML File uploaded successfully!', 'file_path': save_path}), 200
 
 @app.route('/execute_main', methods=['POST'])
 def execute_main():
     try:
-        # Esegui il file test.py nella stessa directory
-        # Esegui il file test.py nella stessa directory della directory principale che contiene visualizer
-        script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'main.py')
-        input_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'example_fifo.xml')
-        output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'out_fifo.txt')
-
-        result = subprocess.run(['python3', script_path, input_path, output_path], capture_output=True, text=True, check=True)
+        # Verifica che il content type sia application/json
+        if request.content_type != 'application/json':
+            return jsonify({"error": "Content-Type must be application/json"}), 415
         
+        # Ottieni il percorso del file XML dal corpo della richiesta
+        input_path = request.json.get('file_path')
+        if not input_path:
+            return jsonify({"error": "No input file path provided"}), 400
+        
+        output_path = os.path.join(os.path.dirname(input_path), 'out_fifoooooooooo.txt')
+        
+        # Importa e esegui lo scheduler
+        scheduler = SchedIO.import_file(input_path, output_path)
+        scheduler.execute()
+        
+        # Leggi l'output dal file di output
+        with open(output_path, 'r') as f:
+            output = f.read()
+
         # Restituisci l'output dell'esecuzione come risposta
-        return jsonify({"output": result.stdout}), 200
-    except subprocess.CalledProcessError as e:
-        # In caso di errore, restituisci un messaggio di errore dettagliato
-        error_message = f"Error occurred: {e.stderr}\nStandard Output: {e.stdout}"
-        app.logger.error(error_message)
-        return jsonify({"error": error_message}), 500
+        return jsonify({"output": output}), 200
+
     except FileNotFoundError:
         error_message = "The specified file was not found."
         app.logger.error(error_message)
@@ -54,6 +67,14 @@ def execute_main():
         error_message = f"An unexpected error occurred: {str(e)}"
         app.logger.error(error_message)
         return jsonify({"error": error_message}), 500
+    
+    finally:
+        # Elimina il file di input
+        try:
+            if os.path.exists(input_path):
+                os.remove(input_path)
+        except Exception as e:
+            app.logger.error(f"Error occurred while deleting the file: {str(e)}")
 
 @app.route('/create_task', methods=['POST'])
 def create_task():
@@ -66,12 +87,45 @@ def create_task():
     deadline = request.form.get('deadline')
     wcet = request.form.get('wcet')
 
-    # Esegui l'elaborazione per creare la nuova task
-    # Ad esempio, puoi salvare i dati nel database o fare altre operazioni necessarie
+    # Controlla che i valori ricevuti siano validi
+    if not all([real_time, task_type, task_id, period, activation, deadline, wcet]):
+        return jsonify({'error': 'All fields are required.'}), 400
+
+    # Converte i valori in tipi appropriati
+    try:
+        task_id = int(task_id)
+        period = int(period)
+        activation = int(activation)
+        deadline = int(deadline)
+        wcet = int(wcet)
+    except ValueError:
+        return jsonify({'error': 'Invalid input format.'}), 400
+
+    # Esegui ulteriori controlli sui valori
+    if task_id <= 0:
+        return jsonify({'error': 'Task ID must be a positive integer.'}), 400
+    if wcet <= 0:
+        return jsonify({'error': 'WCET must be a positive integer.'}), 400
+    if (task_type == 'periodic' and period <= 0) or (task_type == 'sporadic' and activation < 0):
+        return jsonify({'error': 'Invalid period or activation value.'}), 400
+    if deadline <= 0:
+        return jsonify({'error': 'Deadline must be a positive integer.'}), 400
+    if period <= deadline:
+        return jsonify({'error': 'Period must be greater than deadline.'}), 400
+    if wcet > period and task_type == 'periodic':
+        return jsonify({'error': 'WCET must be less than or equal to period.'}), 400
+    if deadline < wcet:
+        return jsonify({'error': 'Deadline must be greater than WCET.'}), 400
+
     print(f'Real Time: {real_time}, Task Type: {task_type}, Task ID: {task_id}, Period: {period}, Activation: {activation}, Deadline: {deadline}, WCET: {wcet}')
 
+    new_task=Task.Task(real_time,task_type,task_id,period,activation,deadline,wcet)
+    scheduler = SchedIO.import_file("input/example_fifo.xml", "output.txt")
+    scheduler.execute()
+    scheduler.new_task(new_task)
     # Restituisci una risposta per confermare che la task è stata creata con successo
     return jsonify({'message': 'Task created successfully!'}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

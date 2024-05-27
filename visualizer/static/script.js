@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
+    let uploadedFilePath = '';
+
     $('#newTaskBtn').click(function() {
         $('#newTaskForm').removeClass('hidden');
     });
@@ -59,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             contentType: false,
             success: function(response) {
                 alert('XML File uploaded successfully!');
+                uploadedFilePath = response.file_path; // Memorizza il percorso del file caricato
             },
             error: function(xhr, status, error) {
                 console.error(error);
@@ -68,12 +71,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#executeBtn').click(function() {
+        if (uploadedFilePath === '') {
+            alert('Please upload an XML file first.');
+            return;
+        }
+
         $.ajax({
             url: '/execute_main',
             type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ file_path: uploadedFilePath }), // Invia il percorso del file come JSON
             success: function(response) {
                 alert(response.output);
-                
             },
             error: function(xhr, status, error) {
                 console.error('XHR Status:', status);
