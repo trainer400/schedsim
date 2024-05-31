@@ -7,19 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     $('#newTaskForm').submit(function(event) {
         event.preventDefault();
-        
-        var taskId = $('#taskId').val();
-        var period = parseInt($('#period').val());
-        var activation = parseInt($('#activation').val());
-        var deadline = parseInt($('#deadline').val());
-        var wcet = parseInt($('#wcet').val());
-        
-        // Validazione dei campi
-        if (isNaN(period) || isNaN(activation) || isNaN(deadline) || isNaN(wcet) || period <= deadline || wcet <= 0 || deadline <= 0 || taskId <=0) {
-            alert('Please fill in all fields correctly.');
-            return;
-        }
-
+    
         var formData = new FormData(this);
 
         $.ajax({
@@ -29,12 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
             processData: false,
             contentType: false,
             success: function(response) {
-                alert('Task created successfully!');
+                alert(response.message || 'Task created successfully!');
                 $('#newTaskForm').addClass('hidden');
             },
             error: function(xhr, status, error) {
-                console.error(error);
-                alert('Error occurred while creating task.');
+                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error occurred while creating task.';
+                console.error(errorMessage);
+                alert(errorMessage);
             }
         });
     });
@@ -64,8 +53,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 uploadedFilePath = response.file_path; // Memorizza il percorso del file caricato
             },
             error: function(xhr, status, error) {
-                console.error(error);
-                alert('Error occurred while uploading XML file.');
+                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error occurred while uploading XML file.';
+                console.error(errorMessage);
+                alert(errorMessage);
             }
         });
     });
@@ -82,14 +72,40 @@ document.addEventListener('DOMContentLoaded', function() {
             contentType: 'application/json',
             data: JSON.stringify({ file_path: uploadedFilePath }), // Invia il percorso del file come JSON
             success: function(response) {
-                alert(response.output);
+                alert(response.output || 'Execution completed successfully!');
             },
             error: function(xhr, status, error) {
+                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error occurred while executing command.';
                 console.error('XHR Status:', status);
                 console.error('Error:', error);
                 console.error('Response Text:', xhr.responseText);
-                alert('Error occurred while executing command.');
+                alert(errorMessage);
             }
         });
     });
+
+
+    $('#addTimeBtn').click(function() {
+        alert('Add Time button clicked!'); // Alert casuale quando il bottone "add_time" viene premuto
+    });
+    
+    $('#printGraphBtn').click(function() {
+        // Invia una richiesta POST al server quando il pulsante viene premuto
+        $.ajax({
+            type: 'POST',
+            url: '/print_graph', // Percorso verso la route che gestisce la stampa del grafico
+            success: function(response) {
+                // Alert di conferma quando la stampa del grafico è avvenuta con successo
+                alert(response.message);
+                // Aggiorna la pagina dopo aver stampato il grafico
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                // Alert in caso di errore durante la stampa del grafico
+                alert('Error: ' + error);
+            }
+        });
+    });
+    
 });
+

@@ -1,7 +1,10 @@
 import sys
 
+from Visualizer import create_graph
+
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        input_path = sys.argv[1]
+    input_path = 'out.csv'
+    output_path = 'out.png'
         
+    create_graph(output_path)
     print(input_path)

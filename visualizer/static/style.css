@@ -9,7 +9,7 @@ body {
     align-items: center;
 }
 
-/* Stile del contenitore principale */
+/* Contenitore principale */
 .container {
     display: flex;
     justify-content: center;
@@ -18,110 +18,106 @@ body {
     width: 100%;
 }
 
-/* Stile del contenuto */
+/* Contenuto */
 .content {
     width: 90%;
+    max-width: 800px; /* Larghezza massima */
     background-color: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
-
-/* Stile dell'header */
-h1 {
-    color: #333;
-    margin-bottom: 30px;
-    font-size: 3rem;
-    text-align: center;
-    text-transform: uppercase; /* Trasforma il testo in maiuscolo */
-    letter-spacing: 2px; /* Aggiunge spaziatura tra le lettere */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Aggiunge un'ombra leggera */
-    font-weight: bold; /* Rende il testo più spesso */
-}
-
-/* Stile dei pulsanti */
-.button-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-}
-
-.button-container button, .button-container label {
-    flex-grow: 1;
-    margin-right: 10px;
     padding: 15px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.button-container button:hover, .button-container label:hover {
-    background-color: #45a049;
-    transform: scale(1.05);
+/* Header */
+h1 {
+    font-size: 2rem; /* Riduci la dimensione del testo */
+    margin-bottom: 20px; /* Riduci il margine inferiore */
+    font-weight: bold;
 }
 
-.button-container button:active, .button-container label:active {
-    transform: scale(0.95);
+/* Pulsanti */
+.button-container {
+    display: flex;
+    flex-wrap: wrap; /* Permette di andare a capo se non c'è spazio */
+    justify-content: center;
+    gap: 8px; /* Spazio tra i pulsanti */
+    margin-bottom: 20px; /* Riduci il margine inferiore */
 }
 
-/* Stile degli input file */
+.button-container button, .button-container label {
+    flex-grow: 1; /* Per riempire tutto lo spazio disponibile */
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px; /* Riduci la dimensione del testo */
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Imposta la larghezza dei pulsanti sulla riga */
+.button-row button, .button-row label {
+    flex-basis: calc(50% - 8px); /* Imposta la larghezza di base dei pulsanti, meno il gap */
+}
+
+/* Input file */
 input[type="file"] {
     display: none;
 }
 
 .custom-file-upload {
     border: 2px solid #4CAF50;
-    padding: 15px;
+    padding: 12px;
     border-radius: 5px;
     cursor: pointer;
 }
 
-/* Stile del contenitore della grafica e del modulo */
+/* Contenitore grafica e modulo */
 .graph-execution-and-form-container {
     display: flex;
     flex-direction: column;
+    align-items: center; /* Centra il contenuto orizzontalmente */
     width: 100%;
 }
 
 .graph-execution {
     background-color: #f0f0f0;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-top: 30px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center; /* Centra il contenuto orizzontalmente */
+    align-items: center; /* Centra il contenuto verticalmente */
+    max-width: 100%; /* Imposta la larghezza massima al 100% */
 }
 
 .graph-execution img {
     max-width: 100%;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .hidden {
     display: none;
 }
 
-/* Stile del form "newTask" */
+/* Form "newTask" */
 #newTaskForm {
     width: 90%;
     max-width: 600px;
     background-color: #f9f9f9;
-    padding: 30px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin: 30px auto; /* Centrato verticalmente e orizzontalmente */
-    box-sizing: border-box;
+    margin: 20px auto;
 }
-
 
 #newTaskForm label {
     display: block;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     color: #333;
 }
 
@@ -130,17 +126,17 @@ input[type="file"] {
 #newTaskForm select,
 #newTaskForm textarea {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
+    padding: 10px;
+    margin-bottom: 16px;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
+    border-radius: 4px;
+    font-size: 14px; /* Riduci la dimensione del testo */
     transition: border-color 0.3s;
 }
 
 #newTaskForm button {
     width: 100%;
-    padding: 15px;
+    padding: 12px;
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -148,7 +144,7 @@ input[type="file"] {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 #newTaskForm button:hover {

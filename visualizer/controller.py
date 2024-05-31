@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, jsonify
 import os
 import sys
+import matplotlib
+matplotlib.use('Agg')  # Imposta il backend non interattivo
 
 # Aggiungi la cartella padre al sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import SchedIO
-import Scheduler,Task
+import Scheduler, Task
+from Visualizer import create_graph
 
 app = Flask(__name__)
 
@@ -36,6 +39,7 @@ def upload_xml():
 @app.route('/execute_main', methods=['POST'])
 def execute_main():
     try:
+        
         # Verifica che il content type sia application/json
         if request.content_type != 'application/json':
             return jsonify({"error": "Content-Type must be application/json"}), 415
@@ -45,18 +49,15 @@ def execute_main():
         if not input_path:
             return jsonify({"error": "No input file path provided"}), 400
         
-        output_path = os.path.join(os.path.dirname(input_path), 'out_fifoooooooooo.txt')
+        output_path = os.path.join(os.path.dirname(input_path), 'out.csv')
         
         # Importa e esegui lo scheduler
-        scheduler = SchedIO.import_file(input_path, output_path)
+        scheduler = SchedIO.import_file(input_path, 'input/out.csv')
         scheduler.execute()
         
-        # Leggi l'output dal file di output
-        with open(output_path, 'r') as f:
-            output = f.read()
-
+        #create_graph('static/out.png')
         # Restituisci l'output dell'esecuzione come risposta
-        return jsonify({"output": output}), 200
+        return jsonify({"output": "Execution completed!"}), 200
 
     except FileNotFoundError:
         error_message = "The specified file was not found."
@@ -69,13 +70,14 @@ def execute_main():
         return jsonify({"error": error_message}), 500
     
     finally:
-        # Elimina il file di input
-        try:
-            if os.path.exists(input_path):
-                os.remove(input_path)
-        except Exception as e:
-            app.logger.error(f"Error occurred while deleting the file: {str(e)}")
-
+        # Elimina il file di input e altri file generati
+        if 'input_path' in locals():
+            try:
+                if os.path.exists(input_path):
+                    os.remove(input_path)
+            except Exception as e:
+                app.logger.error(f"Error occurred while deleting the file: {str(e)}")
+    
 @app.route('/create_task', methods=['POST'])
 def create_task():
     # Ricevi i dati del form per creare una nuova task
@@ -119,12 +121,22 @@ def create_task():
 
     print(f'Real Time: {real_time}, Task Type: {task_type}, Task ID: {task_id}, Period: {period}, Activation: {activation}, Deadline: {deadline}, WCET: {wcet}')
 
-    new_task=Task.Task(real_time,task_type,task_id,period,activation,deadline,wcet)
-    scheduler = SchedIO.import_file("input/example_fifo.xml", "output.txt")
+    new_task = Task.Task(real_time, task_type, task_id, period, activation, deadline, wcet)
+    scheduler = SchedIO.import_file("input/example_srtf.xml", "input/out.csv")
     scheduler.execute()
     scheduler.new_task(new_task)
+    
     # Restituisci una risposta per confermare che la task è stata creata con successo
     return jsonify({'message': 'Task created successfully!'}), 200
+
+@app.route('/print_graph', methods=['POST'])
+def print_graph():
+    # Qui puoi aggiungere le operazioni necessarie per stampare il grafico
+    try:
+        create_graph('static/out.png')
+        return jsonify({'message': 'Graph printed successfully!'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':
