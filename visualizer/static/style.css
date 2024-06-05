@@ -1,69 +1,165 @@
-.container {
+/* Stile generale del body */
+body {
+    background: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.content {
+/* Contenitore principale */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     width: 100%;
-    background-color: hsl(0, 100%, 62%);
-    padding: 20px;
-    border-radius: 10px;
-    background-color: #15c45e; /* Aggiungi il colore di sfondo rosa */
-    display: flex; /* Usiamo flexbox per il layout interno */
-    flex-direction: column; /* Impostiamo la direzione del layout su colonna */
 }
 
-.graph-execution {
-    width: 66.67%; /* Occupa il 66.67% della larghezza della .content */
-    background-color: #f0f0f0; /* Aggiungi un colore di sfondo */
-    padding: 10px; /* Aggiungi spaziatura interna */
-    border-radius: 5px; /* Aggiungi bordi arrotondati */
+/* Contenuto */
+.content {
+    width: 90%;
+    max-width: 800px; /* Larghezza massima */
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Header */
+h1 {
+    font-size: 2rem; /* Riduci la dimensione del testo */
+    margin-bottom: 20px; /* Riduci il margine inferiore */
+    font-weight: bold;
+}
+
+/* Pulsanti */
 .button-container {
-    width: 33.33%; /* Occupa il 33.33% della larghezza della .content */
-    background-color: #ffcccc; /* Aggiungi il colore di sfondo rosa */
-    padding: 10px; /* Aggiungi spaziatura interna */
-    border-radius: 5px; /* Aggiungi bordi arrotondati */
-    margin-top: 10px; /* Aggiungi margine superiore */
+    display: flex;
+    flex-wrap: wrap; /* Permette di andare a capo se non c'è spazio */
+    justify-content: center;
+    gap: 8px; /* Spazio tra i pulsanti */
+    margin-bottom: 20px; /* Riduci il margine inferiore */
 }
+
+.button-container button, .button-container label {
+    flex-grow: 1; /* Per riempire tutto lo spazio disponibile */
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px; /* Riduci la dimensione del testo */
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Imposta la larghezza dei pulsanti sulla riga */
+.button-row button, .button-row label {
+    flex-basis: calc(50% - 8px); /* Imposta la larghezza di base dei pulsanti, meno il gap */
+}
+
+/* Input file */
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+    border: 2px solid #4CAF50;
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Contenitore grafica e modulo */
 .graph-execution-and-form-container {
     display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra il contenuto orizzontalmente */
+    width: 100%;
 }
 
 .graph-execution {
-    width: 50%; /* Occupa il 50% della larghezza del contenitore */
-}
-
-#xmlForm {
-    width: 50%; /* Occupa il 50% della larghezza del contenitore */
-    padding-left: 10px; /* Aggiunge un po' di spazio tra il grafico e il form */
-}
-
-.top-buttons {
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
     display: flex;
-    justify-content: flex-start;
-    align-items: center;
+    justify-content: center; /* Centra il contenuto orizzontalmente */
+    align-items: center; /* Centra il contenuto verticalmente */
+    max-width: 100%; /* Imposta la larghezza massima al 100% */
 }
 
-.top-buttons button {
-    width: 100px;
-    height: 100px;
-    background-color: pink; /* Colore rosa */
-    color: white; /* Testo bianco */
+.graph-execution img {
+    max-width: 100%;
+    border-radius: 6px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Form "newTask" */
+#newTaskForm {
+    width: 90%;
+    max-width: 600px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+#newTaskForm label {
+    display: block;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+#newTaskForm input[type="number"],
+#newTaskForm input[type="text"],
+#newTaskForm select,
+#newTaskForm textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px; /* Riduci la dimensione del testo */
+    transition: border-color 0.3s;
+}
+
+#newTaskForm button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
     border: none;
     border-radius: 5px;
-    margin-right: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.fileLabel {
-    display: block;
-    margin-bottom: 10px;
+#newTaskForm button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
 }
 
-button {
-    width: 100%;
-    margin-bottom: 10px;
+#newTaskForm button:active {
+    transform: scale(0.95);
 }
 
+/* Footer */
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+}
