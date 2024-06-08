@@ -2,18 +2,23 @@ from flask import Flask, render_template, request, jsonify
 import os
 import sys
 import matplotlib
+from SchedulerController import SchedulerController
+
+
 matplotlib.use('Agg')  # Imposta il backend non interattivo
 
 # Aggiungi la cartella padre al sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import SchedIO
-import Scheduler, Task
+import Task
 from Visualizer import create_graph
 
 app = Flask(__name__)
+# Specifica il percorso del file di output
+output_file_path = 'input/out.csv'
+scheduler_controller = SchedulerController(output_file_path)
 
-scheduler = None
 @app.route('/')
 def index():
     return render_template('index.html', title='schedsim')
@@ -50,20 +55,17 @@ def execute_main():
         if not input_path:
             return jsonify({"error": "No input file path provided"}), 400
         
-        output_path = os.path.join(os.path.dirname(input_path), 'out.csv')
-        
         # Importa e esegui lo scheduler
-        scheduler = SchedIO.import_file(input_path, 'input/out.csv')
-        scheduler.execute()
+        success = scheduler_controller.load_xml_file(input_path)
+        if not success:
+            return jsonify({"error": "Error loading XML file"}), 500
         
-        #create_graph('static/out.png')
-        # Restituisci l'output dell'esecuzione come risposta
+        success = scheduler_controller.execute_scheduler()
+        if not success:
+            return jsonify({"error": "Error executing scheduler"}), 500
+
         return jsonify({"output": "Execution completed!"}), 200
 
-    except FileNotFoundError:
-        error_message = "The specified file was not found."
-        app.logger.error(error_message)
-        return jsonify({"error": error_message}), 404
     except Exception as e:
         # Gestione generica degli altri errori
         error_message = f"An unexpected error occurred: {str(e)}"
@@ -122,23 +124,64 @@ def create_task():
 
     print(f'Real Time: {real_time}, Task Type: {task_type}, Task ID: {task_id}, Period: {period}, Activation: {activation}, Deadline: {deadline}, WCET: {wcet}')
 
-    new_task = Task.Task(real_time, task_type, task_id, period, activation, deadline, wcet)
-    scheduler = SchedIO.import_file("input/example_srtf.xml", "input/out.csv")
-    scheduler.execute()
-    scheduler.new_task(new_task)
-    
-    # Restituisci una risposta per confermare che la task è stata creata con successo
-    return jsonify({'message': 'Task created successfully!'}), 200
+    success = scheduler_controller.create_task([real_time, task_type, task_id, period, activation, deadline, wcet])
+    if success:
+        return jsonify({'message': 'Task created successfully!'}), 200
+    else:
+        return jsonify({'error': 'Error creating task.'}), 500
 
 @app.route('/print_graph', methods=['POST'])
 def print_graph():
-    # Qui puoi aggiungere le operazioni necessarie per stampare il grafico
     try:
-        create_graph('static/out.png')
-        return jsonify({'message': 'Graph printed successfully!'}), 200
+        success = scheduler_controller.print_graph()
+        if success:
+            return jsonify({'message': 'Graph printed successfully!'}), 200
+        else:
+            return jsonify({'error': 'Error printing graph.'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/create_xml', methods=['POST'])
+def create_xml():
+    try:
+        # Ricevi i dati dal corpo della richiesta
+        start = request.form.get('start')
+        end = request.form.get('end')
+        scheduling_algorithm = request.form.get('schedulingAlgorithm')
+        task_number = request.form.get('taskNumber')
+        tasks = [
+            {"real_time": True, "type": "periodic", "id": 1, "period": 50, "deadline": 50, "wcet": 20},
+            {"real_time": True, "type": "periodic", "id": 2, "period": 100, "deadline": 30, "wcet": 25},
+            {"real_time": True, "type": "sporadic", "id": 3, "activation": 50, "deadline": 50, "wcet": 20},
+            {"real_time": False, "type": "sporadic", "id": 4, "activation": 5, "wcet": 3}
+        ]
+        
+        # Controlla che tutti i campi siano presenti
+        #if not all([start, end, scheduling_algorithm, task_number]):
+        #    return jsonify({'error': 'All fields are required.'}), 400
+
+        # Converte i valori in tipi appropriati
+        start = int(start)
+        end = int(end)
+        task_number = int(task_number)
+
+        # Crea un'istanza di SchedulerController
+        controller = SchedulerController()
+
+        # Esegui la creazione del file XML utilizzando il metodo create_xml di SchedulerController
+        xml_path = controller.create_xml("input/example.xml", start, end, tasks ,scheduling_algorithm,0,1)
+
+        if xml_path:
+            return jsonify({'message': 'XML file created successfully!', 'xml_path': xml_path}), 200
+        else:
+            return jsonify({'error': 'Failed to create XML file.'}), 500
+
+    except Exception as e:
+        # Gestione generica degli altri errori
+        error_message = f"An unexpected error occurred: {str(e)}"
+        app.logger.error(error_message)
+        return jsonify({"error": error_message}), 500
+
+    
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
-
