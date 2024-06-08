@@ -4,7 +4,9 @@ The software is currently under development by [HEAPLab](https://heaplab.deib.po
 
 ## Features
 
-- Coming soon...
+- VISUALIZER
+- ADD NEW TASK
+- 
 
 <p align="center">
   <img src="./docs/maindiagram.png" />
@@ -12,9 +14,8 @@ The software is currently under development by [HEAPLab](https://heaplab.deib.po
 
 
 ## Contributors
-- Federico Reghenzani
-- Francesco Ratti
-- Tomás Droppelmann
+- Santarossa Noah
+- Romano Luca
 
 ## License
 SchedSim is Open Source and released under the Apache license. See the [LICENSE](./LICENSE) file for further details.

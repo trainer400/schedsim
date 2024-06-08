@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#newTaskForm').removeClass('hidden');
     });
 
+    $('#createXMLBtn').click(function() {
+        $('#createXML').removeClass('hidden');
+    });
+
     $('#newTaskForm').submit(function(event) {
         event.preventDefault();
     
@@ -28,6 +32,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    $('#createXML').submit(function(event) {
+        event.preventDefault();
+    
+        var formData = new FormData(this);
+    
+        $.ajax({
+            url: '/create_xml',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                alert(response.message || 'XML file created successfully!');
+                $('#createXML').addClass('hidden');
+            },
+            error: function(xhr, status, error) {
+                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error occurred while creating XML file.';
+                console.error(errorMessage);
+                alert(errorMessage);
+            }
+        });
+    });
+    
     $('#xmlFile').change(function() {
         if (this.files.length > 0) {
             $('#uploadBtn').removeClass('hidden');
@@ -84,11 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-
     $('#addTimeBtn').click(function() {
         alert('Add Time button clicked!'); // Alert casuale quando il bottone "add_time" viene premuto
     });
-    
+
     $('#printGraphBtn').click(function() {
         // Invia una richiesta POST al server quando il pulsante viene premuto
         $.ajax({
@@ -106,6 +132,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
 });
-

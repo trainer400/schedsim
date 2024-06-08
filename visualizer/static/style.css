@@ -16,22 +16,23 @@ body {
     align-items: center;
     min-height: 100vh;
     width: 100%;
+    padding: 20px; /* Aggiungi del padding per evitare che il contenuto tocchi i bordi */
 }
 
 /* Contenuto */
 .content {
-    width: 90%;
-    max-width: 800px; /* Larghezza massima */
+    width: 100%;
+    max-width: 1200px; /* Aumenta la larghezza massima */
     background-color: #fff;
-    padding: 15px;
+    padding: 30px; /* Aumenta il padding */
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Header */
 h1 {
-    font-size: 2rem; /* Riduci la dimensione del testo */
-    margin-bottom: 20px; /* Riduci il margine inferiore */
+    font-size: 2.5rem; /* Aumenta la dimensione del testo */
+    margin-bottom: 30px; /* Aumenta il margine inferiore */
     font-weight: bold;
 }
 
@@ -40,18 +41,18 @@ h1 {
     display: flex;
     flex-wrap: wrap; /* Permette di andare a capo se non c'è spazio */
     justify-content: center;
-    gap: 8px; /* Spazio tra i pulsanti */
-    margin-bottom: 20px; /* Riduci il margine inferiore */
+    gap: 16px; /* Aumenta lo spazio tra i pulsanti */
+    margin-bottom: 30px; /* Aumenta il margine inferiore */
 }
 
 .button-container button, .button-container label {
     flex-grow: 1; /* Per riempire tutto lo spazio disponibile */
-    padding: 12px;
+    padding: 15px; /* Aumenta il padding */
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 6px;
-    font-size: 16px; /* Riduci la dimensione del testo */
+    font-size: 18px; /* Aumenta la dimensione del testo */
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
@@ -85,10 +86,10 @@ input[type="file"] {
 
 .graph-execution {
     background-color: #f0f0f0;
-    padding: 15px;
+    padding: 20px; /* Aumenta il padding */
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    margin-top: 30px; /* Aumenta il margine superiore */
     display: flex;
     justify-content: center; /* Centra il contenuto orizzontalmente */
     align-items: center; /* Centra il contenuto verticalmente */
@@ -106,13 +107,13 @@ input[type="file"] {
 
 /* Form "newTask" */
 #newTaskForm {
-    width: 90%;
-    max-width: 600px;
+    width: 100%;
+    max-width: 800px; /* Aumenta la larghezza massima */
     background-color: #f9f9f9;
-    padding: 15px;
+    padding: 20px; /* Aumenta il padding */
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
+    margin: 30px auto; /* Aumenta il margine */
 }
 
 #newTaskForm label {
@@ -126,22 +127,22 @@ input[type="file"] {
 #newTaskForm select,
 #newTaskForm textarea {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 16px;
+    padding: 12px; /* Aumenta il padding */
+    margin-bottom: 20px; /* Aumenta il margine inferiore */
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 14px; /* Riduci la dimensione del testo */
+    font-size: 16px; /* Aumenta la dimensione del testo */
     transition: border-color 0.3s;
 }
 
 #newTaskForm button {
     width: 100%;
-    padding: 12px;
+    padding: 15px; /* Aumenta il padding */
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 18px; /* Aumenta la dimensione del testo */
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -162,4 +163,66 @@ footer {
     color: white;
     text-align: center;
     padding: 15px 0;
+}
+
+.graph-execution img {
+    width: 100%; /* Imposta la larghezza al 100% del contenitore */
+    height: auto; /* Mantiene il rapporto di aspetto dell'immagine */
+}
+
+.large-image {
+    width: 110%;
+    height: auto;
+    max-width: 800px;
+}
+
+#createXML {
+    width: 100%;
+    max-width: 800px; /* Aumenta la larghezza massima */
+    background-color: #f9f9f9;
+    padding: 20px; /* Aumenta il padding */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 30px auto; /* Aumenta il margine */
+}
+
+#createXML label {
+    display: block;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+#createXML input[type="number"],
+#createXML input[type="text"],
+#createXML select,
+#createXML textarea {
+    width: 100%;
+    padding: 12px; /* Aumenta il padding */
+    margin-bottom: 20px; /* Aumenta il margine inferiore */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px; /* Aumenta la dimensione del testo */
+    transition: border-color 0.3s;
+}
+
+#createXML button {
+    width: 100%;
+    padding: 15px; /* Aumenta il padding */
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px; /* Aumenta la dimensione del testo */
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#createXML button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+#createXML button:active {
+    transform: scale(0.95);
 }
