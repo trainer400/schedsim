@@ -4,74 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCHEDSIM</title>
-    <link rel="stylesheet"  href="{{ url_for('static', filename='style.css') }}"> <!-- Aggiungi il link al file CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
         <div class="content">
             <h1>SCHEDSIM</h1>
 
-            <div class="top-buttons">
-                <button id="executeBtn">START</button>
-                <button id="newTaskBtn">NEW TASK</button>
+            <div class="button-container">
+                <div class="button-row">
+                    <button id="executeBtn">Start</button>
+                    <button id="newTaskBtn">New Task</button>
+                    <button id="addTimeBtn">Add Time</button>
+                    <button id="printGraphBtn">Print Graph</button> 
+                    <label for="xmlFile" class="custom-file-upload">Select XML File</label>
+                    <button type="button" id="uploadBtn">Upload XML</button>
+                    <button id="createXMLBtn">Create XML</button>
+                </div>
             </div>
 
+            <form id="newTaskForm" class="hidden">
+                <label for="realTime">Real Time (true/false)</label>
+                <select id="realTime" name="realTime" required>
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                </select>
+
+                <label for="taskType">Task Type (sporadic/periodic)</label>
+                <select id="taskType" name="taskType" required>
+                    <option value="sporadic">sporadic</option>
+                    <option value="periodic">periodic</option>
+                </select>
+
+                <label for="taskId">Task ID</label>
+                <input type="number" id="taskId" name="taskId" min="1" step="1" required>
+
+                <label for="period">Period</label>
+                <input type="number" id="period" name="period">
+
+                <label for="activation">Activation</label>
+                <input type="number" id="activation" name="activation" required>
+
+                <label for="deadline">Deadline</label>
+                <input type="number" id="deadline" name="deadline" required>
+
+                <label for="wcet">WCET</label>
+                <input type="number" id="wcet" name="wcet" required>
+
+                <button type="submit">Create Task</button>
+            </form>
+
+            <form id="createXML" class="hidden">
+                <label for="start">Start</label>
+                <input type="number" id="start" name="start" required>
+
+                <label for="end">End</label>
+                <input type="number" id="end" name="end" required>
+
+                <label for="schedulingAlgorithm">scheduling Algorithm</label>
+                <select id="schedulingAlgorithm" name="schedulingAlgorithm" required>
+                    <option value="FIFO">FIFO</option>
+                    <option value="SRTF">SRTF</option>
+                    <option value="SJF">SJF</option>
+                    <option value="RR">RR</option>
+                    <option value="HRRN">HRRN</option>
+                </select>
+
+                <label for="taskNumber">Task Number</label>
+                <input type="number" id="taskNumber" name="taskNumber" required>
+
+                <button type="submit">Create Task</button>
+            </form>
+
             <div class="graph-execution-and-form-container">
-                <!-- Div per il grafico -->
-                <div class="graph-execution">
-                    <img src="{{ url_for('static', filename='sched.png') }}" alt="Graph Image" style="max-width: 100%;">
-                </div>
-                
-                <!-- Form per caricare un file XML -->
                 <form id="xmlForm" enctype="multipart/form-data">
-                    <!-- Aggiungi un pulsante per selezionare un file -->
-                    <label for="xmlFile" class="fileLabel">Select XML File</label>
                     <input type="file" name="xmlFile" id="xmlFile" accept=".xml">
-                    <!-- Aggiungi un pulsante per caricare il file -->
-                    <button type="submit" id="uploadBtn">Upload</button>
                 </form>
+
+                <div class="graph-execution">
+                    <img src="{{ url_for('static', filename='out.png') }}" alt="Graph Image" class="large-image">
+                </div>
             </div>
-            
         </div>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-        // Funzione per gestire l'invio del form per il caricamento del file XML
-        $('#xmlForm').submit(function(event) {
-            event.preventDefault(); // Evita il comportamento predefinito del form
-            var formData = new FormData(this);
-
-            $.ajax({
-                url: '/upload_xml',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    alert('XML File uploaded successfully!');
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                    alert('Error occurred while uploading XML file.');
-                }
-            });
-        });
-
-        // Funzione per eseguire la funzione Python
-        $('#executeBtn').click(function() {
-            $.ajax({
-                url: '/execute_function',
-                type: 'POST',
-                success: function(response) {
-                    alert(response);
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                    alert('Error occurred while executing function.');
-                }
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
