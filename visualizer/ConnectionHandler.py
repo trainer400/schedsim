@@ -15,8 +15,7 @@ from Visualizer import create_graph
 
 app = Flask(__name__)
 # Specifica il percorso del file di output
-output_file_path = 'input/out.csv'
-scheduler_controller = SchedulerController(output_file_path)
+scheduler_controller = SchedulerController()
 
 @app.route('/')
 def index():
@@ -24,36 +23,27 @@ def index():
 
 @app.route('/upload_xml', methods=['POST'])
 def upload_xml():
-    # Controlla se il form ha un file
     if 'xmlFile' not in request.files:
-        return 'No file part', 400
+        return jsonify({'error': 'No file part'}), 400
 
     xml_file = request.files['xmlFile']
-    
-    # Verifica se è stato selezionato un file
     if xml_file.filename == '':
-        return 'No selected file', 400
-    
-    # Salva il file XML nella directory 'input/'
+        return jsonify({'error': 'No selected file'}), 400
+
     save_path = os.path.join("input", xml_file.filename)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     xml_file.save(save_path)
-    scheduler_controller.load_xml_file(save_path)
-    return jsonify({'message': 'XML File uploaded successfully!', 'file_path': save_path}), 200
+    success = scheduler_controller.load_xml_file(save_path)
+    if success:
+        return jsonify({'message': 'XML File uploaded successfully!', 'file_path': save_path}), 200
+    else:
+        return jsonify({'error': 'Error loading XML file.'}), 500
 
 @app.route('/execute_main', methods=['POST'])
 def execute_main():
     try:
-        
-        # Verifica che il content type sia application/json
-        if request.content_type != 'application/json':
-            return jsonify({"error": "Content-Type must be application/json"}), 415
-        
-        # Ottieni il percorso del file XML dal corpo della richiesta
-        input_path = request.json.get('file_path')
-        if not input_path:
-            return jsonify({"error": "No input file path provided"}), 400
-    
+        #print(scheduler_controller.input_file + " " + scheduler_controller.output_file)
+        #scheduler_controller.load_xml_file(scheduler_controller.input_file)
         success = scheduler_controller.execute_scheduler()
         if not success:
             return jsonify({"error": "Error executing scheduler"}), 500
@@ -65,15 +55,14 @@ def execute_main():
         error_message = f"An unexpected error occurred: {str(e)}"
         app.logger.error(error_message)
         return jsonify({"error": error_message}), 500
-    
+
     finally:
-        # Elimina il file di input e altri file generati
-        if 'input_path' in locals():
-            try:
-                if os.path.exists(input_path):
-                    os.remove(input_path)
-            except Exception as e:
-                app.logger.error(f"Error occurred while deleting the file: {str(e)}")
+        # Elimina il file di input se esiste
+        try:
+            if scheduler_controller.input_file and os.path.exists(scheduler_controller.input_file):
+                os.remove(scheduler_controller.input_file)
+        except Exception as e:
+            app.logger.error(f"Error occurred while deleting the file: {str(e)}")
 
 @app.route('/create_task', methods=['POST'])
 def create_task():
@@ -93,6 +82,7 @@ def create_task():
     # Converte i valori in tipi appropriati
     try:
         task_id = int(task_id)
+        real_time =bool(real_time)
         period = int(period)
         activation = int(activation)
         deadline = int(deadline)
@@ -129,7 +119,29 @@ def create_task():
 @app.route('/print_graph', methods=['POST'])
 def print_graph():
     try:
-        success = scheduler_controller.print_graph()
+        data = request.get_json()
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        fraction_time = data.get('frac_time')
+
+        # Validazioni
+        if start_time is None or end_time is None or fraction_time is None:
+            return jsonify({'error': 'Missing parameters.'}), 400
+
+        if not isinstance(start_time, int) or start_time <= 0:
+            return jsonify({'error': 'Start time must be a positive integer.'}), 400
+
+        if not isinstance(end_time, int) or end_time <= start_time :
+            return jsonify({'error': 'End time must be an integer greater than start time.'}), 400
+
+        if not isinstance(fraction_time, int) or not (1 <= fraction_time <= 5):
+            return jsonify({'error': 'Fraction time must be an integer between 1 and 5.'}), 400
+
+        # Stampa dei parametri per debug
+        print(f'{start_time} {end_time} {fraction_time}')
+
+        # Passa i parametri alla funzione del controller
+        success = scheduler_controller.print_graph(start_time, end_time, fraction_time)
         if success:
             return jsonify({'message': 'Graph printed successfully!'}), 200
         else:
@@ -145,11 +157,11 @@ def create_xml():
         end = request.form.get('end')
         scheduling_algorithm = request.form.get('schedulingAlgorithm')
         task_number = int(request.form.get('taskNumber'))
-
         tasks = []
         for i in range(task_number):
             task_type = request.form.get(f'taskType{i}')  
             task_id = request.form.get(f'taskId{i}') 
+            
             period = request.form.get(f'period{i}')  
             activation = request.form.get(f'activation{i}') 
             deadline = request.form.get(f'deadline{i}') 
@@ -180,7 +192,9 @@ def create_xml():
                 "wcet": wcet
             }
             tasks.append(task)
+            
 
+        
         # Esegui la creazione del file XML utilizzando il metodo create_xml di SchedulerController
         xml_path = scheduler_controller.create_xml("input/example.xml", int(start), int(end), tasks, scheduling_algorithm, 0, 1)
 

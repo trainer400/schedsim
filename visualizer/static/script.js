@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#newTaskForm').submit(function(event) {
         event.preventDefault();
     
-        var formData = new FormData(this);
+        const formData = new FormData(this);
 
         $.ajax({
             url: '/create_task',
@@ -24,8 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(response.message || 'Task created successfully!');
                 $('#newTaskForm').addClass('hidden');
             },
-            error: function(xhr, status, error) {
-                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error occurred while creating task.';
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
+                                    ? xhr.responseJSON.error 
+                                    : 'Error occurred while creating task.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }
@@ -35,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#createXML').submit(function(event) {
         event.preventDefault();
     
-        var formData = new FormData(this);
+        const formData = new FormData(this);
     
         $.ajax({
             url: '/create_xml',
@@ -47,8 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(response.message || 'XML file created successfully!');
                 $('#createXML').addClass('hidden');
             },
-            error: function(xhr, status, error) {
-                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error occurred while creating XML file.';
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
+                                    ? xhr.responseJSON.error 
+                                    : 'Error occurred while creating XML file.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }
@@ -65,9 +69,11 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#xmlForm').submit();
     });
 
+    
     $('#xmlForm').submit(function(event) {
         event.preventDefault();
-        var formData = new FormData(this);
+        
+        const formData = new FormData(this);
 
         $.ajax({
             url: '/upload_xml',
@@ -79,8 +85,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('XML File uploaded successfully!');
                 uploadedFilePath = response.file_path; // Memorizza il percorso del file caricato
             },
-            error: function(xhr, status, error) {
-                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error occurred while uploading XML file.';
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
+                                    ? xhr.responseJSON.error 
+                                    : 'Error occurred while uploading XML file.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }
@@ -101,10 +109,12 @@ document.addEventListener('DOMContentLoaded', function() {
             success: function(response) {
                 alert(response.output || 'Execution completed successfully!');
             },
-            error: function(xhr, status, error) {
-                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error occurred while executing command.';
-                console.error('XHR Status:', status);
-                console.error('Error:', error);
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
+                                    ? xhr.responseJSON.error 
+                                    : 'Error occurred while executing command.';
+                console.error('XHR Status:', xhr.status);
+                console.error('Error:', xhr.statusText);
                 console.error('Response Text:', xhr.responseText);
                 alert(errorMessage);
             }
@@ -116,19 +126,36 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#printGraphBtn').click(function() {
-        // Invia una richiesta POST al server quando il pulsante viene premuto
+        // Mostra il modulo per i parametri di stampa del grafico
+        $('#printGraphForm').removeClass('hidden');
+    });
+
+    // Gestisci l'invio del modulo printGraphForm
+    $('#printGraphForm').submit(function(event) {
+        event.preventDefault();
+    
+        const formData = {
+            start_time: parseInt($('#startTime').val()),
+            end_time: parseInt($('#endTime').val()),
+            frac_time: parseInt($('#fracTime').val())
+        };
+    
         $.ajax({
+            url: '/print_graph',
             type: 'POST',
-            url: '/print_graph', // Percorso verso la route che gestisce la stampa del grafico
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
             success: function(response) {
-                // Alert di conferma quando la stampa del grafico è avvenuta con successo
-                alert(response.message);
-                // Aggiorna la pagina dopo aver stampato il grafico
+                alert(response.message || 'Graph printed successfully!');
+                $('#printGraphFormContainer').addClass('hidden');
                 location.reload();
             },
-            error: function(xhr, status, error) {
-                // Alert in caso di errore durante la stampa del grafico
-                alert('Error: ' + error);
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
+                                    ? xhr.responseJSON.error 
+                                    : 'Error occurred while printing graph.';
+                console.error(errorMessage);
+                alert(errorMessage);
             }
         });
     });

@@ -5,9 +5,6 @@ import sys
 import matplotlib
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
-import xmltodict
-
-
 
 matplotlib.use('Agg')  # Imposta il backend non interattivo
 
@@ -18,11 +15,13 @@ import Task
 from Visualizer import create_graph
 app = Flask(__name__)
 class SchedulerController:
-    def __init__(self, output_file=None):
+    def __init__(self):
         self.scheduler = None
-        self.output_file = output_file
+        self.output_file = 'input/out.csv'
+        self.input_file =None
 
     def load_xml_file(self, file_path):
+        self.input_file =file_path
         try:
             self.scheduler = SchedIO.import_file(file_path, self.output_file)
             return True
@@ -40,19 +39,22 @@ class SchedulerController:
 
     def create_task(self, task_data):
         if self.scheduler:
-            new_task = Task.Task(*task_data)
-            self.scheduler.new_task(new_task)
+            if task_data[1] == 'sporadic':
+                n_task = Task.Task(task_data[0], task_data[1], task_data[2], None, task_data[3], task_data[4], task_data[5])
+            elif task_data[1] == 'periodic':
+                n_task = Task.Task(task_data[0], task_data[1], task_data[2], task_data[3], task_data[4], task_data[5], task_data[6])
+            self.scheduler.new_task(n_task)
             return True
         else:
             print("Scheduler not loaded.")
             return False
 
-    def print_graph(self):
+    def print_graph(self,start,end,fraction):
         try:
              # Verifica se il file out.csv esiste
             if not os.path.exists('input/out.csv'):
                 raise FileNotFoundError("out.csv file not found.")
-            create_graph('static/out.png')
+            create_graph('static/out.png',start,end,fraction)
             return True
         except Exception as e:
             print(f"Error printing graph: {str(e)}")
@@ -83,7 +85,9 @@ class SchedulerController:
             for task_data in tasks:
                 task = doc.createElement("task")
                 for key, value in task_data.items():
-                    task.setAttribute(key, str(value))
+                    # Assicurati che il valore non sia None prima di convertirlo in stringa
+                    if value is not None:
+                        task.setAttribute(key, str(value))
                 tasks_node.appendChild(task)
 
             # Aggiunta del nodo per lo scheduler
@@ -112,5 +116,5 @@ class SchedulerController:
             return file_path
         except Exception as e:
             print(f"Error creating XML file: {str(e)}")
-            return None
-        
+            return None     
+    

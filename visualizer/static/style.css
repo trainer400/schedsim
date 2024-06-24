@@ -279,3 +279,51 @@ footer {
     height: auto;
     max-width: 800px;
 }
+
+#printGraphForm {
+    width: 100%;
+    max-width: 800px; /* Aumenta la larghezza massima */
+    background-color: #f9f9f9;
+    padding: 20px; /* Aumenta il padding */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 30px auto; /* Aumenta il margine */
+}
+
+#printGraphForm label {
+    display: block;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+#printGraphForm input[type="number"] {
+    width: 100%;
+    padding: 12px; /* Aumenta il padding */
+    margin-bottom: 20px; /* Aumenta il margine inferiore */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px; /* Aumenta la dimensione del testo */
+    transition: border-color 0.3s;
+}
+
+#printGraphForm button {
+    width: 100%;
+    padding: 15px; /* Aumenta il padding */
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px; /* Aumenta la dimensione del testo */
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#printGraphForm button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+#printGraphForm button:active {
+    transform: scale(0.95);
+}
