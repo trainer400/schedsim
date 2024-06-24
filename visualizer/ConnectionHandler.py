@@ -4,7 +4,6 @@ import sys
 import matplotlib
 from SchedulerController import SchedulerController
 
-
 matplotlib.use('Agg')  # Imposta il backend non interattivo
 
 # Aggiungi la cartella padre al sys.path
@@ -39,7 +38,7 @@ def upload_xml():
     save_path = os.path.join("input", xml_file.filename)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     xml_file.save(save_path)
-
+    scheduler_controller.load_xml_file(save_path)
     return jsonify({'message': 'XML File uploaded successfully!', 'file_path': save_path}), 200
 
 @app.route('/execute_main', methods=['POST'])
@@ -54,12 +53,7 @@ def execute_main():
         input_path = request.json.get('file_path')
         if not input_path:
             return jsonify({"error": "No input file path provided"}), 400
-        
-        # Importa e esegui lo scheduler
-        success = scheduler_controller.load_xml_file(input_path)
-        if not success:
-            return jsonify({"error": "Error loading XML file"}), 500
-        
+    
         success = scheduler_controller.execute_scheduler()
         if not success:
             return jsonify({"error": "Error executing scheduler"}), 500
@@ -115,7 +109,7 @@ def create_task():
         return jsonify({'error': 'Invalid period or activation value.'}), 400
     if deadline <= 0:
         return jsonify({'error': 'Deadline must be a positive integer.'}), 400
-    if period <= deadline and task_type == 'periodic':
+    if period >= deadline and task_type == 'periodic':
         return jsonify({'error': 'Period must be greater than deadline.'}), 400
     if wcet > period and task_type == 'periodic':
         return jsonify({'error': 'WCET must be less than or equal to period.'}), 400
@@ -123,8 +117,10 @@ def create_task():
         return jsonify({'error': 'Deadline must be greater than WCET.'}), 400
 
     print(f'Real Time: {real_time}, Task Type: {task_type}, Task ID: {task_id}, Period: {period}, Activation: {activation}, Deadline: {deadline}, WCET: {wcet}')
-
-    success = scheduler_controller.create_task([real_time, task_type, task_id, period, activation, deadline, wcet])
+    if(task_type=="sporadic"):
+        success = scheduler_controller.create_task([real_time, task_type, task_id, activation, deadline, wcet])
+    elif(task_type=="periodic"):
+        success = scheduler_controller.create_task([real_time, task_type, task_id, period, activation, deadline, wcet])
     if success:
         return jsonify({'message': 'Task created successfully!'}), 200
     else:
@@ -148,28 +144,45 @@ def create_xml():
         start = request.form.get('start')
         end = request.form.get('end')
         scheduling_algorithm = request.form.get('schedulingAlgorithm')
-        task_number = request.form.get('taskNumber')
-        tasks = [
-            {"real_time": True, "type": "periodic", "id": 1, "period": 50, "deadline": 50, "wcet": 20},
-            {"real_time": True, "type": "periodic", "id": 2, "period": 100, "deadline": 30, "wcet": 25},
-            {"real_time": True, "type": "sporadic", "id": 3, "activation": 50, "deadline": 50, "wcet": 20},
-            {"real_time": False, "type": "sporadic", "id": 4, "activation": 5, "wcet": 3}
-        ]
-        
-        # Controlla che tutti i campi siano presenti
-        #if not all([start, end, scheduling_algorithm, task_number]):
-        #    return jsonify({'error': 'All fields are required.'}), 400
+        task_number = int(request.form.get('taskNumber'))
 
-        # Converte i valori in tipi appropriati
-        start = int(start)
-        end = int(end)
-        task_number = int(task_number)
+        tasks = []
+        for i in range(task_number):
+            task_type = request.form.get(f'taskType{i}')  
+            task_id = request.form.get(f'taskId{i}') 
+            period = request.form.get(f'period{i}')  
+            activation = request.form.get(f'activation{i}') 
+            deadline = request.form.get(f'deadline{i}') 
+            wcet = request.form.get(f'wcet{i}') 
 
-        # Crea un'istanza di SchedulerController
-        controller = SchedulerController()
+            # Verifica se i valori sono validi
+            if not all([task_type, task_id, period, activation, deadline, wcet]):
+                return jsonify({'error': 'All task fields are required.'}), 400
+
+            # Converte i valori in interi, se possibile
+            try:
+                task_id = int(task_id)
+                period = int(period)
+                activation = int(activation)
+                deadline = int(deadline)
+                wcet = int(wcet)
+            except ValueError:
+                return jsonify({'error': 'Invalid input format for task fields.'}), 400
+
+            # Aggiungi i dati della task alla lista
+            task = {
+                "real_time": True,
+                "type": task_type,
+                "id": task_id,
+                "period": period,
+                "activation": activation,
+                "deadline": deadline,
+                "wcet": wcet
+            }
+            tasks.append(task)
 
         # Esegui la creazione del file XML utilizzando il metodo create_xml di SchedulerController
-        xml_path = controller.create_xml("input/example.xml", start, end, tasks ,scheduling_algorithm,0,1)
+        xml_path = scheduler_controller.create_xml("input/example.xml", int(start), int(end), tasks, scheduling_algorithm, 0, 1)
 
         if xml_path:
             return jsonify({'message': 'XML file created successfully!', 'xml_path': xml_path}), 200
@@ -182,6 +195,5 @@ def create_xml():
         app.logger.error(error_message)
         return jsonify({"error": error_message}), 500
 
-    
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

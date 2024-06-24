@@ -62,19 +62,26 @@ def create_graph(output_image, start_time=None, end_time=None):
                 if event_type == 'A':
                     # Arrival: la task arriva nel sistema
                     active_tasks[(task_id, job)] = {'arrival': time}
+                    # Disegna la barra sottilissima rossa per l'arrivo
+                    ax.broken_barh([(time, 1)], (task_positions[task_id] - 0.2, 0.4), facecolors='tab:red')
                 elif event_type == 'S':
                     # Start: la task inizia l'esecuzione
                     if (task_id, job) in active_tasks:
                         active_tasks[(task_id, job)]['start'] = time
+                    else:
+                        active_tasks[(task_id, job)] = {'start': time}
                 elif event_type == 'F':
                     # Finish: la task termina l'esecuzione
-                    if (task_id, job) in active_tasks:
+                    if (task_id, job) in active_tasks and 'start' in active_tasks[(task_id, job)]:
                         start_time = active_tasks[(task_id, job)]['start']
                         duration = time - start_time
                         label = f'Task {task_id}'
-                        ax.broken_barh([(start_time, duration)], (task_positions[task_id] - 0.2, 0.4), facecolors='tab:blue')
+                        # Disegna la barra verde per l'esecuzione
+                        ax.broken_barh([(start_time, duration)], (task_positions[task_id] - 0.2, 0.4), facecolors='tab:green')
                         ax.text(start_time + duration / 2, task_positions[task_id], label, ha='center', va='center', color='white', fontsize=8)
                         del active_tasks[(task_id, job)]
+                    # Disegna la barra blu per la fine
+                    ax.broken_barh([(time, 1)], (task_positions[task_id] - 0.2, 0.4), facecolors='tab:blue')
 
             # Configura gli assi
             ax.set_xlabel('Time')
@@ -91,8 +98,18 @@ def create_graph(output_image, start_time=None, end_time=None):
 
             ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
+            # Aggiungi la legenda
+            legend_labels = [
+                'Red: Arrival',
+                'Blue: End',
+                'Green: Execution'
+            ]
+            legend_colors = ['tab:red', 'tab:blue', 'tab:green']
+            handles = [plt.Line2D([0], [0], color=color, lw=4) for color in legend_colors]
+            ax.legend(handles, legend_labels, loc='lower center', bbox_to_anchor=(0.5, -0.1), ncol=3)
+
             # Salva il grafico
-            plt.savefig(output_image)
+            plt.savefig(output_image, bbox_inches='tight')
 
             # Chiudi la figura per liberare la memoria
             plt.close()

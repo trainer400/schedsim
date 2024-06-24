@@ -201,7 +201,11 @@ def equals(self, time):  #TODO with hash
 
 
 def debug(self, time):
+<<<<<<< Updated upstream
     return
+=======
+    return 
+>>>>>>> Stashed changes
     print('-------------------------')
     print('time ' + str(time))
     print('finish')

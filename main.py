@@ -59,7 +59,7 @@ if __name__ == "__main__":
         #new_task = Task.Task(False, 'sporadic', 4, None, 10, None, 15)
         #scheduler.new_task(new_task)
 
-        new_task = Task.Task(True, 'sporadic', 5, None, 15, 100, 5)
+        new_task = Task.Task(True, 'sporadic', 11, None, 15, 100, 5)
         #new_task = Task.Task(True,'sporadic',6,None, 0,100,10)
         scheduler.new_task(new_task)
         
