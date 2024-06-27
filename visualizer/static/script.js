@@ -71,11 +71,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     $('#xmlFile').change(function() {
         if (this.files.length > 0) {
-            $('#uploadBtn').removeClass('hidden');
             // Hide the graph when a new XML file is selected
             $('.graph-execution').addClass('hidden');
             $('.graph-execution .large-image').addClass('hidden');
             $('#printGraphForm').addClass('hidden');
+            $('#xmlForm').submit();  // Submit the form automatically
         }
     });
 
@@ -209,10 +209,19 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#printGraphForm').submit(function(event) {
         event.preventDefault();
     
+        const startTime = $('#start_time').val();
+        const endTime = $('#end_time').val();
+        const fracTime = $('#frac_time').val();
+    
+        if (startTime === '' || endTime === '' || fracTime === '') {
+            alert('Please fill in all parameters.');
+            return;
+        }
+    
         const formData = {
-            start_time: parseInt($('#startTime').val()),
-            end_time: parseInt($('#endTime').val()),
-            frac_time: parseInt($('#fracTime').val())
+            start_time: parseInt(startTime),
+            end_time: parseInt(endTime),
+            frac_time: parseInt(fracTime)
         };
     
         $.ajax({
@@ -238,5 +247,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    $('#downloadCsvBtn').click(function() {
+        $.ajax({
+            url: '/download_csv',
+            type: 'GET',
+            success: function(response) {
+                // Crea un URL temporaneo per il file CSV e crea un link per il download
+                const url = window.URL.createObjectURL(new Blob([response]));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'data.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);  // Libera la memoria
+            },
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
+                                    ? xhr.responseJSON.error 
+                                    : 'Error occurred while downloading CSV file.';
+                console.error(errorMessage);
+                alert(errorMessage);
+            }
+        });
+    });
     
 });

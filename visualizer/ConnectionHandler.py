@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 import sys
 import matplotlib
@@ -131,7 +131,6 @@ def print_graph():
             start_time = data.get('start_time')
             end_time = data.get('end_time')
             fraction_time = data.get('frac_time')
-
         # Validations
         if start_time is None or end_time is None or fraction_time is None:
             return jsonify({'error': 'Missing parameters.'}), 400
@@ -218,18 +217,18 @@ def create_xml():
         app.logger.error(error_message)
         return jsonify({"error": error_message}), 500
 
+@app.route('/download_csv', methods=['GET'])
+def download_csv():
+    
+    directory = 'input'
+    filename = 'out.csv'
+    return send_from_directory(directory, filename, as_attachment=True, mimetype='text/csv')
+    
 @app.route('/submit_all_tasks', methods=['POST'])
 def submit_all_tasks():
     try:
         data = request.get_json()
-        tasks = data['tasks']
-        
-        # Process tasks
-        for task in tasks:
-            task_name = task['taskName']
-            task_description = task['taskDescription']
-            print(f"Task Name: {task_name}, Description: {task_description}")
-            # Add save logic here
+        print(data[0],data[1],data[2],data[3],data[4],data[5])
 
         return jsonify({'message': 'All tasks submitted successfully!'})
     except Exception as e:

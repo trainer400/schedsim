@@ -55,14 +55,22 @@ $(document).ready(function() {
 
     $('#submitAllTasksBtn').click(function() {
         const allTasksData = [];
+        allTasksData.push(parseInt($('#start').val()))
+        allTasksData.push(parseInt($('#end').val()))
+        allTasksData.push($('#schedulingAlgorithm').val())
+        allTasksData.push(parseInt($('#quantum').val()))
 
         for (let i = 1; i <= taskCount; i++) {
-            const formId = `dynamicTaskForm_${i}`;
-            const formData = $(`#${formId}`).serializeArray();
-            allTasksData.push(formData.reduce((obj, item) => {
-                obj[item.name] = item.value;
-                return obj;
-            }, {}));
+            
+            const realtime_id = '#realTime_'+i;
+            const task_type_id = 'taskType_'+i;
+            const taskid_id = 'taskid_${i}'+i;
+            const period_id = "period_${i}"
+            const activation_id = 'activation_${i}';
+            const deadline_id = "deadline_${i}"
+            const wcet_id = 'wcet_${i}';
+            allTasksData.push($(realtime_id).val())
+            allTasksData.push($(task_type_id).val())
         }
 
         $.ajax({
