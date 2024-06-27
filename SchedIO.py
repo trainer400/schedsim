@@ -84,6 +84,7 @@ def import_file(file_path, output_file):
 class SchedulerEventWriter:
     def __init__(self, output_file):
         self.out = open(output_file, 'w')
+        self.out.write('timestamp, task, job, processor, type_of_event, extra_data' + '\n')
 
     def add_scheduler_event(self, scheduler_event):
         self.out.write(
@@ -99,9 +100,12 @@ class SchedulerEventWriter:
         with open(self.out.name, 'r') as f:
             for line in f:
                 parts = line.strip().split(',')
-                event_time = int(parts[0])
-                if event_time < time:
+                if parts[0] == 'timestamp':
                     events.append(line)
+                else:
+                    event_time = int(parts[0])
+                    if event_time < time:
+                        events.append(line)
         self.out = open(self.out.name, 'w')
         self.out.writelines(events)
 

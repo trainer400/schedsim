@@ -196,6 +196,7 @@ class Preemptive(Scheduler):
 
 
 def debug(self, time):
+    return
     print('-------------------------')
     print('time ' + str(time))
     print('finish')
@@ -288,10 +289,10 @@ class FIFO(NonPreemptive):
         self.compute(time, count)
 
     def new_task(self, new_task):
-        time = 0
+        time = self.start
         count = 0
         new_task.core = self.cores[0].id
-        if new_task.type == 'sporadic' and new_task.activation > 0:
+        if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -330,7 +331,7 @@ class FIFO(NonPreemptive):
         time = self.time_list[pos] + 1
         delete(self, time)
         self.output_file.clean(time)
-        self.compute(time, 0)
+        self.compute(time, self.start)
 
     def terminate(self):
         self.output_file.terminate_write()
@@ -371,10 +372,10 @@ class SJF(NonPreemptive):
         self.compute(time, count)
 
     def new_task(self, new_task):
-        time = 0
+        time = self.start
         count = 0
         new_task.core = self.cores[0].id
-        if new_task.type == 'sporadic' and new_task.activation > 0:
+        if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -413,7 +414,7 @@ class SJF(NonPreemptive):
         time = self.time_list[pos] + 1
         delete(self, time)
         self.output_file.clean(time)
-        self.compute(time, 0)
+        self.compute(time, self.start)
 
     def terminate(self):
         self.output_file.terminate_write()
@@ -455,10 +456,10 @@ class HRRN(NonPreemptive):
         self.compute(time, count)
 
     def new_task(self, new_task):
-        time = 0
+        time = self.start
         count = 0
         new_task.core = self.cores[0].id
-        if new_task.type == 'sporadic' and new_task.activation > 0:
+        if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -504,7 +505,7 @@ class HRRN(NonPreemptive):
         time = self.time_list[pos] + 1
         delete(self, time)
         self.output_file.clean(time)
-        self.compute(time, 0)
+        self.compute(time, self.start)
 
     def terminate(self):
         self.output_file.terminate_write()
@@ -580,10 +581,10 @@ class SRTF(Preemptive):
         self.compute(time, count)
 
     def new_task(self, new_task):
-        time = 0
+        time = self.start
         count = 0
         new_task.core = self.cores[0].id
-        if new_task.type == 'sporadic' and new_task.activation > 0:
+        if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -624,7 +625,7 @@ class SRTF(Preemptive):
         time = self.time_list[pos] + 1
         delete(self, time)
         self.output_file.clean(time)
-        self.compute(time, 0)
+        self.compute(time, self.start)
 
     def terminate(self):
         self.output_file.terminate_write()
@@ -706,10 +707,10 @@ class RoundRobin(Preemptive):
         self.compute(time, count)
 
     def new_task(self, new_task):
-        time = 0
+        time = self.start
         count = 0
         new_task.core = self.cores[0].id
-        if new_task.type == 'sporadic' and new_task.activation > 0:
+        if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -752,7 +753,7 @@ class RoundRobin(Preemptive):
         time = self.time_list[pos] + 1
         delete(self, time)
         self.output_file.clean(time)
-        self.compute(time, 0)
+        self.compute(time, self.start)
 
     def terminate(self):
         self.output_file.terminate_write()

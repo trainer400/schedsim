@@ -3,6 +3,7 @@ import SchedIO
 import Task
 import random
 
+MAX_TIME_START = 4
 MAX_TIME_END = 10
 MAX_PERIOD = 4
 MAX_WCET = 2
@@ -21,8 +22,8 @@ def compare_files(file1, file2):
 
 if __name__ == "__main__":
     scheduling_algorithm = "FIFO"
-    time_start = 0  # TODO random
-    time_end = random.randint(1, MAX_TIME_END)
+    time_start = random.randint(0, MAX_TIME_START)
+    time_end = random.randint(time_start + 1, MAX_TIME_END)
     add_time = random.randint(1, MAX_TIME_END)
     print(time_end, add_time)
     simulation1 = ET.Element("simulation")
@@ -55,13 +56,13 @@ if __name__ == "__main__":
         wcet = None
         if type == 0:
             type = 'sporadic'
-            activation = random.randint(0, time_end - 1)
+            activation = random.randint(time_start, time_end - 1)
             deadline = random.randint(activation + 1, MAX_TIME_END)
             wcet = random.randint(1, max(1, deadline - 1))
         else:
             type = 'periodic'
             period = random.randint(1, MAX_PERIOD)
-            deadline = random.randint(1, MAX_TIME_END)
+            deadline = random.randint(time_start + 1, MAX_TIME_END)
             wcet = random.randint(1, max(1, min(period, deadline)))
         id = task
         if type == 'sporadic':
@@ -118,10 +119,10 @@ if __name__ == "__main__":
     tree2 = ET.ElementTree(simulation2)
     tree2.write("examples/Inputs/test_input2.xml", encoding="UTF-8", xml_declaration=True)
 
-    test_scheduler1 = SchedIO.import_file("examples/Inputs/test_input1.xml", "examples/Outputs/test_output1.txt")
+    test_scheduler1 = SchedIO.import_file("examples/Inputs/test_input1.xml", "examples/Outputs/test_output1.csv")
     test_scheduler1.execute()
     test_scheduler1.terminate()
-    test_scheduler2 = SchedIO.import_file("examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.txt")
+    test_scheduler2 = SchedIO.import_file("examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.csv")
     test_scheduler2.execute()
 
     count = 0
@@ -130,6 +131,7 @@ if __name__ == "__main__":
         print(new_task.activation)
         print(new_task.finish)
         test_scheduler2.new_task(new_task)
+        test_scheduler2.terminate()
         count += 1
     test_scheduler2.add_time(add_time)
     test_scheduler2.terminate()
@@ -137,4 +139,4 @@ if __name__ == "__main__":
     for task in new_tasks:
         print(task.id, task.activation, task.type)
 
-    compare_files("examples/Outputs/test_output1.txt", "examples/Outputs/test_output2.txt")
+    compare_files("examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")
