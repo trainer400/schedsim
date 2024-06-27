@@ -1,12 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     let uploadedFilePath = '';
+    $('.graph-execution').addClass('hidden');
 
     $('#newTaskBtn').click(function() {
         $('#newTaskForm').removeClass('hidden');
+        $('#createXML').addClass('hidden');
+        $('#printGraphForm').addClass('hidden');
+        $('.graph-execution .large-image').addClass('hidden');
+        $('#addTimeForm').addClass('hidden');
     });
 
     $('#createXMLBtn').click(function() {
         $('#createXML').removeClass('hidden');
+        $('#newTaskForm').addClass('hidden');
+        $('#printGraphForm').addClass('hidden');
+        $('.graph-execution .large-image').addClass('hidden');
+        $('#addTimeForm').addClass('hidden');
     });
 
     $('#newTaskForm').submit(function(event) {
@@ -23,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
             success: function(response) {
                 alert(response.message || 'Task created successfully!');
                 $('#newTaskForm').addClass('hidden');
+                
             },
             error: function(xhr) {
                 const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
@@ -62,6 +72,10 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#xmlFile').change(function() {
         if (this.files.length > 0) {
             $('#uploadBtn').removeClass('hidden');
+            // Hide the graph when a new XML file is selected
+            $('.graph-execution').addClass('hidden');
+            $('.graph-execution .large-image').addClass('hidden');
+            $('#printGraphForm').addClass('hidden');
         }
     });
 
@@ -69,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#xmlForm').submit();
     });
 
-    
     $('#xmlForm').submit(function(event) {
         event.preventDefault();
         
@@ -83,7 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
             contentType: false,
             success: function(response) {
                 alert('XML File uploaded successfully!');
-                uploadedFilePath = response.file_path; // Memorizza il percorso del file caricato
+                uploadedFilePath = response.file_path;
+                // Hide the graph when a new XML file is uploaded
+                $('.graph-execution').addClass('hidden');
+                $('.graph-execution .large-image').addClass('hidden');
             },
             error: function(xhr) {
                 const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
@@ -96,6 +112,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#executeBtn').click(function() {
+        $('#newTaskForm').addClass('hidden');
+        $('#createXML').addClass('hidden');
+        $('#printGraphForm').addClass('hidden');
+        $('.graph-execution .large-image').addClass('hidden');
+        $('#addTimeForm').addClass('hidden');
+
         if (uploadedFilePath === '') {
             alert('Please upload an XML file first.');
             return;
@@ -105,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
             url: '/execute_main',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ file_path: uploadedFilePath }), // Invia il percorso del file come JSON
+            data: JSON.stringify({ file_path: uploadedFilePath }),
             success: function(response) {
                 alert(response.output || 'Execution completed successfully!');
             },
@@ -122,15 +144,68 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#addTimeBtn').click(function() {
-        alert('Add Time button clicked!'); // Alert casuale quando il bottone "add_time" viene premuto
+        $('#newTaskForm').addClass('hidden');
+        $('#createXML').addClass('hidden');
+        $('#printGraphForm').addClass('hidden');
+        $('.graph-execution .large-image').addClass('hidden');
+        $('#addTimeForm').removeClass('hidden');
+        $('.graph-execution').addClass('hidden');
+    });
+
+    $('#addTimeForm').submit(function(event) {
+        event.preventDefault();
+        let n_time = $('#newTime').val();
+        
+        if (n_time) {
+            $.ajax({
+                url: '/add_time',
+                type: 'POST',
+                data: JSON.stringify({ new_time: parseInt(n_time) }),
+                contentType: 'application/json',
+                success: function(response) {
+                    alert(response.message);
+                    $('#addTimeForm').addClass('hidden');
+                },
+                error: function(xhr, status, error) {
+                    alert("Error: " + xhr.responseJSON.error);
+                }
+            });
+        }
     });
 
     $('#printGraphBtn').click(function() {
-        // Mostra il modulo per i parametri di stampa del grafico
+        const fixedParams = {
+            use_fixed_params: true
+        };
+        
+        $.ajax({
+            url: '/print_graph',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(fixedParams),
+            success: function(response) {
+                alert(response.message || 'Graph printed successfully!');
+                // Show the .graph-execution element and the graph image
+                $('.graph-execution').removeClass('hidden');
+                $('.graph-execution .large-image').removeClass('hidden');
+                // Refresh the image source to prevent caching issues
+                $('.graph-execution .large-image').attr('src', '/static/out.png?' + new Date().getTime());
+            },
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
+                                    ? xhr.responseJSON.error 
+                                    : 'Error occurred while printing graph.';
+                console.error(errorMessage);
+                alert(errorMessage);
+            }
+        });
+        
         $('#printGraphForm').removeClass('hidden');
+        $('#newTaskForm').addClass('hidden');
+        $('#createXML').addClass('hidden');
+        $('#addTimeForm').addClass('hidden');
     });
-
-    // Gestisci l'invio del modulo printGraphForm
+    
     $('#printGraphForm').submit(function(event) {
         event.preventDefault();
     
@@ -147,8 +222,11 @@ document.addEventListener('DOMContentLoaded', function() {
             data: JSON.stringify(formData),
             success: function(response) {
                 alert(response.message || 'Graph printed successfully!');
-                $('#printGraphFormContainer').addClass('hidden');
-                location.reload();
+                // Show the .graph-execution element and the graph image
+                $('.graph-execution').removeClass('hidden');
+                $('.graph-execution .large-image').removeClass('hidden');
+                // Refresh the image source to prevent caching issues
+                $('.graph-execution .large-image').attr('src', '/static/out.png?' + new Date().getTime());
             },
             error: function(xhr) {
                 const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
@@ -159,4 +237,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    
 });

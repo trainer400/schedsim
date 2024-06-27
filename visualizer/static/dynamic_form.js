@@ -1,113 +1,90 @@
 $(document).ready(function() {
-    // Funzione per generare i form dinamici in base al numero di task specificato
-    $('#generateTasksBtn').click(function() {
-        var taskNumber = document.getElementById('taskNumber').value;
-        var container = document.getElementById('dynamicTaskForm');
-        container.innerHTML = ''; // Cancella eventuali form esistenti
+    let taskCount = 0;
 
-        for (var i = 1; i <= taskNumber; i++) {
-            var form = document.createElement('div');
-            form.id = 'taskForm' + i;
+    $('#newTaskBtn').click(function() {
+        $('#newTaskForm').removeClass('hidden');
+        $('#createXML').addClass('hidden');
+        $('#printGraphForm').addClass('hidden');
+        $('.graph-execution').addClass('hidden');
+        $('#addTimeForm').addClass('hidden');
+    });
 
-            form.innerHTML = `
-                <h3>Task ${i}</h3>
-                <label for="realTime${i}">Real Time (true/false)</label>
-                <select id="realTime${i}" name="realTime${i}" required>
-                    <option value="true">true</option>
-                    <option value="false">false</option>
+    $('#createXMLBtn').click(function() {
+        $('#createXML').removeClass('hidden');
+        $('#newTaskForm').addClass('hidden');
+        $('#printGraphForm').addClass('hidden');
+        $('.graph-execution').addClass('hidden');
+        $('#addTimeForm').addClass('hidden');
+    });
+
+    $('#addTaskBtn').click(function() {
+        taskCount++;
+        const formId = `dynamicTaskForm_${taskCount}`;
+        const dynamicFormHtml = `
+            <form id="${formId}">
+                <label for="realTime_${taskCount}">Real Time (true/false)</label>
+                <select id="realTime_${taskCount}" name="realTime_${taskCount}" required>
+                    <option value="true">True</option>
+                    <option value="false">False</option>
                 </select>
 
-                <label for="taskType${i}">Task Type (sporadic/periodic)</label>
-                <select id="taskType${i}" name="taskType${i}" required>
+                <label for="taskType_${taskCount}">Task Type (sporadic/periodic)</label>
+                <select id="taskType_${taskCount}" name="taskType_${taskCount}" required>
                     <option value="sporadic">sporadic</option>
                     <option value="periodic">periodic</option>
                 </select>
 
-                <label for="taskId${i}">Task ID</label>
-                <input type="number" id="taskId${i}" name="taskId${i}" min="1" step="1" required>
+                <label for="taskId_${taskCount}">Task ID</label>
+                <input type="number" id="taskId_${taskCount}" name="taskId_${taskCount}" min="1" step="1" required>
 
-                <label for="period${i}">Period</label>
-                <input type="number" id="period${i}" name="period${i}">
+                <label for="period_${taskCount}">Period</label>
+                <input type="number" id="period_${taskCount}" name="period_${taskCount}">
 
-                <label for="activation${i}">Activation</label>
-                <input type="number" id="activation${i}" name="activation${i}" required>
+                <label for="activation_${taskCount}">Activation</label>
+                <input type="number" id="activation_${taskCount}" name="activation_${taskCount}" required>
 
-                <label for="deadline${i}">Deadline</label>
-                <input type="number" id="deadline${i}" name="deadline${i}" required>
+                <label for="deadline_${taskCount}">Deadline</label>
+                <input type="number" id="deadline_${taskCount}" name="deadline_${taskCount}" required>
 
-                <label for="wcet${i}">WCET</label>
-                <input type="number" id="wcet${i}" name="wcet${i}" required>
-            `;
-
-            container.appendChild(form);
-        }
+                <label for="wcet_${taskCount}">WCET</label>
+                <input type="number" id="wcet_${taskCount}" name="wcet_${taskCount}" required>
+            </form>
+        `;
+        $('#dynamicTaskForm').append(dynamicFormHtml);
     });
 
-    // Funzione per inviare i dati del form XML al server quando viene premuto il tasto
-    $('#submitCreateXmlBtn').click(function() {
-        // Otteniamo i valori dei campi dal form
-        var start = parseInt($('#start').val());
-        var end = parseInt($('#end').val());
-        var schedulingAlgorithm = $('#schedulingAlgorithm').val();
-        var taskNumber = parseInt($('#taskNumber').val());
-    
-        // Verifichiamo che i valori siano numeri validi
-        if (isNaN(start) || isNaN(end) || taskNumber <= 0) {
-            alert('Please enter valid values for start, end, and task number.');
-            return;
+    $('#submitAllTasksBtn').click(function() {
+        const allTasksData = [];
+
+        for (let i = 1; i <= taskCount; i++) {
+            const formId = `dynamicTaskForm_${i}`;
+            const formData = $(`#${formId}`).serializeArray();
+            allTasksData.push(formData.reduce((obj, item) => {
+                obj[item.name] = item.value;
+                return obj;
+            }, {}));
         }
-    
-        // Creiamo un oggetto per contenere i dati delle task
-        var tasks = [];
-    
-        // Cicliamo attraverso le task e otteniamo i valori dei campi
-        for (var i = 1; i <= taskNumber; i++) {
-            var realTime = $('#realTime' + i).val();
-            var taskType = $('#taskType' + i).val();
-            var taskId = parseInt($('#taskId' + i).val());
-            var period = parseInt($('#period' + i).val());
-            var activation = parseInt($('#activation' + i).val());
-            var deadline = parseInt($('#deadline' + i).val());
-            var wcet = parseInt($('#wcet' + i).val());
-    
-            // Verifichiamo che i valori siano numeri validi
-            if (isNaN(taskId) || isNaN(period) || isNaN(activation) || isNaN(deadline) || isNaN(wcet)) {
-                alert('Please enter valid values for all task fields.');
-                return;
-            }
-    
-            // Aggiungiamo i dati della task all'array
-            tasks.push({
-                realTime: realTime,
-                taskType: taskType,
-                taskId: taskId,
-                period: period,
-                activation: activation,
-                deadline: deadline,
-                wcet: wcet
-            });
-        }
-    
-        // Inviamo i dati al server
+
         $.ajax({
-            url: '/create_xml',
+            url: '/submit_all_tasks',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({
-                start: start,
-                end: end,
-                schedulingAlgorithm: schedulingAlgorithm,
-                tasks: tasks
-            }),
+            data: JSON.stringify(allTasksData),
             success: function(response) {
-                alert(response.message);
+                alert('All tasks submitted successfully!');
+                $('#newTaskForm').addClass('hidden');
+                $('#createXML').addClass('hidden');
+                $('#printGraphForm').addClass('hidden');
+                $('.graph-execution').addClass('hidden');
+                $('#addTimeForm').addClass('hidden');
             },
-            error: function(xhr, status, error) {
-                alert('Error: ' + error);
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error
+                    ? xhr.responseJSON.error
+                    : 'Error occurred while submitting tasks.';
+                console.error(errorMessage);
+                alert(errorMessage);
             }
         });
     });
-    
-    
-    
 });
