@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('.graph-execution').addClass('hidden');
 
     $('#newTaskBtn').click(function() {
+        $('#newTaskForm')[0].reset(); // Reset the form
         $('#newTaskForm').removeClass('hidden');
         $('#createXML').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#createXMLBtn').click(function() {
+        $('#createXML')[0].reset(); // Reset the form
         $('#createXML').removeClass('hidden');
         $('#newTaskForm').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -32,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
             success: function(response) {
                 alert(response.message || 'Task created successfully!');
                 $('#newTaskForm').addClass('hidden');
-                
             },
             error: function(xhr) {
                 const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
@@ -144,6 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#addTimeBtn').click(function() {
+        $('#addTimeForm')[0].reset(); // Reset the form
         $('#newTaskForm').addClass('hidden');
         $('#createXML').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -174,6 +176,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#printGraphBtn').click(function() {
+        $('#printGraphForm')[0].reset(); // Reset the form
+
         const fixedParams = {
             use_fixed_params: true
         };
@@ -271,5 +275,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
 });

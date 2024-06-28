@@ -105,6 +105,7 @@ def create_task():
     if deadline < wcet:
         return jsonify({'error': 'Deadline must be greater than WCET.'}), 400
 
+    
     print(f'Real Time: {real_time}, Task Type: {task_type}, Task ID: {task_id}, Period: {period}, Activation: {activation}, Deadline: {deadline}, WCET: {wcet}')
     
     if task_type == "sporadic":
@@ -147,10 +148,6 @@ def print_graph():
         if not isinstance(fraction_time, int) or not (1 <= fraction_time <= 5):
             return jsonify({'error': 'Fraction time must be an integer between 1 and 5.'}), 400
 
-        # Print parameters for debugging
-        print(f'{start_time} {end_time} {fraction_time}')
-
-        # Pass parameters to the controller function
         success = scheduler_controller.print_graph(start_time, end_time, fraction_time)
         if success:
             return jsonify({'message': 'Graph printed successfully!'}), 200
@@ -228,12 +225,89 @@ def download_csv():
 def submit_all_tasks():
     try:
         data = request.get_json()
-        print(data[0],data[1],data[2],data[3],data[4],data[5])
+        print(len(data))
+        total_task = int((len(data)-4)/7)
+        
+        start = int(data[0])
+        end = int(data[1])
+        scheduling_algorithm = data[2]
+        quantum = int(data[3])
+        pos = 4
+        tasks = []
+        
+        for i in range(total_task):
+            real_time = data[pos]
+            task_type = data[pos+1]
+            task_id = data[pos+2]
+            period = data[pos+3]
+            activation = data[pos+4] 
+            deadline = data[pos+5]
+            wcet = data[pos+6]
+            pos += 7
 
-        return jsonify({'message': 'All tasks submitted successfully!'})
+            # Check if received values are valid
+            if not all([real_time, task_type, task_id, period, activation, deadline, wcet]):
+                return jsonify({'error': 'All fields are required.'}), 400
+
+            # Convert values to appropriate types
+            try:
+                real_time = bool(real_time)
+                task_id = int(task_id)
+                period = int(period)
+                activation = int(activation)
+                deadline = int(deadline)
+                wcet = int(wcet)
+            except ValueError:
+                return jsonify({'error': 'Invalid input format.'}), 400
+
+            # Perform additional checks on the values
+            if task_id <= 0:
+                return jsonify({'error': 'Task ID must be a positive integer.'}), 400
+            if wcet <= 0:
+                return jsonify({'error': 'WCET must be a positive integer.'}), 400
+            if (task_type == 'periodic' and period <= 0) or (task_type == 'sporadic' and activation < 0):
+                return jsonify({'error': 'Invalid period or activation value.'}), 400
+            if deadline <= 0:
+                return jsonify({'error': 'Deadline must be a positive integer.'}), 400
+            if period >= deadline and task_type == 'periodic':
+                return jsonify({'error': 'Period must be greater than deadline.'}), 400
+            if wcet > period and task_type == 'periodic':
+                return jsonify({'error': 'WCET must be less than or equal to period.'}), 400
+            if deadline < wcet:
+                return jsonify({'error': 'Deadline must be greater than WCET.'}), 400
+            if scheduling_algorithm == "RR" and quantum < 0:
+                return jsonify({'error': 'Quantum must be greater than 0.'}), 400
+            if start < 0:
+                return jsonify({'error': 'Start must be greater than 0.'}), 400
+            if end < 0 and start > end:
+                return jsonify({'error': 'End must be greater than 0 and higher than start.'}), 400
+            
+            # Add task data to the list
+            task = {
+                "real_time": real_time,
+                "type": task_type,
+                "id": task_id,
+                "period": period,
+                "activation": activation,
+                "deadline": deadline,
+                "wcet": wcet
+            }
+            tasks.append(task)
+
+        # Execute XML file creation using SchedulerController's create_xml method
+        xml_path = scheduler_controller.create_xml("input/example.xml", int(start), int(end), tasks, scheduling_algorithm, 0, 1, quantum)
+
+        if xml_path:
+            return jsonify({'message': 'XML file created successfully!', 'xml_path': xml_path}), 200
+        else:
+            return jsonify({'error': 'Failed to create XML file.'}), 500
+        
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
+        # Generic handling for other errors
+        error_message = f"An unexpected error occurred: {str(e)}"
+        app.logger.error(error_message)
+        return jsonify({"error": error_message}), 500
+    
 @app.route('/add_time', methods=['POST'])
 def add_time():
     try:

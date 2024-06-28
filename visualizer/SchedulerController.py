@@ -78,7 +78,7 @@ class SchedulerController:
             print(f"Error printing graph: {str(e)}")
             return False
 
-    def create_xml(self, file_path, start, end, tasks, scheduling_algorithm, cpu_pe_id, cpu_speed):
+    def create_xml(self, file_path, start, end, tasks, scheduling_algorithm, cpu_pe_id, cpu_speed,quantum):
         try:
             # Creating the XML document
             doc = xml.dom.minidom.Document()
@@ -111,7 +111,7 @@ class SchedulerController:
             scheduler = doc.createElement("scheduler")
             scheduler.setAttribute("algorithm", scheduling_algorithm)
             if scheduling_algorithm == "RR":
-                scheduler.setAttribute("quantum", "3")
+                scheduler.setAttribute("quantum", str(quantum))
             software.appendChild(scheduler)
 
             # Adding the node for hardware (CPUs)
