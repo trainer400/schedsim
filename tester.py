@@ -3,12 +3,12 @@ import SchedIO
 import Task
 import random
 
-MAX_TIME_START = 4
-MAX_TIME_END = 10
-MAX_PERIOD = 4
-MAX_WCET = 2
+MAX_TIME_START = 20
+MAX_TIME_END = 100
+MAX_PERIOD = 40
+MAX_WCET = 20
 MAX_QUANTUM = 10
-TASKS_NUMS = 5
+TASKS_NUMS = 10
 NEW_TASKS_NUMS = 4
 
 def compare_files(file1, file2):
@@ -21,19 +21,28 @@ def compare_files(file1, file2):
         print("Not correct")
 
 if __name__ == "__main__":
-    scheduling_algorithm = "FIFO"
+    alg = random.randint(0, 4)
+    if alg == 0:
+        scheduling_algorithm = "FIFO"
+    if alg == 1:
+        scheduling_algorithm = "SJF"
+    if alg == 2:
+        scheduling_algorithm = "HRRN"
+    if alg == 3:
+        scheduling_algorithm = "SRTF"
+    if alg == 4:
+        scheduling_algorithm = "RR"
     time_start = random.randint(0, MAX_TIME_START)
     time_end = random.randint(time_start + 1, MAX_TIME_END)
     add_time = random.randint(1, MAX_TIME_END)
-    print(time_end, add_time)
     simulation1 = ET.Element("simulation")
-    time1 = ET.SubElement(simulation1, "time", start="0", end=str(time_end + add_time))
+    time1 = ET.SubElement(simulation1, "time", start=str(time_start), end=str(time_end + add_time))
     time1.tail = "\n"
     software1 = ET.SubElement(simulation1, "software")
     tasks1 = ET.SubElement(software1, "tasks")
     tasks1.tail = "\n"
     simulation2 = ET.Element("simulation")
-    time2 = ET.SubElement(simulation2, "time", start="0", end=str(time_end))
+    time2 = ET.SubElement(simulation2, "time", start=str(time_start), end=str(time_end))
     time2.tail = "\n"
     software2 = ET.SubElement(simulation2, "software")
     tasks2 = ET.SubElement(software2, "tasks")
@@ -49,7 +58,7 @@ if __name__ == "__main__":
         else:
             real_time = True
             real_time_str = 'true'
-        type = random.randint(0, 0)
+        type = random.randint(0, 1)
         activation = None
         period = None
         deadline = None
@@ -127,16 +136,10 @@ if __name__ == "__main__":
 
     count = 0
     for new_task in new_tasks:
-        print(new_task.id)
-        print(new_task.activation)
-        print(new_task.finish)
         test_scheduler2.new_task(new_task)
         test_scheduler2.terminate()
         count += 1
     test_scheduler2.add_time(add_time)
     test_scheduler2.terminate()
-
-    for task in new_tasks:
-        print(task.id, task.activation, task.type)
 
     compare_files("examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")

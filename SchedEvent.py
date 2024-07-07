@@ -1,6 +1,6 @@
 # This module was based on SchedSim v1:
 # https://github.com/HEAPLab/schedsim/blob/master/SchedEvent.py
-
+import copy
 from enum import Enum
 
 
@@ -18,7 +18,7 @@ class ScheduleEvent:
     def __init__(self, timestamp, task, _type, _id):
         self.id = _id
         self.timestamp = timestamp
-        self.task = task
+        self.task = copy.deepcopy(task)
         self.job = 0
         self.processor = task.core
         self.type = _type
