@@ -7,7 +7,7 @@ def import_file(file_path, output_file):
     scheduler = None
     root_node = ET.parse(file_path).getroot()
 
-    # Parsing scheduler
+    # Parsing scheduler parametres based on TAG xml
     for node in root_node.findall('./software/scheduler'):
         if scheduler is not None:
             raise Exception('More than one scheduler is defined in the file')
@@ -32,7 +32,7 @@ def import_file(file_path, output_file):
         raise Exception('No scheduler is defined in the file')
     
     
-    # Parsing tasks
+    # Parsing the tasks based on the TAG xml
     for node in root_node.findall('./software/tasks/task'):
         _real_time = node.attrib.get('real_time', 'false') == 'true'
         _type = node.attrib['type']
@@ -42,7 +42,7 @@ def import_file(file_path, output_file):
         _deadline = int(node.attrib.get('deadline', -1))
         _wcet = int(node.attrib['wcet'])
 
-        #print(_real_time, _type, _id, _period, _activation, _deadline, _wcet)
+        
         if _id < 0 or _wcet <= 0 or (_type == 'periodic' and _period <= 0) or (_type == 'sporadic' and _activation < 0):
             raise Exception('Non-positive values are saved in the file')
 
@@ -62,7 +62,7 @@ def import_file(file_path, output_file):
         scheduler.start = int(time_node.attrib['start'])
         scheduler.end = int(time_node.attrib['end'])
         if scheduler.end < scheduler.start :
-            raise Exception('Error in time definition')#chiedi se non deve fare nulla o lanciare eccezzione
+            raise Exception('Error in time definition')
 
     # Parsing hardware
     for node in root_node.findall('./hardware/cpus/pe'):
@@ -79,8 +79,6 @@ def import_file(file_path, output_file):
     return scheduler
 
 
-# This class was based on SchedSim v1:
-# https://github.com/HEAPLab/schedsim/blob/master/SchedIo.py
 class SchedulerEventWriter:
     def __init__(self, output_file):
         self.out = open(output_file, 'w')
@@ -91,12 +89,13 @@ class SchedulerEventWriter:
             str(scheduler_event.timestamp) + ',' + str(scheduler_event.task.id) + ',' +
             str(scheduler_event.job) + ',' + str(scheduler_event.processor) + ',' +
             str(scheduler_event.type) + ',' + str(scheduler_event.extra) + '\n')
-        
+    
+    # Function to clean the data in the output file between [time,end]
     def clean(self, time):
         self.out.close()
         # Create a list for save the element in the range [0,time]
         events = []
-        # Open the file of output and read it to save the element, where is valid events_time<=time
+        # Open the file of output and read it to save the element, where is valid "events_time<=time"
         with open(self.out.name, 'r') as f:
             for line in f:
                 parts = line.strip().split(',')
@@ -109,5 +108,6 @@ class SchedulerEventWriter:
         self.out = open(self.out.name, 'w')
         self.out.writelines(events)
 
+    # Function to close the file used by Scheduler
     def terminate_write(self):
         self.out.close()

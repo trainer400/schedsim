@@ -5,7 +5,7 @@ import matplotlib
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
-matplotlib.use('Agg')  # Set the non-interactive backend
+matplotlib.use('Agg')  
 
 # Add parent directory to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -22,7 +22,10 @@ class SchedulerController:
         self.input_file = None
         self.end = 0
         self.start = 0
-
+    
+    # Method to load an XML file and initialize the scheduler
+    # @input: file_path (str) - The path to the XML file
+    # @output: bool - True if the file is successfully loaded, False if the file is not found
     def load_xml_file(self, file_path):
         self.input_file = file_path
         try:
@@ -49,7 +52,7 @@ class SchedulerController:
             if task_data[1] == 'sporadic':
                 n_task = Task.Task(task_data[0], task_data[1], task_data[2], None, task_data[3], task_data[4], task_data[5])
             elif task_data[1] == 'periodic':
-                n_task = Task.Task(task_data[0], task_data[1], task_data[2], task_data[3], task_data[4], task_data[5], task_data[6])
+                n_task = Task.Task(task_data[0], task_data[1], task_data[2], task_data[3], None, task_data[4], task_data[5])
             self.scheduler.new_task(n_task)
             self.scheduler.terminate()
             return True
@@ -69,7 +72,7 @@ class SchedulerController:
         
     def print_graph(self, start, end, fraction):
         try:
-            # Check if the out.csv file exists
+            # Check if the output file exist, or lunch an exeception
             if not os.path.exists('input/out.csv'):
                 raise FileNotFoundError("out.csv file not found.")
             create_graph('static/out.png', start, end, fraction)
@@ -114,7 +117,7 @@ class SchedulerController:
                 scheduler.setAttribute("quantum", str(quantum))
             software.appendChild(scheduler)
 
-            # Adding the node for hardware (CPUs)
+            # Adding the node for hardware
             hardware = doc.createElement("hardware")
             simulation.appendChild(hardware)
 

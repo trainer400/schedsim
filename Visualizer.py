@@ -13,7 +13,7 @@ def create_graph(output_image, start_time, end_time, fraction):
             fraction = int(fraction)
         
         print(start_time, end_time)
-        # Read data from the CSV file
+        # Read data from the CSV file (default set)
         input_csv = 'input/out.csv'
         
         # Check if the "out.csv" file exists and is not empty
@@ -38,10 +38,8 @@ def create_graph(output_image, start_time, end_time, fraction):
             for idx, task_id in enumerate(sorted(unique_task_ids)):
                 task_positions[task_id] = idx + 1  # Add 1 to avoid starting positions from zero
 
-            # Configure the graph
-            fig, ax = plt.subplots(figsize=(20, 14)) 
-
-            # Dictionary to track active tasks
+            
+            fig, ax = plt.subplots(figsize=(20, 14))
             active_tasks = {}
 
             # Draw horizontal bars
@@ -57,8 +55,6 @@ def create_graph(output_image, start_time, end_time, fraction):
                         start_time_exec = active_tasks[(task_id, job)]['start']
                         duration = time - start_time_exec
                         label = f'Task {task_id}'
-                        
-                        # The green bar have alpha=0.7 (shadow)
                         ax.broken_barh([(start_time_exec, duration)], (task_positions[task_id] - 0.2, 0.4), facecolors='tab:green', alpha=0.75)
                         ax.text(start_time_exec + duration / 2, task_positions[task_id], label, ha='center', va='center', color='white', fontsize=8)
                         del active_tasks[(task_id, job)]
@@ -73,13 +69,10 @@ def create_graph(output_image, start_time, end_time, fraction):
                         start_time_exec = active_tasks[(task_id, job)]['start']
                         duration = time - start_time_exec
                         label = f'Task {task_id}'
-                        
                         ax.broken_barh([(start_time_exec, duration)], (task_positions[task_id] - 0.2, 0.4), facecolors='tab:green')
                         ax.text(start_time_exec + duration / 2, task_positions[task_id], label, ha='center', va='center', color='white', fontsize=8)
-                        
                         ax.broken_barh([(time, 0.1)], (task_positions[task_id] - 0.2, 0.4), facecolors='tab:red')
                     else:
-                        
                         ax.broken_barh([(time, 0.1)], (task_positions[task_id] - 0.2, 0.4), facecolors='tab:red')
 
                 elif event_type == 'S':
@@ -97,15 +90,13 @@ def create_graph(output_image, start_time, end_time, fraction):
             ax.set_xlabel('Time')
             ax.set_ylabel('Task ID')
 
-            # Set a finer scale for the x-axis
+            # Set a finer scale for the x-axis and the limits
             ax.set_xticks(range(start_time, end_time + 1, fraction))
-            ax.set_xlim(start_time-1, end_time+1)  # Set the x-axis limits
+            ax.set_xlim(start_time-1, end_time+1)
 
             plt.xticks(rotation=90)
-            # Set a denser grid on the y-axis
             ax.set_yticks(range(1, len(unique_task_ids) + 1))
             ax.set_yticklabels([f'Task {task_id}' for task_id in sorted(unique_task_ids)])
-
             ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
             # Add the legend
@@ -127,7 +118,7 @@ def create_graph(output_image, start_time, end_time, fraction):
             plt.close()
 
         else:
-            # Create a new figure empty 
+            # Create a new figure empty (method to manage an empty CSV file)
             plt.figure(figsize=(30, 10))  
             plt.plot([], [])  
             plt.xlabel('Time')  

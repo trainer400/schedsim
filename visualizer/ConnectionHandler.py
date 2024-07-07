@@ -4,9 +4,9 @@ import sys
 import matplotlib
 from SchedulerController import SchedulerController
 
-matplotlib.use('Agg')  # Set the non-interactive backend
+matplotlib.use('Agg') 
 
-# Add parent directory to sys.path
+# The path to use the class of Scheduler
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import SchedIO
@@ -14,7 +14,7 @@ import Task
 from Visualizer import create_graph
 
 app = Flask(__name__)
-# Specify the output file path
+# Create the object "Scheduler" to control the web request 
 scheduler_controller = SchedulerController()
 
 @app.route('/')
@@ -73,17 +73,24 @@ def create_task():
     activation = request.form.get('activation')
     deadline = request.form.get('deadline')
     wcet = request.form.get('wcet')
-
-    # Check if received values are valid
-    if not all([real_time, task_type, task_id, period, activation, deadline, wcet]):
-        return jsonify({'error': 'All fields are required.'}), 400
+    if task_type=='periodic':
+        if not all([real_time, task_type, task_id, period, deadline, wcet]):
+            return jsonify({'error': 'All fields are required.'}), 400
+    elif task_type=='sporadic':
+        if not all([real_time, task_type, task_id, activation, deadline, wcet]):
+            return jsonify({'error': 'All fields are required.'}), 400
+    
 
     # Convert values to appropriate types
     try:
         task_id = int(task_id)
         real_time = bool(real_time)
-        period = int(period)
-        activation = int(activation)
+        if task_type=='periodic':
+            period = int(period)
+            activation=0
+        if task_type=='sporadic':
+            activation = int(activation)
+            period=0
         deadline = int(deadline)
         wcet = int(wcet)
     except ValueError:
@@ -156,64 +163,6 @@ def print_graph():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/create_xml', methods=['POST'])
-def create_xml():
-    try:
-        # Receive data from the request body
-        start = request.form.get('start')
-        end = request.form.get('end')
-        scheduling_algorithm = request.form.get('schedulingAlgorithm')
-        task_number = int(request.form.get('taskNumber'))
-        tasks = []
-        for i in range(task_number):
-            task_type = request.form.get(f'taskType{i}')  
-            task_id = request.form.get(f'taskId{i}') 
-            
-            period = request.form.get(f'period{i}')  
-            activation = request.form.get(f'activation{i}') 
-            deadline = request.form.get(f'deadline{i}') 
-            wcet = request.form.get(f'wcet{i}') 
-
-            # Check if values are valid
-            if not all([task_type, task_id, period, activation, deadline, wcet]):
-                return jsonify({'error': 'All task fields are required.'}), 400
-
-            # Convert values to integers if possible
-            try:
-                task_id = int(task_id)
-                period = int(period)
-                activation = int(activation)
-                deadline = int(deadline)
-                wcet = int(wcet)
-            except ValueError:
-                return jsonify({'error': 'Invalid input format for task fields.'}), 400
-
-            # Add task data to the list
-            task = {
-                "real_time": True,
-                "type": task_type,
-                "id": task_id,
-                "period": period,
-                "activation": activation,
-                "deadline": deadline,
-                "wcet": wcet
-            }
-            tasks.append(task)
-
-        # Execute XML file creation using SchedulerController's create_xml method
-        xml_path = scheduler_controller.create_xml("input/example.xml", int(start), int(end), tasks, scheduling_algorithm, 0, 1)
-
-        if xml_path:
-            return jsonify({'message': 'XML file created successfully!', 'xml_path': xml_path}), 200
-        else:
-            return jsonify({'error': 'Failed to create XML file.'}), 500
-
-    except Exception as e:
-        # Generic handling for other errors
-        error_message = f"An unexpected error occurred: {str(e)}"
-        app.logger.error(error_message)
-        return jsonify({"error": error_message}), 500
-
 @app.route('/download_csv', methods=['GET'])
 def download_csv():
     
@@ -245,16 +194,22 @@ def submit_all_tasks():
             wcet = data[pos+6]
             pos += 7
 
-            # Check if received values are valid
-            if not all([real_time, task_type, task_id, period, activation, deadline, wcet]):
-                return jsonify({'error': 'All fields are required.'}), 400
-
+            if task_type=='periodic':
+                if not all([real_time, task_type, task_id, period, deadline, wcet]):
+                    return jsonify({'error': 'All fields are required.'}), 400
+            elif task_type=='sporadic':
+                if not all([real_time, task_type, task_id, activation, deadline, wcet]):
+                    return jsonify({'error': 'All fields are required.'}), 400
             # Convert values to appropriate types
             try:
-                real_time = bool(real_time)
                 task_id = int(task_id)
-                period = int(period)
-                activation = int(activation)
+                real_time = bool(real_time)
+                if task_type=='periodic':
+                    period = int(period)
+                    activation=0
+                if task_type=='sporadic':
+                    activation = int(activation)
+                    period=0
                 deadline = int(deadline)
                 wcet = int(wcet)
             except ValueError:
@@ -271,7 +226,7 @@ def submit_all_tasks():
                 return jsonify({'error': 'Deadline must be a positive integer.'}), 400
             if period >= deadline and task_type == 'periodic':
                 return jsonify({'error': 'Period must be greater than deadline.'}), 400
-            if wcet > period and task_type == 'periodic':
+            if task_type == 'periodic' and wcet > period :
                 return jsonify({'error': 'WCET must be less than or equal to period.'}), 400
             if deadline < wcet:
                 return jsonify({'error': 'Deadline must be greater than WCET.'}), 400
@@ -282,16 +237,24 @@ def submit_all_tasks():
             if end < 0 and start > end:
                 return jsonify({'error': 'End must be greater than 0 and higher than start.'}), 400
             
-            # Add task data to the list
-            task = {
-                "real_time": real_time,
-                "type": task_type,
-                "id": task_id,
-                "period": period,
-                "activation": activation,
-                "deadline": deadline,
-                "wcet": wcet
-            }
+            if task_type == 'periodic':
+                task = {
+                    "real_time": real_time,
+                    "type": task_type,
+                    "id": task_id,
+                    "period": period,
+                    "deadline": deadline,
+                    "wcet": wcet
+                }
+            elif task_type == 'sporadic':
+                task = {
+                    "real_time": real_time,
+                    "type": task_type,
+                    "id": task_id,
+                    "activation": activation,
+                    "deadline": deadline,
+                    "wcet": wcet
+                }
             tasks.append(task)
 
         # Execute XML file creation using SchedulerController's create_xml method
@@ -303,7 +266,6 @@ def submit_all_tasks():
             return jsonify({'error': 'Failed to create XML file.'}), 500
         
     except Exception as e:
-        # Generic handling for other errors
         error_message = f"An unexpected error occurred: {str(e)}"
         app.logger.error(error_message)
         return jsonify({"error": error_message}), 500

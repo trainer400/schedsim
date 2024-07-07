@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('.graph-execution').addClass('hidden');
 
     $('#newTaskBtn').click(function() {
-        $('#newTaskForm')[0].reset(); // Reset the form
+        $('#newTaskForm')[0].reset(); 
         $('#newTaskForm').removeClass('hidden');
         $('#createXML').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#createXMLBtn').click(function() {
-        $('#createXML')[0].reset(); // Reset the form
+        $('#createXML')[0].reset(); 
         $('#createXML').removeClass('hidden');
         $('#newTaskForm').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -47,41 +47,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     $('#createXML').submit(function(event) {
         event.preventDefault();
-    
-        const formData = new FormData(this);
-    
-        $.ajax({
-            url: '/create_xml',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                alert(response.message || 'XML file created successfully!');
-                $('#createXML').addClass('hidden');
-            },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
-                                    ? xhr.responseJSON.error 
-                                    : 'Error occurred while creating XML file.';
-                console.error(errorMessage);
-                alert(errorMessage);
-            }
-        });
+        $('#createXML').removeClass('hidden');
     });
     
     $('#xmlFile').change(function() {
         if (this.files.length > 0) {
-            // Hide the graph when a new XML file is selected
             $('.graph-execution').addClass('hidden');
             $('.graph-execution .large-image').addClass('hidden');
             $('#printGraphForm').addClass('hidden');
-            $('#xmlForm').submit();  // Submit the form automatically
+            // Automatic submit
+            $('#xmlForm').submit();
         }
-    });
-
-    $('#uploadBtn').click(function() {
-        $('#xmlForm').submit();
     });
 
     $('#xmlForm').submit(function(event) {
@@ -98,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
             success: function(response) {
                 alert('XML File uploaded successfully!');
                 uploadedFilePath = response.file_path;
-                // Hide the graph when a new XML file is uploaded
                 $('.graph-execution').addClass('hidden');
                 $('.graph-execution .large-image').addClass('hidden');
             },
@@ -176,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#printGraphBtn').click(function() {
-        $('#printGraphForm')[0].reset(); // Reset the form
+        $('#printGraphForm')[0].reset(); 
 
         const fixedParams = {
             use_fixed_params: true
@@ -189,7 +164,6 @@ document.addEventListener('DOMContentLoaded', function() {
             data: JSON.stringify(fixedParams),
             success: function(response) {
                 alert(response.message || 'Graph printed successfully!');
-                // Show the .graph-execution element and the graph image
                 $('.graph-execution').removeClass('hidden');
                 $('.graph-execution .large-image').removeClass('hidden');
                 // Refresh the image source to prevent caching issues
@@ -256,15 +230,16 @@ document.addEventListener('DOMContentLoaded', function() {
             url: '/download_csv',
             type: 'GET',
             success: function(response) {
-                // Crea un URL temporaneo per il file CSV e crea un link per il download
+                // CReate a temporany URL to download the CSV file
                 const url = window.URL.createObjectURL(new Blob([response]));
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = 'data.csv';
                 document.body.appendChild(a);
                 a.click();
+                // Release the memory after the operation
                 document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);  // Libera la memoria
+                window.URL.revokeObjectURL(url); 
             },
             error: function(xhr) {
                 const errorMessage = xhr.responseJSON && xhr.responseJSON.error 

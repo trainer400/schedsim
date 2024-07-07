@@ -78,7 +78,7 @@ input[type="file"] {
     display: none;
 }
 
-.custom-file-upload {
+.file_upload {
     border: 2px solid #4CAF50;
     padding: 12px;
     border-radius: 5px;
@@ -86,7 +86,7 @@ input[type="file"] {
 }
 
 /* Graph and form container */
-.graph-execution-and-form-container {
+.execution_block {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -358,7 +358,7 @@ footer {
     height: auto;
 }
 
-.custom-file-upload {
+.file_upload {
     width: 100%;
     padding: 10px;
     background-color: #4CAF50;
@@ -371,7 +371,7 @@ footer {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.custom-file-upload:hover {
+.file_upload:hover {
     background-color: #45a049;
     transform: scale(1.01);
 }
