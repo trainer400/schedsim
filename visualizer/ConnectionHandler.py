@@ -180,7 +180,10 @@ def submit_all_tasks():
         start = int(data[0])
         end = int(data[1])
         scheduling_algorithm = data[2]
-        quantum = int(data[3])
+        if scheduling_algorithm == "RR":
+            quantum = int(data[3])
+        else: 
+            quantum = 0
         pos = 4
         tasks = []
         

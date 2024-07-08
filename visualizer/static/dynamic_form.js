@@ -74,7 +74,8 @@ $(document).ready(function() {
         const end = parseInt($('#end').val());
         const schedulingAlgorithm = $('#schedulingAlgorithm').val();
         const quantum = parseInt($('#quantum').val());
-
+        if(isNaN(quantum))
+            quantum = 0
         if (isNaN(start) || isNaN(end) || start >= end ) {
             alert('Start time must be less than end time.');
             return;
