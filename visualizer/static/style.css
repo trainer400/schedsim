@@ -16,13 +16,13 @@ body {
     align-items: center;
     min-height: 100vh;
     width: 100%;
-    padding: 20px;
+    padding: 10px;
 }
 
 /* Content */
 .content {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1800px;
     background-color: #fff;
     padding: 30px;
     border-radius: 8px;
@@ -61,15 +61,12 @@ h1 {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.button-row button, .button-row label {
-    flex-basis: calc(50% - 8px);
-}
-.button-row button:hover {
+.button-container button:hover, .button-container label:hover {
     background-color: #45a049;
     transform: scale(1.01);
 }
 
-.button-row button:active {
+.button-container button:active, .button-container label:active {
     transform: scale(0.95);
 }
 
@@ -83,6 +80,20 @@ input[type="file"] {
     padding: 12px;
     border-radius: 5px;
     cursor: pointer;
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.file_upload:hover {
+    background-color: #45a049;
+    transform: scale(1.01);
+}
+
+.file_upload:active {
+    transform: scale(0.95);
 }
 
 /* Graph and form container */
@@ -120,8 +131,12 @@ input[type="file"] {
     display: none;
 }
 
-/* Style for "newTaskForm" */
-#newTaskForm {
+/* Style for "newTaskForm", "createXML", "addTimeForm", "printGraphForm", "downloadXmlBtn", "styled-form" */
+#newTaskForm,
+#createXML,
+#addTimeForm,
+#printGraphForm,
+.styled-form {
     width: 100%;
     max-width: 1000px;
     background-color: #f9f9f9;
@@ -131,79 +146,37 @@ input[type="file"] {
     margin: 30px auto;
 }
 
-#newTaskForm .form-group {
+#newTaskForm .form-group,
+#createXML .form-group,
+#addTimeForm .form-group,
+#printGraphForm .form-group,
+.styled-form .form-group {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
 }
 
-#newTaskForm label {
+#newTaskForm label,
+#createXML label,
+#addTimeForm label,
+#printGraphForm label,
+.styled-form label {
     color: #333;
     flex: 1;
-    min-width: 100px;
+    min-width: 80px;
 }
 
 #newTaskForm input[type="number"],
-#newTaskForm select {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-    flex: 2;
-}
-
-#newTaskForm button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-#newTaskForm button:hover {
-    background-color: #45a049;
-    transform: scale(1.01);
-}
-
-#newTaskForm button:active {
-    transform: scale(0.95);
-}
-
-/* Style for "createXML" */
-#createXML {
-    width: 100%;
-    max-width: 1000px;
-    background-color: #f9f9f9;
-    padding: 18px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin: 30px auto;
-}
-
-#createXML .form-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-#createXML label {
-    color: #333;
-    flex: 1;
-    min-width: 100px;
-}
-
+#newTaskForm select,
 #createXML input[type="number"],
 #createXML input[type="text"],
 #createXML select,
-#createXML textarea {
+#createXML textarea,
+#addTimeForm input[type="number"],
+#printGraphForm input[type="number"],
+.styled-form input[type="number"],
+.styled-form select {
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -212,7 +185,11 @@ input[type="file"] {
     flex: 2;
 }
 
-#createXML button {
+#newTaskForm button,
+#createXML button,
+#addTimeForm button,
+#printGraphForm button,
+.styled-form button {
     width: 100%;
     padding: 10px;
     background-color: #4CAF50;
@@ -225,124 +202,27 @@ input[type="file"] {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-#createXML button:hover {
+#newTaskForm button:hover,
+#createXML button:hover,
+#addTimeForm button:hover,
+#printGraphForm button:hover,
+.styled-form button:hover {
     background-color: #45a049;
     transform: scale(1.01);
 }
 
-#createXML button:active {
+#newTaskForm button:active,
+#createXML button:active,
+#addTimeForm button:active,
+#printGraphForm button:active,
+.styled-form button:active {
     transform: scale(0.95);
 }
 
-/* Style for "addTimeForm" */
-#addTimeForm {
-    width: 100%;
-    max-width: 1000px;
-    background-color: #f9f9f9;
-    padding: 18px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin: 30px auto;
-}
-
-#addTimeForm .form-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.styled-form h3 {
+    text-align: center;
     margin-bottom: 20px;
-}
-
-#addTimeForm label {
     color: #333;
-    flex: 1;
-    min-width: 100px;
-}
-
-#addTimeForm input[type="number"] {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-    flex: 2;
-}
-
-#addTimeForm button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-#addTimeForm button:hover {
-    background-color: #45a049;
-    transform: scale(1.01);
-}
-
-#addTimeForm button:active {
-    transform: scale(0.95);
-}
-
-/* Style for "printGraphForm" */
-#printGraphForm {
-    width: 100%;
-    max-width: 1000px;
-    background-color: #f9f9f9;
-    padding: 18px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin: 30px auto;
-}
-
-#printGraphForm .form-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-#printGraphForm label {
-    color: #333;
-    flex: 1;
-    min-width: 100px;
-}
-
-#printGraphForm input[type="number"] {
-    width: calc(100% - 24px);
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-    flex: 2;
-}
-
-#printGraphForm button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-#printGraphForm button:hover {
-    background-color: #45a049;
-    transform: scale(1.01);
-}
-
-#printGraphForm button:active {
-    transform: scale(0.95);
 }
 
 /* Footer */
@@ -351,90 +231,4 @@ footer {
     color: white;
     text-align: center;
     padding: 15px 0;
-}
-
-.graph-execution img {
-    width: 100%;
-    height: auto;
-}
-
-.file_upload {
-    width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.file_upload:hover {
-    background-color: #45a049;
-    transform: scale(1.01);
-}
-
-input[type="file"].hidden {
-    display: none;
-}
-
-/* Style for the styled-form */
-.styled-form {
-    width: 800%;
-    max-width: 800px;
-    background-color: #f9f9f9;
-    padding: 18px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin: 30px auto;
-}
-
-.styled-form .form-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-.styled-form h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-}
-.styled-form label {
-    color: #333;
-    flex: 1;
-    min-width: 100px;
-}
-
-.styled-form input[type="number"], .styled-form select {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-    flex: 2;
-}
-
-.styled-form button {
-    width: 80%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.styled-form button:hover {
-    background-color: #45a049;
-    transform: scale(1.01);
-}
-
-.styled-form button:active {
-    transform: scale(0.95);
 }

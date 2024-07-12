@@ -1,3 +1,4 @@
+import tempfile
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
@@ -13,8 +14,11 @@ def create_graph(output_image, start_time, end_time, fraction):
             fraction = int(fraction)
         
         print(start_time, end_time)
-        # Read data from the CSV file (default set)
-        input_csv = 'input/out.csv'
+        # Get the temporary directory path
+        temp_dir = tempfile.gettempdir()
+
+        # Path to the input CSV file in the temporary directory
+        input_csv = os.path.join(temp_dir, 'out.csv')
         
         # Check if the "out.csv" file exists and is not empty
         if os.path.isfile(input_csv) and os.path.getsize(input_csv) > 0:

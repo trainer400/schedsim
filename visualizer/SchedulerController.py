@@ -1,3 +1,4 @@
+import tempfile
 from flask import Flask, render_template, request, jsonify
 import os
 import sys
@@ -18,7 +19,8 @@ app = Flask(__name__)
 class SchedulerController:
     def __init__(self):
         self.scheduler = None
-        self.output_file = 'input/out.csv'
+        self.temp_dir = tempfile.gettempdir()
+        self.output_file = os.path.join(self.temp_dir, 'out.csv')  
         self.input_file = None
         self.end = 0
         self.start = 0
@@ -72,13 +74,20 @@ class SchedulerController:
         
     def print_graph(self, start, end, fraction):
         try:
-            # Check if the output file exist, or lunch an exeception
-            if not os.path.exists('input/out.csv'):
-                raise FileNotFoundError("out.csv file not found.")
+            
+            temp_dir = tempfile.gettempdir()
+
+            
+            csv_file_path = os.path.join(temp_dir, 'out.csv')
+
+            if not os.path.exists(csv_file_path):
+                raise FileNotFoundError(f"{csv_file_path} non trovato.")
+
             create_graph('static/out.png', start, end, fraction)
+
             return True
         except Exception as e:
-            print(f"Error printing graph: {str(e)}")
+            print(f"Errore durante la stampa del grafico: {str(e)}")
             return False
 
     def create_xml(self, file_path, start, end, tasks, scheduling_algorithm, cpu_pe_id, cpu_speed,quantum):
@@ -129,7 +138,7 @@ class SchedulerController:
             pe.setAttribute("speed", str(cpu_speed))
             cpus.appendChild(pe)
 
-            # Writing the XML document to file
+            # Scrittura del documento XML nel file nella cartella temporanea
             with open(file_path, "w", encoding="utf-8") as xml_file:
                 doc.writexml(xml_file, indent="\t", newl="\n", addindent="\t", encoding="utf-8")
 

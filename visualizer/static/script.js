@@ -2,6 +2,61 @@ document.addEventListener('DOMContentLoaded', function() {
     let uploadedFilePath = '';
     $('.graph-execution').addClass('hidden');
 
+    function toggleFields() {
+        var taskType = $('#taskType').val();
+        var periodGroup = $('#periodGroup');
+        var activationGroup = $('#activationGroup');
+    
+        console.log("Task Type:", taskType); // Debugging
+    
+        if (taskType === "periodic") {
+            console.log("Showing Period");
+            periodGroup.removeClass("hidden");
+            activationGroup.addClass("hidden");
+        } else if (taskType === "sporadic") {
+            console.log("Showing Activation");
+            periodGroup.addClass("hidden");
+            activationGroup.removeClass("hidden");
+        } else {
+            console.log("Hiding Both");
+            periodGroup.addClass("hidden");
+            activationGroup.addClass("hidden");
+        }
+
+        // Additional logs to verify the state of elements
+        console.log("Period Group hidden:", periodGroup.hasClass('hidden'));
+        console.log("Activation Group hidden:", activationGroup.hasClass('hidden'));
+    }
+
+    // Attach the change event handler
+    $('#taskType').change(toggleFields);
+
+    // Initial call to set correct visibility on page load
+    toggleFields();
+    function toggleFieldsQuantum() {
+        var schedulingAlgorithm = $('#schedulingAlgorithm').val();
+        var quantumGroup = $('#quantumGroup');
+
+        console.log("Scheduling Algorithm:", schedulingAlgorithm); // Debugging
+
+        if (schedulingAlgorithm === "RR") {
+            console.log("Showing Quantum");
+            quantumGroup.removeClass("hidden");
+        } else {
+            console.log("Hiding Quantum");
+            quantumGroup.addClass("hidden");
+        }
+
+        // Additional logs to verify the state of elements
+        console.log("Quantum Group hidden:", quantumGroup.hasClass('hidden'));
+    }
+
+    // Attach the change event handler
+    $('#schedulingAlgorithm').change(toggleFieldsQuantum);
+
+    // Initial call to set correct visibility on page load
+    toggleFieldsQuantum();
+
     $('#newTaskBtn').click(function() {
         $('#newTaskForm')[0].reset(); 
         $('#newTaskForm').removeClass('hidden');
@@ -250,4 +305,38 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    $('#downloadXmlBtn').click(function() {
+        $.ajax({
+            url: '/download_xml',
+            type: 'GET',
+            success: function(response) {
+                // Creazione di un URL temporaneo per scaricare il file XML
+                const url = window.URL.createObjectURL(new Blob([response]));
+                
+                // Creazione di un elemento <a> per il download del file
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'data.xml'; // Nome del file XML che verrà scaricato
+                document.body.appendChild(a);
+                
+                // Simula il click sull'elemento <a> per avviare il download
+                a.click();
+                
+                // Rimuove l'elemento <a> dopo il download
+                document.body.removeChild(a);
+                
+                // Rilascia la risorsa dell'URL temporaneo
+                window.URL.revokeObjectURL(url); 
+            },
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
+                                    ? xhr.responseJSON.error 
+                                    : 'Si è verificato un errore durante il download del file XML.';
+                console.error(errorMessage);
+                alert(errorMessage);
+            }
+        });
+    });
+
 });

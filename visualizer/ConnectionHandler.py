@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+import tempfile
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
 import os
 import sys
 import matplotlib
@@ -150,7 +151,9 @@ def print_graph():
             return jsonify({'error': 'End time must be an integer greater than start time.'}), 400
 
         if scheduler_controller.end is not None and end_time > scheduler_controller.end:
-            return jsonify({'error': 'The end time should not be greater than scheduler end.'}), 400
+            return jsonify({
+                'error': f'The end time should not be greater than scheduler end {scheduler_controller.end}'
+            }), 400
         
         if not isinstance(fraction_time, int) or not (1 <= fraction_time <= 5):
             return jsonify({'error': 'Fraction time must be an integer between 1 and 5.'}), 400
@@ -163,13 +166,41 @@ def print_graph():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/download_xml', methods=['GET'])
+def download_xml():
+    try:
+        
+        temp_dir = tempfile.gettempdir()
+        
+        
+        filename = 'temp.xml'
+        
+        
+        file_path = os.path.join(temp_dir, filename)
+        
+        
+        if os.path.exists(file_path):
+            
+            return send_file(file_path, as_attachment=True, mimetype='application/xml')
+        else:
+            return jsonify({'error': 'File not found.'}), 404
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 @app.route('/download_csv', methods=['GET'])
 def download_csv():
+    try:
+        temp_dir = tempfile.gettempdir()
+        filename = 'out.csv'
+        file_path = os.path.join(temp_dir, filename)
+        if os.path.exists(file_path):
+            
+            return send_file(file_path, as_attachment=True, mimetype='text/csv')
+        else:
+            return jsonify({'error': 'File not found.'}), 404
     
-    directory = 'input'
-    filename = 'out.csv'
-    return send_from_directory(directory, filename, as_attachment=True, mimetype='text/csv')
-    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 @app.route('/submit_all_tasks', methods=['POST'])
 def submit_all_tasks():
     try:
@@ -260,8 +291,14 @@ def submit_all_tasks():
                 }
             tasks.append(task)
 
+
+        # Get the temporary directory path
+        temp_dir = tempfile.gettempdir()
+
+        # Add the file name "temp.xml" to the temporary directory path
+        temp_file_path = os.path.join(temp_dir, "temp.xml")
         # Execute XML file creation using SchedulerController's create_xml method
-        xml_path = scheduler_controller.create_xml("input/example.xml", int(start), int(end), tasks, scheduling_algorithm, 0, 1, quantum)
+        xml_path = scheduler_controller.create_xml(temp_file_path, int(start), int(end), tasks, scheduling_algorithm, 0, 1, quantum)
 
         if xml_path:
             return jsonify({'message': 'XML file created successfully!', 'xml_path': xml_path}), 200
