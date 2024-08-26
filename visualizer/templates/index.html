@@ -19,6 +19,7 @@
                     <label for="xmlFile" class="file_upload">Select and Upload XML File</label>
                     <button id="createXMLBtn">Create XML</button>
                     <button id="downloadCsvBtn">Download CSV</button>
+                    <button id="downloadXmlBtn">Download XML</button>
                 </div>
             </div>
 
@@ -33,9 +34,9 @@
                 
                 <div class="form-group">
                     <label for="taskType">Task Type (sporadic/periodic)</label>
-                    <select id="taskType" name="taskType" required>
-                        <option value="sporadic">Sporadic</option>
+                    <select id="taskType" name="taskType">
                         <option value="periodic">Periodic</option>
+                        <option value="sporadic">Sporadic</option>
                     </select>
                 </div>
                 
@@ -43,17 +44,18 @@
                     <label for="taskId">Task ID</label>
                     <input type="number" id="taskId" name="taskId" min="1" step="1" required>
                 </div>
-                
-                <div class="form-group">
-                    <label for="period">Period</label>
-                    <input type="number" id="period" name="period">
+                <div class= "hidden"  id="periodGroup">
+                    <div class="form-group ">
+                        <label for="period">Period</label>
+                        <input type="number" id="period" name="period">
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="activation">Activation</label>
-                    <input type="number" id="activation" name="activation" >
+                <div class= "hidden"  id="activationGroup">
+                    <div class="form-group" id="activationGroup">
+                        <label for="activation">Activation</label>
+                        <input type="number" id="activation" name="activation">
+                    </div>
                 </div>
-                
                 <div class="form-group">
                     <label for="deadline">Deadline</label>
                     <input type="number" id="deadline" name="deadline" required>
@@ -66,6 +68,9 @@
                 
                 <button type="submit">Create Task</button>
             </form>
+            
+            
+            
             
             <form id="createXML" class="hidden">
                 <div class="form-group">
@@ -88,11 +93,13 @@
                         <option value="HRRN">HRRN</option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label for="quantum">Quantum</label>
-                    <input type="number" id="quantum" name="quantum" required>
+                <div class= "hidden"  id="quantumGroup">
+                    <div class="form-group" id="quantumGroup">
+                        <label for="quantum">Quantum</label>
+                        <input type="number" id="quantum" name="quantum" required>
+                    </div>
                 </div>
+                
 
                 <button id="addTaskBtn">Add New Task</button>
                 <div id="dynamicTaskForm"></div>
@@ -140,5 +147,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='dynamic_form.js') }}"></script>
+    
 </body>
 </html>
