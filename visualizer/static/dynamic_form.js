@@ -9,6 +9,26 @@ $(document).ready(function() {
         $('#addTimeForm').addClass('hidden');
     });
 
+    function toggleFields(taskCount) {
+        var taskType = $(`#taskType_${taskCount}`).val();
+        var periodGroup = $(`#periodGroup_${taskCount}`);
+        var activationGroup = $(`#activationGroup_${taskCount}`);
+
+        if (taskType === "periodic") {
+            periodGroup.removeClass("hidden");
+            activationGroup.addClass("hidden");
+        } else if (taskType === "sporadic") {
+            periodGroup.addClass("hidden");
+            activationGroup.removeClass("hidden");
+        } else {
+            periodGroup.addClass("hidden");
+            activationGroup.addClass("hidden");
+        }
+
+        console.log("Period Group hidden:", periodGroup.hasClass('hidden'));
+        console.log("Activation Group hidden:", activationGroup.hasClass('hidden'));
+    }
+
     $('#createXMLBtn').click(function() {
         $('#createXML').removeClass('hidden');
         $('#newTaskForm').addClass('hidden');
@@ -44,14 +64,20 @@ $(document).ready(function() {
                     <input type="number" id="taskId_${taskCount}" name="taskId_${taskCount}" min="1" step="1" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="period_${taskCount}">Period</label>
-                    <input type="number" id="period_${taskCount}" name="period_${taskCount}">
+                <div class=" hidden" id="periodGroup_${taskCount}">
+                    <div class="form-group" >
+                        <label for="period_${taskCount}">Period</label>
+                        <input type="number" id="period_${taskCount}" name="period_${taskCount}">
+                    </div>
+                    
                 </div>
+                
 
-                <div class="form-group">
-                    <label for="activation_${taskCount}">Activation</label>
-                    <input type="number" id="activation_${taskCount}" name="activation_${taskCount}" required>
+                <div class=" hidden" id="activationGroup_${taskCount}">
+                    <div class="form-group ">
+                        <label for="activation_${taskCount}">Activation</label>
+                        <input type="number" id="activation_${taskCount}" name="activation_${taskCount}">
+                    </div> 
                 </div>
 
                 <div class="form-group">
@@ -66,6 +92,12 @@ $(document).ready(function() {
             </form>
         `;
         $('#dynamicTaskForm').append(dynamicFormHtml);
+
+        $(`#taskType_${taskCount}`).change(function() {
+            toggleFields(taskCount);
+        });
+
+        toggleFields(taskCount);
     });
 
     $('#submitAllTasksBtn').click(function() {
@@ -73,19 +105,12 @@ $(document).ready(function() {
         const start = parseInt($('#start').val());
         const end = parseInt($('#end').val());
         const schedulingAlgorithm = $('#schedulingAlgorithm').val();
-        const quantum = parseInt($('#quantum').val());
-        if(isNaN(quantum))
-            quantum = 0
-        if (isNaN(start) || isNaN(end) || start >= end ) {
-            alert('Start time must be less than end time.');
-            return;
+        let quantum = parseInt($('#quantum').val());
+        if (isNaN(quantum)) {
+            quantum = 0;
         }
-        if (isNaN(start) || isNaN(end) || start <= -1 ) {
-            alert('Start time must be greater than 0.');
-            return;
-        }
-        if (isNaN(start) || isNaN(end) || end <= 0 ) {
-            alert('End time must be greater than 0.');
+        if (isNaN(start) || isNaN(end) || start >= end || start < 0 || end <= 0) {
+            alert('Start time must be less than end time and greater than 0.');
             return;
         }
 
@@ -100,51 +125,23 @@ $(document).ready(function() {
         allTasksData.push(quantum);
 
         for (let i = 1; i <= taskCount; i++) {
-            const realtime_id = `#realTime_${i}`;
-            const task_type_id = `#taskType_${i}`;
-            const taskid_id = `#taskId_${i}`;
-            const period_id = `#period_${i}`;
-            const activation_id = `#activation_${i}`;
-            const deadline_id = `#deadline_${i}`;
-            const wcet_id = `#wcet_${i}`;
+            const realTime = $(`#realTime_${i}`).val();
+            const taskType = $(`#taskType_${i}`).val();
+            const taskId = parseInt($(`#taskId_${i}`).val());
+            const period = parseInt($(`#period_${i}`).val()) || 0;
+            const activation = parseInt($(`#activation_${i}`).val()) || 0;
+            const deadline = parseInt($(`#deadline_${i}`).val());
+            const wcet = parseInt($(`#wcet_${i}`).val());
 
-            // Get field values
-            const realTime = $(realtime_id).val();
-            const taskType = $(task_type_id).val();
-            const taskId = parseInt($(taskid_id).val());
-            const period = parseInt($(period_id).val()) || 0;
-            const activation = parseInt($(activation_id).val());
-            const deadline = parseInt($(deadline_id).val());
-            const wcet = parseInt($(wcet_id).val());
+            if (taskId <= 0 || wcet <= 0 || deadline <= 0) {
+                alert(`Invalid inputs for task ${i}.`);
+                return;
+            }
 
-            // Validate fields
-            if (taskId <= 0) {
-                alert('Task ID must be a positive integer for task ' + i);
-                return;
-            }
-            
-            if (wcet <= 0) {
-                alert('WCET must be a positive integer for task ' + i);
-                return;
-            }
-            if ((taskType === 'periodic' && period <= 0) || (taskType === 'sporadic' && activation < 0)) {
-                alert('Invalid period or activation value for task ' + i);
-                return;
-            }
-            if (deadline <= 0) {
-                alert('Deadline must be a positive integer for task ' + i);
-                return;
-            }
-            if (taskType === 'periodic' && period >= deadline) {
-                alert('Period must be greater than deadline for periodic task ' + i);
-                return;
-            }
-            if (taskType === 'periodic' && wcet > period) {
-                alert('WCET must be less than or equal to period for periodic task ' + i);
-                return;
-            }
-            if (deadline < wcet) {
-                alert('Deadline must be greater than WCET for task ' + i);
+            if ((taskType === 'periodic' && (period <= 0 || period >= deadline || wcet > period)) ||
+                (taskType === 'sporadic' && activation < 0) ||
+                (deadline < wcet)) {
+                alert(`Invalid scheduling parameters for task ${i}.`);
                 return;
             }
 

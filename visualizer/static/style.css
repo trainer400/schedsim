@@ -27,6 +27,7 @@ body {
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: auto; /* Ensure content is contained within the box */
 }
 
 /* Header */
@@ -114,6 +115,7 @@ input[type="file"] {
     justify-content: center;
     align-items: center;
     max-width: 100%;
+    overflow: hidden; /* Prevent content from overflowing */
 }
 
 .graph-execution img {
@@ -144,14 +146,17 @@ input[type="file"] {
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     margin: 30px auto;
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
 }
 
+/* Ensure the form content stays within the container */
 #newTaskForm .form-group,
 #createXML .form-group,
 #addTimeForm .form-group,
 #printGraphForm .form-group,
 .styled-form .form-group {
     display: flex;
+    flex-wrap: wrap; /* Allow wrapping to prevent overflow */
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
@@ -183,6 +188,7 @@ input[type="file"] {
     font-size: 16px;
     transition: border-color 0.3s;
     flex: 2;
+    box-sizing: border-box; /* Ensure padding is included in the width */
 }
 
 #newTaskForm button,
