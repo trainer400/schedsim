@@ -193,29 +193,6 @@ class Preemptive(Scheduler):
             self.deadline_events.append(deadline_event)
             event.task.first_time_executing = False
 
-
-def debug(self, time):
-    return
-    print('-------------------------')
-    print('time ' + str(time))
-    print('finish')
-    for ev in self.finish_events:
-        print(ev.task.id, ev.remaining_time, ev.executing_time, ev.timestamp, ev.task.wcet, ev.task.first_time_executing)#, ev.id)
-    print('deadline')
-    for ev in self.deadline_events:
-        print(ev.task.id, ev.remaining_time, ev.executing_time, ev.timestamp, ev.task.wcet, ev.task.first_time_executing)#, ev.id)
-    print('arrival')
-    for ev in self.arrival_events:
-        print(ev.task.id, ev.remaining_time, ev.executing_time, ev.timestamp, ev.task.wcet, ev.task.first_time_executing)#, ev.id)
-    print('start')
-    for ev in self.start_events:
-        print(ev.task.id, ev.remaining_time, ev.executing_time, ev.timestamp, ev.task.wcet, ev.task.first_time_executing)#, ev.id)
-    print('executing')
-    if(self.executing == None):
-        print('No')
-    else:
-        print(self.executing.task.id, self.executing.remaining_time, self.executing.executing_time, self.executing.timestamp, self.executing.task.wcet, self.executing.task.first_time_executing)#, self.executing.id)
-
 def search_pos(self, time):
     for i in range(len(self.time_list) - 1):
         if self.time_list[i] <= time and self.time_list[i + 1] > time:
@@ -278,11 +255,10 @@ class FIFO(NonPreemptive):
                 self.executing_list.append(copy.deepcopy(self.executing))
                 count = 0
             time += 1
-            debug(self, time)
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
-        self.size = int(math.sqrt(self.end))
+        self.size = int(math.sqrt(self.end - self.start))
         count = self.size - 1
         time = self.start
         self.compute(time, count)
@@ -361,11 +337,10 @@ class SJF(NonPreemptive):
                 self.executing_list.append(copy.deepcopy(self.executing))
                 count = 0
             time += 1
-            debug(self, time)
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
-        self.size = int(math.sqrt(self.end))
+        self.size = int(math.sqrt(self.end - self.start))
         count = self.size - 1
         time = self.start
         self.compute(time, count)
@@ -445,11 +420,10 @@ class HRRN(NonPreemptive):
                 self.executing_list.append(copy.deepcopy(self.executing))
                 count = 0
             time += 1
-            debug(self, time)
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
-        self.size = int(math.sqrt(self.end))
+        self.size = int(math.sqrt(self.end - self.start))
         count = self.size - 1
         time = self.start
         self.compute(time, count)
@@ -551,7 +525,6 @@ class SRTF(Preemptive):
 
     def compute(self, time, count):
         while time <= self.end:
-            debug(self, time)
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
@@ -570,11 +543,10 @@ class SRTF(Preemptive):
                 self.executing_list.append(copy.deepcopy(self.executing))
                 count = 0
             time += 1
-        debug(self, time)
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
-        self.size = int(math.sqrt(self.end))
+        self.size = int(math.sqrt(self.end - self.start))
         count = self.size - 1
         time = self.start
         self.compute(time, count)
@@ -678,7 +650,6 @@ class RoundRobin(Preemptive):
 
     def compute(self, time, count):
         while time <= self.end:
-            debug(self, time)
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
@@ -698,13 +669,12 @@ class RoundRobin(Preemptive):
                 self.quantum_counter_list.append(self.quantum_counter)
                 count = 0
             time += 1
-        debug(self, time)
 
     def execute(self):
         self.arrival_events = self.get_all_arrivals()
-        self.size = int(math.sqrt(self.end))
-        count = self.size - 1
+        self.size = int(math.sqrt(self.end - self.start))
         time = self.start
+        count = self.size - 1
         self.compute(time, count)
 
     def new_task(self, new_task):
