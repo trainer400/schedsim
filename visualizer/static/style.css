@@ -187,7 +187,7 @@ input[type="file"] {
     font-size: 16px;
     transition: border-color 0.3s;
     flex: 2;
-    box-sizing: border-box; /* Ensure padding is included in the width */
+    box-sizing: border-box;
 }
 
 #newTaskForm button,
