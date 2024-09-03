@@ -28,7 +28,7 @@ There you have different buttons:
 - `Select and Upload XML File`: Select an XML file from your pc to be executed.
 - `Create XML`: You can create an XML file by choosing the starting configuration and the tasks that you want with the command `Add New Task`. The file will be saved in the `visualizer/Input` folder.
 - `Download CSV`: save the result in a csv format.
-- 'Download XML' : save the created XML file.
+- `Download XML` : save the created XML file.
 
 
 ## License
