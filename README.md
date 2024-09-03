@@ -27,7 +27,8 @@ There you have different buttons:
 - `Print Graph`: print a diagram of the current execution with the different executing tasks in the various time instances. You can also insert the time interval where you want to see the task execution 
 - `Select and Upload XML File`: Select an XML file from your pc to be executed.
 - `Create XML`: You can create an XML file by choosing the starting configuration and the tasks that you want with the command `Add New Task`. The file will be saved in the `visualizer/Input` folder.
-- `Download CSV`: save the result in a csv format
+- `Download CSV`: save the result in a csv format.
+- 'Download XML' : save the created XML file.
 
 
 ## License
