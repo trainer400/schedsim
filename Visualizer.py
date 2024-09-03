@@ -13,11 +13,8 @@ def create_graph(output_image, start_time, end_time, fraction):
         if fraction is not None:
             fraction = int(fraction)
         
-        print(start_time, end_time)
-        # Get the temporary directory path
+        # Get the temporary directory path and path to temporany CSV file
         temp_dir = tempfile.gettempdir()
-
-        # Path to the input CSV file in the temporary directory
         input_csv = os.path.join(temp_dir, 'out.csv')
         
         # Check if the "out.csv" file exists and is not empty
@@ -28,7 +25,7 @@ def create_graph(output_image, start_time, end_time, fraction):
             # Remove any rows with NaN values, or occur error
             df.dropna(inplace=True)
 
-            # Convert columns to integers, handling exceptions
+            # Convert columns to integers, handling exceptions to avoid cast errors
             df['time'] = pd.to_numeric(df['time'], errors='coerce').fillna(0).astype(int)
             df['task_id'] = pd.to_numeric(df['task_id'], errors='coerce').fillna(0).astype(int)
             df['job'] = pd.to_numeric(df['job'], errors='coerce').fillna(0).astype(int)
@@ -40,13 +37,14 @@ def create_graph(output_image, start_time, end_time, fraction):
             task_positions = {}
             unique_task_ids = df['task_id'].unique()
             for idx, task_id in enumerate(sorted(unique_task_ids)):
-                task_positions[task_id] = idx + 1  # Add 1 to avoid starting positions from zero
+                # Add 1 to avoid starting positions from zero
+                task_positions[task_id] = idx + 1  
 
             
             fig, ax = plt.subplots(figsize=(20, 14))
             active_tasks = {}
 
-            # Draw horizontal bars
+            # Draw horizontal bars (divided by type)
             for index, row in df.iterrows():
                 time = row['time']
                 task_id = row['task_id']
@@ -94,23 +92,21 @@ def create_graph(output_image, start_time, end_time, fraction):
             ax.set_xlabel('Time')
             ax.set_ylabel('Task ID')
 
-            # Set a finer scale for the x-axis and the limits
+            # Set a finer scale for the x-axis and define the limits
             ax.set_xticks(range(start_time, end_time + 1, fraction))
             ax.set_xlim(start_time-1, end_time+1)
-
             plt.xticks(rotation=90)
             ax.set_yticks(range(1, len(unique_task_ids) + 1))
             ax.set_yticklabels([f'Task {task_id}' for task_id in sorted(unique_task_ids)])
             ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-            # Add the legend
+            # Define the legend
             legend_labels = [
                 'Red: Arrival',
                 'Blue: End',
                 'Green: Execution',
                 'Orange: Deadline'  
             ]
-            
             legend_colors = ['tab:red', 'tab:blue', 'tab:green', 'tab:orange']
             handles = [plt.Line2D([0], [0], color=color, lw=4) for color in legend_colors]
             ax.legend(handles, legend_labels, loc='lower center', bbox_to_anchor=(0.5, -0.1), ncol=4) 
@@ -132,6 +128,5 @@ def create_graph(output_image, start_time, end_time, fraction):
             plt.grid(True, linestyle='--', linewidth=0.5)  
             plt.savefig(output_image)
 
-    # Manage the exception
     except Exception as e:
         print(f"Error while creating the graph: {str(e)}")

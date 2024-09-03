@@ -8,7 +8,6 @@ import xml.dom.minidom
 
 matplotlib.use('Agg')  
 
-# Add parent directory to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import SchedIO
 import Task
@@ -25,9 +24,6 @@ class SchedulerController:
         self.end = 0
         self.start = 0
     
-    # Method to load an XML file and initialize the scheduler
-    # @input: file_path (str) - The path to the XML file
-    # @output: bool - True if the file is successfully loaded, False if the file is not found
     def load_xml_file(self, file_path):
         self.input_file = file_path
         try:
@@ -63,6 +59,7 @@ class SchedulerController:
             return False
 
     def add_new_time(self, n_time):
+        # Check if the Scheduler exist and then modify "scheduler.end"
         if self.scheduler:
             self.scheduler.add_time(n_time)
             self.end = self.end + n_time
@@ -76,18 +73,16 @@ class SchedulerController:
         try:
             
             temp_dir = tempfile.gettempdir()
-
-            
             csv_file_path = os.path.join(temp_dir, 'out.csv')
 
             if not os.path.exists(csv_file_path):
-                raise FileNotFoundError(f"{csv_file_path} non trovato.")
+                raise FileNotFoundError(f"{csv_file_path} not found.")
 
             create_graph('static/out.png', start, end, fraction)
 
             return True
         except Exception as e:
-            print(f"Errore durante la stampa del grafico: {str(e)}")
+            print(f"Error while printing the file: {str(e)}")
             return False
 
     def create_xml(self, file_path, start, end, tasks, scheduling_algorithm, cpu_pe_id, cpu_speed,quantum):
@@ -103,7 +98,7 @@ class SchedulerController:
             time.setAttribute("end", str(end))
             simulation.appendChild(time)
 
-            # Adding the node for software (tasks and scheduler)
+            # Adding the node for software( tasks and scheduler)
             software = doc.createElement("software")
             simulation.appendChild(software)
 
@@ -114,7 +109,6 @@ class SchedulerController:
             for task_data in tasks:
                 task = doc.createElement("task")
                 for key, value in task_data.items():
-                    # Ensure the value is not None before converting it to a string
                     if value is not None:
                         task.setAttribute(key, str(value))
                 tasks_node.appendChild(task)
@@ -130,19 +124,22 @@ class SchedulerController:
             hardware = doc.createElement("hardware")
             simulation.appendChild(hardware)
 
+            # Adding the node for cpu
             cpus = doc.createElement("cpus")
             hardware.appendChild(cpus)
 
+            # Adding the node for id and speed
             pe = doc.createElement("pe")
             pe.setAttribute("id", str(cpu_pe_id))
             pe.setAttribute("speed", str(cpu_speed))
             cpus.appendChild(pe)
 
-            # Scrittura del documento XML nel file nella cartella temporanea
+            # Write the XML file in the temporany path
             with open(file_path, "w", encoding="utf-8") as xml_file:
                 doc.writexml(xml_file, indent="\t", newl="\n", addindent="\t", encoding="utf-8")
 
             return file_path
+        
         except Exception as e:
             print(f"Error creating XML file: {str(e)}")
             return None

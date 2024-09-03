@@ -2,12 +2,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let uploadedFilePath = '';
     $('.graph-execution').addClass('hidden');
 
+    // Function to manage dinamically the PERIODIC/SPORADIC tasks
     function toggleFields() {
         var taskType = $('#taskType').val();
         var periodGroup = $('#periodGroup');
         var activationGroup = $('#activationGroup');
-    
-        console.log("Task Type:", taskType); // Debugging
     
         if (taskType === "periodic") {
             console.log("Showing Period");
@@ -23,21 +22,14 @@ document.addEventListener('DOMContentLoaded', function() {
             activationGroup.addClass("hidden");
         }
 
-        // Additional logs to verify the state of elements
-        console.log("Period Group hidden:", periodGroup.hasClass('hidden'));
-        console.log("Activation Group hidden:", activationGroup.hasClass('hidden'));
     }
-
-    // Attach the change event handler
     $('#taskType').change(toggleFields);
-
-    // Initial call to set correct visibility on page load
     toggleFields();
+
+    // Function to manage dinamically the QUANTUM for RR algorithm
     function toggleFieldsQuantum() {
         var schedulingAlgorithm = $('#schedulingAlgorithm').val();
         var quantumGroup = $('#quantumGroup');
-
-        console.log("Scheduling Algorithm:", schedulingAlgorithm); // Debugging
 
         if (schedulingAlgorithm === "RR") {
             console.log("Showing Quantum");
@@ -46,15 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Hiding Quantum");
             quantumGroup.addClass("hidden");
         }
-
-        // Additional logs to verify the state of elements
-        console.log("Quantum Group hidden:", quantumGroup.hasClass('hidden'));
     }
-
-    // Attach the change event handler
     $('#schedulingAlgorithm').change(toggleFieldsQuantum);
-
-    // Initial call to set correct visibility on page load
     toggleFieldsQuantum();
 
     $('#newTaskBtn').click(function() {
@@ -110,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
             $('.graph-execution').addClass('hidden');
             $('.graph-execution .large-image').addClass('hidden');
             $('#printGraphForm').addClass('hidden');
-            // Automatic submit
+            // Automatic submit of the form
             $('#xmlForm').submit();
         }
     });
@@ -285,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
             url: '/download_csv',
             type: 'GET',
             success: function(response) {
-                // CReate a temporany URL to download the CSV file
+                // Create a temporany URL to download the CSV file
                 const url = window.URL.createObjectURL(new Blob([response]));
                 const a = document.createElement('a');
                 a.href = url;
@@ -311,28 +296,21 @@ document.addEventListener('DOMContentLoaded', function() {
             url: '/download_xml',
             type: 'GET',
             success: function(response) {
-                // Creazione di un URL temporaneo per scaricare il file XML
+                // Create a temporany URL to download the XML file
                 const url = window.URL.createObjectURL(new Blob([response]));
-                
-                // Creazione di un elemento <a> per il download del file
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'data.xml'; // Nome del file XML che verrà scaricato
+                a.download = 'data.xml'; 
                 document.body.appendChild(a);
-                
-                // Simula il click sull'elemento <a> per avviare il download
                 a.click();
-                
-                // Rimuove l'elemento <a> dopo il download
+                // Release the memory after the operation
                 document.body.removeChild(a);
-                
-                // Rilascia la risorsa dell'URL temporaneo
                 window.URL.revokeObjectURL(url); 
             },
             error: function(xhr) {
                 const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
                                     ? xhr.responseJSON.error 
-                                    : 'Si è verificato un errore durante il download del file XML.';
+                                    : 'Error occurred while downloading XML file.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }

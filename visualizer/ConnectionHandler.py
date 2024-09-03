@@ -81,7 +81,6 @@ def create_task():
         if not all([real_time, task_type, task_id, activation, deadline, wcet]):
             return jsonify({'error': 'All fields are required.'}), 400
     
-
     # Convert values to appropriate types
     try:
         task_id = int(task_id)
@@ -152,8 +151,7 @@ def print_graph():
 
         if scheduler_controller.end is not None and end_time > scheduler_controller.end:
             return jsonify({
-                'error': f'The end time should not be greater than scheduler end {scheduler_controller.end}'
-            }), 400
+                'error': f'The end time should not be greater than scheduler end {scheduler_controller.end}'}), 400
         
         if not isinstance(fraction_time, int) or not (1 <= fraction_time <= 5):
             return jsonify({'error': 'Fraction time must be an integer between 1 and 5.'}), 400
@@ -163,21 +161,16 @@ def print_graph():
             return jsonify({'message': 'Graph printed successfully!'}), 200
         else:
             return jsonify({'error': 'Error printing graph.'}), 500
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/download_xml', methods=['GET'])
 def download_xml():
     try:
-        
         temp_dir = tempfile.gettempdir()
-        
-        
         filename = 'temp.xml'
-        
-        
         file_path = os.path.join(temp_dir, filename)
-        
         
         if os.path.exists(file_path):
             
@@ -187,6 +180,7 @@ def download_xml():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 @app.route('/download_csv', methods=['GET'])
 def download_csv():
     try:
@@ -201,6 +195,7 @@ def download_csv():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 @app.route('/submit_all_tasks', methods=['POST'])
 def submit_all_tasks():
     try:

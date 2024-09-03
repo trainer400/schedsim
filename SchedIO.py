@@ -7,7 +7,7 @@ def import_file(file_path, output_file):
     scheduler = None
     root_node = ET.parse(file_path).getroot()
 
-    # Parsing scheduler parametres based on TAG xml
+    # Parsing SCHEDULER parametres based on TAG xml
     for node in root_node.findall('./software/scheduler'):
         if scheduler is not None:
             raise Exception('More than one scheduler is defined in the file')
@@ -32,7 +32,7 @@ def import_file(file_path, output_file):
         raise Exception('No scheduler is defined in the file')
     
     
-    # Parsing the tasks based on the TAG xml
+    # Parsing the TASKS based on the TAG xml
     for node in root_node.findall('./software/tasks/task'):
         _real_time = node.attrib.get('real_time', 'false') == 'true'
         _type = node.attrib['type']
