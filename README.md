@@ -22,6 +22,8 @@ There you have different buttons:
 - `Download CSV`: save the result in a csv format.
 - `Download XML` : save the created XML file.
 
+## Documentation
+Detailed documentation on how to use the simulator and the available features can be found in the [docs](./docs/Schedsim_documentation.pdf) directory.
 
 ## License
 SchedSim is Open Source and released under the Apache license. See the [LICENSE](./LICENSE) file for further details.
