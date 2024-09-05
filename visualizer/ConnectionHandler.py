@@ -105,8 +105,6 @@ def create_task():
         return jsonify({'error': 'Invalid period or activation value.'}), 400
     if deadline <= 0:
         return jsonify({'error': 'Deadline must be a positive integer.'}), 400
-    if period >= deadline and task_type == 'periodic':
-        return jsonify({'error': 'Period must be greater than deadline.'}), 400
     if wcet > period and task_type == 'periodic':
         return jsonify({'error': 'WCET must be less than or equal to period.'}), 400
     if deadline < wcet:
@@ -253,8 +251,6 @@ def submit_all_tasks():
                 return jsonify({'error': 'Invalid period or activation value.'}), 400
             if deadline <= 0:
                 return jsonify({'error': 'Deadline must be a positive integer.'}), 400
-            if period >= deadline and task_type == 'periodic':
-                return jsonify({'error': 'Period must be greater than deadline.'}), 400
             if task_type == 'periodic' and wcet > period :
                 return jsonify({'error': 'WCET must be less than or equal to period.'}), 400
             if deadline < wcet:
