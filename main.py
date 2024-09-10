@@ -2,7 +2,6 @@ import sys
 import os
 import SchedIO
 import Task
-import subprocess
 import time
 import threading
 from Visualizer import create_graph
