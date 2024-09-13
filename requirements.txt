@@ -1,0 +1,24 @@
+# Specify the version of Python required
+python_version >= 3.12.5
+
+# Web framework for building web applications
+Flask==3.0.3
+
+# Library for creating static and interactive visualizations
+matplotlib==3.9.2
+
+# Powerful data analysis and manipulation library
+pandas==2.2.2
+
+# Standard libraries used
+# These modules are part of the Python standard library and do not need to be installed
+# os - for interacting with the operating system
+# sys - for accessing system-specific parameters and functions
+# tempfile - for generating temporary files and directories
+# xml.etree.ElementTree - for parsing and creating XML data
+# xml.dom.minidom - for XML parsing with DOM (Document Object Model)
+# math - for mathematical functions (part of Python's standard library)
+# copy - for shallow and deep copy operations (part of Python's standard library)
+# random - for generating random numbers (part of Python's standard library)
+# time - for time-related functions (part of Python's standard library)
+# threading - for thread-based parallelism (part of Python's standard library)
