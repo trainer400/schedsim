@@ -23,6 +23,8 @@ class Scheduler:
         self.starting_arrivals = []
         self.size = 0
         self.time_list = []
+
+        # Snapshots that are saved every sqrt(time)
         self.arrival_events_list = []
         self.finish_events_list = []
         self.deadline_events_list = []
@@ -39,6 +41,7 @@ class Scheduler:
 
         self.event_id = 0
 
+    # TODO: Why two?
     @abstractmethod
     @abstractmethod
     def execute(self):
@@ -49,67 +52,113 @@ class Scheduler:
         pass
 
     def get_all_arrivals(self):
+        '''
+            Arrivals are all the events that are ready to be scheduled\n
+            @return A sorted array of all the events
+        '''
         arrival_events = []
         for task in self.tasks:
             # Here you can add the code to choose between different cores:
             task.core = self.cores[0].id
             # ------------------------------- #
             if task.type == 'periodic':
-                i = self.start
-                j = 1
-                while i < self.end:
+                timestamp = self.start
+                job = 1
+
+                # Generate N copies of the event due to its periodicity
+                while timestamp < self.end:
                     event = SchedEvent.ScheduleEvent(
-                        i, task, SchedEvent.EventType.activation.value, self.event_id)
+                        timestamp, task, SchedEvent.EventType.activation.value, self.event_id)
                     self.event_id += 1
-                    event.job = j
+
+                    event.job = job
+                    job += 1
+
                     arrival_events.append(event)
-                    i += task.period
-                    j += 1
+                    timestamp += task.period
+
             elif task.type == 'sporadic':
+                # Add one event corresponding to the inserted task because of it needs to be executed once
                 task.init = task.activation
                 event = SchedEvent.ScheduleEvent(
                     task.activation, task, SchedEvent.EventType.activation.value, self.event_id)
                 self.event_id += 1
                 arrival_events.append(event)
+
+        # Sort sporadic and periodic events by execution timestamp
         arrival_events.sort(key=lambda x: x.timestamp)
         return arrival_events
 
     def add_arrivals(self, time_start, time_end):
+        '''
+            Adds a task into the arrival list only if it is periodic\n
+            @param time_start TODO
+            @param time_end TODO
+        '''
         for task in self.tasks:
+            # Here you can add the code to choose between different cores:
             task.core = self.cores[0].id
+            # ------------------------------- #
             if task.type == 'periodic':
-                i = self.start
-                j = 1
-                while i < time_end:
-                    if i >= time_start:
+                timestamp = self.start
+                job = 1
+
+                while timestamp < time_end:
+                    # Add the event if the considered timestamp comes after the specified start time
+                    if timestamp >= time_start:
                         event = SchedEvent.ScheduleEvent(
-                            i, task, SchedEvent.EventType.activation.value, self.event_id)
+                            timestamp, task, SchedEvent.EventType.activation.value, self.event_id)
+
                         self.event_id += 1
-                        event.job = j
+                        event.job = job
+
+                        # Add the event in all the already saved snapshots and sort them again
                         for arrival_events in self.arrival_events_list:
                             arrival_events.append(copy.deepcopy(event))
                             arrival_events.sort(key=lambda x: x.timestamp)
-                    i += task.period
-                    j += 1
+
+                    timestamp += task.period
+                    job += 1
 
     def find_arrival_event(self, time):
+        '''
+            Finds the events that are corresponding to the passed timestamp. Those events are inserted
+            in the start_events list and removed from the arrival_events list.\n
+            @param time current time
+        '''
         helper_list = []
+
         for event in self.arrival_events:
+            # In case of current event, add it in the start_events array and remove it from arrival_events array
             if event.timestamp == time:
+                # Log the event
                 self.output_file.add_scheduler_event(event)
+
+                # Add it to the started events
                 start_event = SchedEvent.ScheduleEvent(
                     event.timestamp, event.task, SchedEvent.EventType.start.value, event.id)
                 start_event.job = event.job
                 self.start_events.append(start_event)
+
+            # In case of future events, insert them again into the arrival_events without touching them
             elif event.timestamp > time:
                 helper_list.append(event)
+
         self.arrival_events = helper_list
 
     def find_deadline_events(self, time):
+        '''
+            Deadline events are those events that missed their deadline\n
+            @param time current time
+        '''
         helper_list = []
+
         for event in self.deadline_events:
             if event.timestamp == time:
+                # Log the event
                 self.output_file.add_scheduler_event(event)
+
+            # In case of future events, insert them again into the deadline_events without touching them.
             elif event.timestamp > time:
                 helper_list.append(event)
         self.deadline_events = helper_list
@@ -244,12 +293,14 @@ class FIFO(NonPreemptive):
         self.name = 'FIFO'
 
     def compute(self, time, count):
+        # For every time step compute the algorithm
         while time <= self.end:
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
             self.find_start_events(time)
 
+            # When the snapshot counter is sqrt(end - start) save the state
             count += 1
             if count == self.size:
                 self.time_list.append(time)
@@ -265,9 +316,16 @@ class FIFO(NonPreemptive):
             time += 1
 
     def execute(self):
+        # Get all the events that need to be scheduled
         self.arrival_events = self.get_all_arrivals()
+
+        # Set the number of steps
         self.size = int(math.sqrt(self.end - self.start))
+
+        # The first snapshot must be saved at time 0
         count = self.size - 1
+
+        # Compute the schedule
         time = self.start
         self.compute(time, count)
 
