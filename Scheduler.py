@@ -243,27 +243,40 @@ class Preemptive(Scheduler):
         pass
 
     def find_finish_events(self, time):
+        '''
+            Finish events are events that are completing their execution.\n
+            The method logs when the events terminate\n
+            @param time current time
+        '''
         if self.executing:
+            # If the total execution time is respected, terminate the event
             if self.executing.executing_time == self.executing.task.wcet:
-                # Create finish event:
+                # Create finish event
                 finish_event = SchedEvent.ScheduleEvent(
                     time, self.executing.task, SchedEvent.EventType.finish.value, self.executing.id)
                 finish_event.job = self.executing.job
                 self.output_file.add_scheduler_event(finish_event)
-                # Delete from start_events:
+
+                # Delete from start_events
                 for event in self.start_events:
                     if event.id == self.executing.id:
                         self.start_events.remove(event)
-                # self.start_events.remove(self.executing)
-                # Free execute:
+
+                # Free execute
                 self.executing = None
 
     def create_deadline_event(self, event):
+        '''
+            In case of real time events, it creates a deadline event to specify wether a task exceeds its deadline\n
+            @param event the event to which the deadline must correspond
+        '''
         if event.task.real_time:
             deadline_timestamp = event.timestamp + event.task.deadline
             deadline_event = SchedEvent.ScheduleEvent(
                 deadline_timestamp, event.task, SchedEvent.EventType.deadline.value, event.id)
             deadline_event.job = event.job
+
+            # Append the event
             self.deadline_events.append(deadline_event)
             event.task.first_time_executing = False
 
