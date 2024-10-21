@@ -39,8 +39,6 @@ class Scheduler:
 
         self.event_id = 0
 
-
-
     @abstractmethod
     @abstractmethod
     def execute(self):
@@ -60,7 +58,8 @@ class Scheduler:
                 i = self.start
                 j = 1
                 while i < self.end:
-                    event = SchedEvent.ScheduleEvent(i, task, SchedEvent.EventType.activation.value, self.event_id)
+                    event = SchedEvent.ScheduleEvent(
+                        i, task, SchedEvent.EventType.activation.value, self.event_id)
                     self.event_id += 1
                     event.job = j
                     arrival_events.append(event)
@@ -68,7 +67,8 @@ class Scheduler:
                     j += 1
             elif task.type == 'sporadic':
                 task.init = task.activation
-                event = SchedEvent.ScheduleEvent(task.activation, task, SchedEvent.EventType.activation.value, self.event_id)
+                event = SchedEvent.ScheduleEvent(
+                    task.activation, task, SchedEvent.EventType.activation.value, self.event_id)
                 self.event_id += 1
                 arrival_events.append(event)
         arrival_events.sort(key=lambda x: x.timestamp)
@@ -82,7 +82,8 @@ class Scheduler:
                 j = 1
                 while i < time_end:
                     if i >= time_start:
-                        event = SchedEvent.ScheduleEvent(i, task, SchedEvent.EventType.activation.value, self.event_id)
+                        event = SchedEvent.ScheduleEvent(
+                            i, task, SchedEvent.EventType.activation.value, self.event_id)
                         self.event_id += 1
                         event.job = j
                         for arrival_events in self.arrival_events_list:
@@ -153,7 +154,8 @@ class NonPreemptive(Scheduler):
                     deadline_event.job = event.job
                     self.deadline_events.append(deadline_event)
             elif event.timestamp == time and self.executing:
-                event.timestamp += (self.executing.timestamp + self.executing.task.wcet - event.timestamp)
+                event.timestamp += (self.executing.timestamp +
+                                    self.executing.task.wcet - event.timestamp)
             if event.timestamp > time:
                 helper_list.append(event)
         self.start_events = helper_list
@@ -180,7 +182,7 @@ class Preemptive(Scheduler):
                 for event in self.start_events:
                     if event.id == self.executing.id:
                         self.start_events.remove(event)
-                #self.start_events.remove(self.executing)
+                # self.start_events.remove(self.executing)
                 # Free execute:
                 self.executing = None
 
@@ -193,14 +195,16 @@ class Preemptive(Scheduler):
             self.deadline_events.append(deadline_event)
             event.task.first_time_executing = False
 
+
 def search_pos(self, time):
     for i in range(len(self.time_list) - 1):
         if self.time_list[i] <= time and self.time_list[i + 1] > time:
             return i
     return len(self.time_list) - 1
 
+
 def delete(self, time):
-    if(self.time_list[-1] >= time):
+    if (self.time_list[-1] >= time):
         self.time_list.pop()
         self.arrival_events_list.pop()
         self.finish_events_list.pop()
@@ -210,6 +214,7 @@ def delete(self, time):
         if self.name == 'RoundRobin':
             self.quantum_counter_list.pop()
         delete(self, time)
+
 
 def reset(self):
     self.executing = None
@@ -248,9 +253,12 @@ class FIFO(NonPreemptive):
             count += 1
             if count == self.size:
                 self.time_list.append(time)
-                self.finish_events_list.append(copy.deepcopy(self.finish_events))
-                self.deadline_events_list.append(copy.deepcopy(self.deadline_events))
-                self.arrival_events_list.append(copy.deepcopy(self.arrival_events))
+                self.finish_events_list.append(
+                    copy.deepcopy(self.finish_events))
+                self.deadline_events_list.append(
+                    copy.deepcopy(self.deadline_events))
+                self.arrival_events_list.append(
+                    copy.deepcopy(self.arrival_events))
                 self.start_events_list.append(copy.deepcopy(self.start_events))
                 self.executing_list.append(copy.deepcopy(self.executing))
                 count = 0
@@ -271,13 +279,15 @@ class FIFO(NonPreemptive):
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
-            self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
+            self.deadline_events = copy.deepcopy(
+                self.deadline_events_list[pos])
             self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
             self.tasks.append(new_task)
             new_task.init = new_task.activation
-            event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
+            event = SchedEvent.ScheduleEvent(
+                new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
@@ -330,9 +340,12 @@ class SJF(NonPreemptive):
             count += 1
             if count == self.size:
                 self.time_list.append(time)
-                self.finish_events_list.append(copy.deepcopy(self.finish_events))
-                self.deadline_events_list.append(copy.deepcopy(self.deadline_events))
-                self.arrival_events_list.append(copy.deepcopy(self.arrival_events))
+                self.finish_events_list.append(
+                    copy.deepcopy(self.finish_events))
+                self.deadline_events_list.append(
+                    copy.deepcopy(self.deadline_events))
+                self.arrival_events_list.append(
+                    copy.deepcopy(self.arrival_events))
                 self.start_events_list.append(copy.deepcopy(self.start_events))
                 self.executing_list.append(copy.deepcopy(self.executing))
                 count = 0
@@ -353,13 +366,15 @@ class SJF(NonPreemptive):
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
-            self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
+            self.deadline_events = copy.deepcopy(
+                self.deadline_events_list[pos])
             self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
             self.tasks.append(new_task)
             new_task.init = new_task.activation
-            event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
+            event = SchedEvent.ScheduleEvent(
+                new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
@@ -407,15 +422,19 @@ class HRRN(NonPreemptive):
             self.find_arrival_event(time)
             self.calculate_responsive_ratio(time)
             # Sort by response ratio:
-            self.start_events.sort(key=lambda x: x.response_ratio, reverse=True)
+            self.start_events.sort(
+                key=lambda x: x.response_ratio, reverse=True)
             self.find_start_events(time)
 
             count += 1
             if count == self.size:
                 self.time_list.append(time)
-                self.finish_events_list.append(copy.deepcopy(self.finish_events))
-                self.deadline_events_list.append(copy.deepcopy(self.deadline_events))
-                self.arrival_events_list.append(copy.deepcopy(self.arrival_events))
+                self.finish_events_list.append(
+                    copy.deepcopy(self.finish_events))
+                self.deadline_events_list.append(
+                    copy.deepcopy(self.deadline_events))
+                self.arrival_events_list.append(
+                    copy.deepcopy(self.arrival_events))
                 self.start_events_list.append(copy.deepcopy(self.start_events))
                 self.executing_list.append(copy.deepcopy(self.executing))
                 count = 0
@@ -436,13 +455,15 @@ class HRRN(NonPreemptive):
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
-            self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
+            self.deadline_events = copy.deepcopy(
+                self.deadline_events_list[pos])
             self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
             self.tasks.append(new_task)
             new_task.init = new_task.activation
-            event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
+            event = SchedEvent.ScheduleEvent(
+                new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
@@ -536,9 +557,12 @@ class SRTF(Preemptive):
             count += 1
             if count == self.size:
                 self.time_list.append(time)
-                self.finish_events_list.append(copy.deepcopy(self.finish_events))
-                self.deadline_events_list.append(copy.deepcopy(self.deadline_events))
-                self.arrival_events_list.append(copy.deepcopy(self.arrival_events))
+                self.finish_events_list.append(
+                    copy.deepcopy(self.finish_events))
+                self.deadline_events_list.append(
+                    copy.deepcopy(self.deadline_events))
+                self.arrival_events_list.append(
+                    copy.deepcopy(self.arrival_events))
                 self.start_events_list.append(copy.deepcopy(self.start_events))
                 self.executing_list.append(copy.deepcopy(self.executing))
                 count = 0
@@ -559,7 +583,8 @@ class SRTF(Preemptive):
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
-            self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
+            self.deadline_events = copy.deepcopy(
+                self.deadline_events_list[pos])
             self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
@@ -567,7 +592,8 @@ class SRTF(Preemptive):
                 self.executing = self.start_events[0]
             self.tasks.append(new_task)
             new_task.init = new_task.activation
-            event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
+            event = SchedEvent.ScheduleEvent(
+                new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
@@ -661,9 +687,12 @@ class RoundRobin(Preemptive):
             count += 1
             if count == self.size:
                 self.time_list.append(time)
-                self.finish_events_list.append(copy.deepcopy(self.finish_events))
-                self.deadline_events_list.append(copy.deepcopy(self.deadline_events))
-                self.arrival_events_list.append(copy.deepcopy(self.arrival_events))
+                self.finish_events_list.append(
+                    copy.deepcopy(self.finish_events))
+                self.deadline_events_list.append(
+                    copy.deepcopy(self.deadline_events))
+                self.arrival_events_list.append(
+                    copy.deepcopy(self.arrival_events))
                 self.start_events_list.append(copy.deepcopy(self.start_events))
                 self.executing_list.append(copy.deepcopy(self.executing))
                 self.quantum_counter_list.append(self.quantum_counter)
@@ -685,7 +714,8 @@ class RoundRobin(Preemptive):
             time = new_task.activation
             pos = search_pos(self, time - 1)
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
-            self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
+            self.deadline_events = copy.deepcopy(
+                self.deadline_events_list[pos])
             self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
@@ -694,7 +724,8 @@ class RoundRobin(Preemptive):
                 self.executing = self.start_events[0]
             self.tasks.append(new_task)
             new_task.init = new_task.activation
-            event = SchedEvent.ScheduleEvent(new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
+            event = SchedEvent.ScheduleEvent(
+                new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
