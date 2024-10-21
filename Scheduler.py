@@ -134,7 +134,7 @@ class Scheduler:
                 # Log the event
                 self.output_file.add_scheduler_event(event)
 
-                # Add it to the started events
+                # Add it to the start events
                 start_event = SchedEvent.ScheduleEvent(
                     event.timestamp, event.task, SchedEvent.EventType.start.value, event.id)
                 start_event.job = event.job
@@ -158,7 +158,7 @@ class Scheduler:
                 # Log the event
                 self.output_file.add_scheduler_event(event)
 
-            # In case of future events, insert them again into the deadline_events without touching them.
+            # Append again the event in the list if it has not been processed yet
             elif event.timestamp > time:
                 helper_list.append(event)
         self.deadline_events = helper_list
@@ -174,39 +174,62 @@ class NonPreemptive(Scheduler):
         pass
 
     def find_finish_events(self, time):
+        '''
+            Finish events are events that are completing their execution.\n
+            The method logs when the events terminate\n
+            @param time current time
+        '''
         helper_list = []
         for event in self.finish_events:
             if event.timestamp == time:
+                # Log the event
                 self.output_file.add_scheduler_event(event)
                 self.executing = None
+
+            # Append again the event in the list if it not finished yet
             elif event.timestamp > time:
                 helper_list.append(event)
+
         self.finish_events = helper_list
 
     def find_start_events(self, time):
+        '''
+            Starts one task in start_events list and creates the finish/deadline events.
+            @param time current time
+        '''
         helper_list = []
+
         for event in self.start_events:
+            # If not already executing something and the event has to be executed now then execute it
             if event.timestamp == time and self.executing is None:
+                # Log the event
                 self.output_file.add_scheduler_event(event)
                 self.executing = event
-                # Create finish event:
+
+                # Create finish event
                 finish_timestamp = event.timestamp + event.task.wcet
                 finish_event = SchedEvent.ScheduleEvent(
                     finish_timestamp, event.task, SchedEvent.EventType.finish.value, event.id)
                 finish_event.job = event.job
                 self.finish_events.append(finish_event)
-                # Create deadline event:
+
+                # Create deadline event for real time tasks
                 if event.task.real_time:
                     deadline_timestamp = event.timestamp + event.task.deadline
                     deadline_event = SchedEvent.ScheduleEvent(
                         deadline_timestamp, event.task, SchedEvent.EventType.deadline.value, event.id)
                     deadline_event.job = event.job
                     self.deadline_events.append(deadline_event)
+
+            # If the event is scheduled for the execution now but something is already in execution, shift the execution timestamp
             elif event.timestamp == time and self.executing:
                 event.timestamp += (self.executing.timestamp +
                                     self.executing.task.wcet - event.timestamp)
+
+            # At the end, if the event is out of time, it gets appended again into the start event list
             if event.timestamp > time:
                 helper_list.append(event)
+
         self.start_events = helper_list
 
 
