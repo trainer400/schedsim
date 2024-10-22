@@ -282,6 +282,9 @@ class Preemptive(Scheduler):
 
 
 def search_pos(self, time):
+    '''
+        Looks inside the snapshots list what is the last saved snapshot given the current time
+    '''
     for i in range(len(self.time_list) - 1):
         if self.time_list[i] <= time and self.time_list[i + 1] > time:
             return i
@@ -329,6 +332,11 @@ class FIFO(NonPreemptive):
         self.name = 'FIFO'
 
     def compute(self, time, count):
+        '''
+            The function computes the scheduling actions starting from time and count
+            @param time starting time
+            @param count snapshot counter
+        '''
         # For every time step compute the algorithm
         while time <= self.end:
             self.find_finish_events(time)
@@ -352,6 +360,9 @@ class FIFO(NonPreemptive):
             time += 1
 
     def execute(self):
+        '''
+            The function executes the entire algorithm, preparing the number of snapshot size and the arrival events
+        '''
         # Get all the events that need to be scheduled
         self.arrival_events = self.get_all_arrivals()
 
@@ -366,26 +377,40 @@ class FIFO(NonPreemptive):
         self.compute(time, count)
 
     def new_task(self, new_task):
+        '''
+            The function adds a new task to the scheduling, identifying the last available snapshot and 
+            restoring the correct events lists.
+        '''
         time = self.start
         count = 0
+        
+        # Here you can add the code to choose between different cores:
         new_task.core = self.cores[0].id
+        # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
             pos = search_pos(self, time - 1)
+
+            # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
             self.deadline_events = copy.deepcopy(
                 self.deadline_events_list[pos])
             self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
+
+            # Add the new task and create the activation event
             self.tasks.append(new_task)
             new_task.init = new_task.activation
             event = SchedEvent.ScheduleEvent(
                 new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
+            
+            # Add the event inside the arrivals and sort them
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
                 self.arrival_events_list[p].sort(key=lambda x: x.timestamp)
+
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
@@ -395,11 +420,18 @@ class FIFO(NonPreemptive):
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
+
         self.output_file.clean(time)
         self.compute(time, count)
 
     def add_time(self, add_time):
+        '''
+            Adds time to the simulation restoring the last available snapshot
+            @param add_time the simulation time to be added at the end
+        '''
         self.add_arrivals(self.end, self.end + add_time)
+
+        # Restore the last available snapshot
         pos = search_pos(self, self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
@@ -407,6 +439,8 @@ class FIFO(NonPreemptive):
         self.start_events = copy.deepcopy(self.start_events_list[pos])
         self.executing = copy.deepcopy(self.executing_list[pos])
         self.end += add_time
+
+        # Recompute with the new added time
         time = self.time_list[pos] + 1
         delete(self, time)
         self.output_file.clean(time)
