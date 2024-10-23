@@ -383,7 +383,7 @@ class FIFO(NonPreemptive):
         '''
         time = self.start
         count = 0
-        
+
         # Here you can add the code to choose between different cores:
         new_task.core = self.cores[0].id
         # ------------------------------- #
@@ -405,7 +405,7 @@ class FIFO(NonPreemptive):
             event = SchedEvent.ScheduleEvent(
                 new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
-            
+
             # Add the event inside the arrivals and sort them
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
@@ -457,14 +457,20 @@ class SJF(NonPreemptive):
         self.name = 'SJF'
 
     def compute(self, time, count):
+        '''
+            The function computes the scheduling actions starting from time and count
+            @param time starting time
+            @param count snapshot counter
+        '''
         while time <= self.end:
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
-            # Sort by wcet:
+            # Sort by wcet (Shortest Job First)
             self.start_events.sort(key=lambda x: x.task.wcet)
             self.find_start_events(time)
 
+            # Save the new snapshot if count = sqrt(size)
             count += 1
             if count == self.size:
                 self.time_list.append(time)
@@ -480,33 +486,57 @@ class SJF(NonPreemptive):
             time += 1
 
     def execute(self):
+        '''
+            The function executes the entire algorithm, preparing the number of snapshot size and the arrival events
+        '''
+        # Get all the events that need to be scheduled
         self.arrival_events = self.get_all_arrivals()
+
+        # Set the number of steps to take a snapshot
         self.size = int(math.sqrt(self.end - self.start))
+
+        # The first snapshot must be saved at time 0
         count = self.size - 1
+
+        # Compute the schedule
         time = self.start
         self.compute(time, count)
 
     def new_task(self, new_task):
+        '''
+            The function adds a new task to the scheduling, identifying the last available snapshot and 
+            restoring the correct events lists.
+        '''
         time = self.start
         count = 0
+
+        # Here you can add the code to choose between different cores:
         new_task.core = self.cores[0].id
+        # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
             pos = search_pos(self, time - 1)
+
+            # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
             self.deadline_events = copy.deepcopy(
                 self.deadline_events_list[pos])
             self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
+
+            # Add the new task and create the activation event
             self.tasks.append(new_task)
             new_task.init = new_task.activation
             event = SchedEvent.ScheduleEvent(
                 new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
+
+            # Add the event inside the arrivals and sort them
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
                 self.arrival_events_list[p].sort(key=lambda x: x.timestamp)
+
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
@@ -516,17 +546,26 @@ class SJF(NonPreemptive):
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
+
         self.output_file.clean(time)
         self.compute(time, count)
 
     def add_time(self, add_time):
+        '''
+            Adds time to the simulation restoring the last available snapshot
+            @param add_time the simulation time to be added at the end
+        '''
         self.add_arrivals(self.end, self.end + add_time)
+
+        # Restore the last available snapshot
         pos = search_pos(self, self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
         self.start_events = copy.deepcopy(self.start_events_list[pos])
         self.executing = copy.deepcopy(self.executing_list[pos])
+
+        # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
         delete(self, time)
