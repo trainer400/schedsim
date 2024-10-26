@@ -1076,3 +1076,54 @@ class RoundRobin(Preemptive):
 
     def terminate(self):
         self.output_file.terminate_write()
+
+class RateMonotonic(Preemptive):
+    def __init__(self, output_file):
+        super().__init__(output_file)
+        self.name = 'RateMonotonic'
+    
+    def choose_executed(self, time):
+        if len(self.start_events) > 0:
+            # No task is executed
+            if self.executing is None:
+                # Add the first task to the executing one
+                event = self.start_events[0]
+                event.timestamp = time
+                self.output_file.add_scheduler_event(event)
+                self.executing = event
+
+                # Create deadline event
+                self.create_deadline_event(event)
+
+            # Change of task if another one has a higher priority (aka a smaller period)
+            elif self.executing.period > self.start_events[0].period and self.executing.id != self.start_events[0].id:
+                # Create finish event of the current task in execution
+                finish_timestamp = time
+                finish_event = SchedEvent.ScheduleEvent(finish_timestamp, self.executing.task, SchedEvent.EventType.finish.value, self.executing.id)
+                finish_event.job = self.executing.job
+                self.output_file.add_scheduler_event(finish_event)
+
+                # Change task
+                event = self.start_events[0]
+                event.timestamp = time
+                self.output_file.add_scheduler_event(event)
+                self.executing = event
+                # Create deadline event
+                if event.task.first_time_executing:
+                    self.create_deadline_event(event)
+
+
+    def compute(self, time, count):
+        pass
+
+    def execute(self):
+        pass
+
+    def new_task(self, new_task):
+        pass
+
+    def add_time(self, add_time):
+        pass
+
+    def terminate(self):
+        self.output_file.terminate_write()
