@@ -902,51 +902,69 @@ class RoundRobin(Preemptive):
         self.quantum_counter = 0
 
     def choose_executed(self, time):
+        '''
+            The method chooses what task to execute at the passed time. \n
+            It evaluates the quantum counter every task and executes the next one when the quantum counter is\n
+            equal to the quantum dimension set when the object is created.
+            @param time current time
+        '''
         if len(self.start_events) > 0:
-            # Non task is executed:
+            # No task is executed
             if self.executing is None:
+                # Add the first task to the executing one
                 event = self.start_events[0]
                 event.timestamp = time
                 self.output_file.add_scheduler_event(event)
                 self.executing = event
-                # Create deadline event:
+            
+                # Create deadline event
                 self.create_deadline_event(event)
                 # Restart quantum counter
                 self.quantum_counter = 0
-            # Change of task:
+
+            # Change of task
             elif self.quantum_counter == self.quantum:
-                # Create finish event of the current task in execution:
+                # Create finish event of the current task in execution
                 finish_timestamp = time
                 finish_event = SchedEvent.ScheduleEvent(
                     finish_timestamp, self.executing.task, SchedEvent.EventType.finish.value, self.executing.id)
                 finish_event.job = self.executing.job
                 self.output_file.add_scheduler_event(finish_event)
+
                 # Change task:
-                # 1) Delete from start_events:
+                # 1) Delete from start_events
                 del self.start_events[0]
-                # 2) Add this event to the final:
+                # 2) Add this event to the final
                 self.start_events.append(copy.deepcopy(self.executing))
-                # 3) New event:
+                # 3) New event
                 event = self.start_events[0]
                 event.timestamp = time
                 self.output_file.add_scheduler_event(event)
                 self.executing = event
-                # Create deadline event:
+
+                # Create deadline event
                 if event.task.first_time_executing:
                     self.create_deadline_event(event)
                 # Restart counter
                 self.quantum_counter = 0
 
     def compute(self, time, count):
+        '''
+            The function computes the scheduling actions starting from time and count
+            @param time starting time
+            @param count snapshot counter
+        '''
         while time <= self.end:
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
+            # Select the next task to execute based on the quantum counter
             self.choose_executed(time)
             self.quantum_counter += 1
             if self.executing:
                 self.executing.executing_time += 1
 
+            # Save the new snapshot if count = sqrt(size)
             count += 1
             if count == self.size:
                 self.time_list.append(time)
@@ -963,19 +981,38 @@ class RoundRobin(Preemptive):
             time += 1
 
     def execute(self):
+        '''
+            The function executes the entire algorithm, preparing the number of snapshot size and the arrival events
+        '''
+        # Get all the events that need to be scheduled
         self.arrival_events = self.get_all_arrivals()
+
+        # Set the number of steps to take a snapshot
         self.size = int(math.sqrt(self.end - self.start))
-        time = self.start
+
+        # The first snapshot must be saved at time 0
         count = self.size - 1
+
+        # Compute the schedule
+        time = self.start
         self.compute(time, count)
 
     def new_task(self, new_task):
+        '''
+            The function adds a new task to the scheduling, identifying the last available snapshot and 
+            restoring the correct events lists.
+        '''
         time = self.start
         count = 0
+
+        # Here you can add the code to choose between different cores:
         new_task.core = self.cores[0].id
+        # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
             pos = search_pos(self, time - 1)
+
+             # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
             self.deadline_events = copy.deepcopy(
                 self.deadline_events_list[pos])
@@ -983,16 +1020,22 @@ class RoundRobin(Preemptive):
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
             self.quantum_counter = self.quantum_counter_list[pos]
+
             if self.executing:
                 self.executing = self.start_events[0]
+            
+            # Add the new task and create the activation event
             self.tasks.append(new_task)
             new_task.init = new_task.activation
             event = SchedEvent.ScheduleEvent(
                 new_task.activation, new_task, SchedEvent.EventType.activation.value, self.event_id)
             self.event_id += 1
+
+            # Add the event inside the arrivals and sort them
             for p in range(pos + 1):
                 self.arrival_events_list[p].append(copy.deepcopy(event))
                 self.arrival_events_list[p].sort(key=lambda x: x.timestamp)
+
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
@@ -1002,11 +1045,18 @@ class RoundRobin(Preemptive):
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
+
         self.output_file.clean(time)
         self.compute(time, count)
 
     def add_time(self, add_time):
+        '''
+            Adds time to the simulation restoring the last available snapshot
+            @param add_time the simulation time to be added at the end
+        '''
         self.add_arrivals(self.end, self.end + add_time)
+
+        # Restore the last available snapshot
         pos = search_pos(self, self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
@@ -1016,6 +1066,8 @@ class RoundRobin(Preemptive):
         self.quantum_counter = self.quantum_counter_list[pos]
         if self.executing:
             self.executing = self.start_events[0]
+        
+        # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
         delete(self, time)
