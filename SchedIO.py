@@ -3,6 +3,7 @@ import Task
 import Scheduler
 import Cpu
 
+
 def import_file(file_path, output_file):
     scheduler = None
     root_node = ET.parse(file_path).getroot()
@@ -30,8 +31,7 @@ def import_file(file_path, output_file):
 
     if scheduler is None:
         raise Exception('No scheduler is defined in the file')
-    
-    
+
     # Parsing the TASKS based on the TAG xml
     for node in root_node.findall('./software/tasks/task'):
         _real_time = node.attrib.get('real_time', 'false') == 'true'
@@ -42,16 +42,15 @@ def import_file(file_path, output_file):
         _deadline = int(node.attrib.get('deadline', -1))
         _wcet = int(node.attrib['wcet'])
 
-        
         if _id < 0 or _wcet <= 0 or (_type == 'periodic' and _period <= 0) or (_type == 'sporadic' and _activation < 0):
             raise Exception('Non-positive values are saved in the file')
 
         if (_wcet > _period != -1) or (_deadline != -1 and _deadline < _wcet):
             raise Exception('Inconsistent values are saved in the file')
 
-        task = Task.Task(_real_time, _type, _id, _period, _activation, _deadline, _wcet)
+        task = Task.Task(_real_time, _type, _id, _period,
+                         _activation, _deadline, _wcet)
         scheduler.tasks.append(task)
-
 
     if not scheduler.tasks:
         raise Exception('No tasks recognized in the file')
@@ -61,7 +60,7 @@ def import_file(file_path, output_file):
     if time_node is not None:
         scheduler.start = int(time_node.attrib['start'])
         scheduler.end = int(time_node.attrib['end'])
-        if scheduler.end < scheduler.start :
+        if scheduler.end < scheduler.start:
             raise Exception('Error in time definition')
 
     # Parsing hardware
@@ -82,14 +81,15 @@ def import_file(file_path, output_file):
 class SchedulerEventWriter:
     def __init__(self, output_file):
         self.out = open(output_file, 'w')
-        self.out.write('timestamp, task, job, processor, type_of_event, extra_data' + '\n')
+        self.out.write(
+            'timestamp, task, job, processor, type_of_event, extra_data' + '\n')
 
     def add_scheduler_event(self, scheduler_event):
         self.out.write(
             str(scheduler_event.timestamp) + ',' + str(scheduler_event.task.id) + ',' +
             str(scheduler_event.job) + ',' + str(scheduler_event.processor) + ',' +
             str(scheduler_event.type) + ',' + str(scheduler_event.extra) + '\n')
-    
+
     # Function to clean the data in the output file between [time,end]
     def clean(self, time):
         self.out.close()
