@@ -1129,6 +1129,9 @@ class RateMonotonic(Preemptive):
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
+            # Sort the tasks based on their period
+            self.start_events.sort(key=lambda x: x.period)
+
             # Select the next task to execute based on the priority
             self.choose_executed(time)
             if self.executing:

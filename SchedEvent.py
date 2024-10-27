@@ -29,3 +29,5 @@ class ScheduleEvent:
         # SRTF facilities:
         self.remaining_time = self.task.wcet
         self.executing_time = 0
+        # RM facilities:
+        self.period = self.task.period
