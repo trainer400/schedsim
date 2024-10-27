@@ -1150,7 +1150,21 @@ class RateMonotonic(Preemptive):
             time += 1
 
     def execute(self):
-        pass
+        '''
+            The function executes the entire algorithm, preparing the number of snapshot size and the arrival events
+        '''
+        # Get all the events that need to be scheduled
+        self.arrival_events = self.get_all_arrivals()
+
+        # Set the number of steps to take a snapshot
+        self.size = int(math.sqrt(self.end - self.start))
+
+        # The first snapshot must be saved at time 0
+        count = self.size - 1
+
+        # Compute the schedule
+        time = self.start
+        self.compute(time, count)
 
     def new_task(self, new_task):
         pass
