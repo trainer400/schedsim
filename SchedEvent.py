@@ -30,4 +30,4 @@ class ScheduleEvent:
         self.remaining_time = self.task.wcet
         self.executing_time = 0
         # RM facilities:
-        self.period = self.task.period
+        self.period = self.task.period if hasattr(self.task, "period") else 0
