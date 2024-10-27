@@ -745,7 +745,7 @@ class SRTF(Preemptive):
                 self.executing = event
                 # Create deadline event
                 self.create_deadline_event(event)
-            
+
             # Change of task in case another one has a greater priority
             elif self.executing.remaining_time > self.start_events[0].remaining_time and \
                     self.executing.id != self.start_events[0].id:
@@ -777,7 +777,7 @@ class SRTF(Preemptive):
             self.find_arrival_event(time)
             # Compute the updated remaining time for every task
             self.calculate_remaining_time()
-            # Select the task to execute based on the remaining time (lower the best) 
+            # Select the task to execute based on the remaining time (lower the best)
             self.choose_executed(time)
             if self.executing:
                 self.executing.executing_time += 1
@@ -829,7 +829,7 @@ class SRTF(Preemptive):
             time = new_task.activation
             pos = search_pos(self, time - 1)
 
-             # Restore the last snapshot that can be used to insert the new task
+            # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
             self.deadline_events = copy.deepcopy(
                 self.deadline_events_list[pos])
@@ -839,7 +839,7 @@ class SRTF(Preemptive):
 
             if self.executing:
                 self.executing = self.start_events[0]
-            
+
             # Add the new task and create the activation event
             self.tasks.append(new_task)
             new_task.init = new_task.activation
@@ -881,7 +881,7 @@ class SRTF(Preemptive):
         self.executing = copy.deepcopy(self.executing_list[pos])
         if self.executing:
             self.executing = self.start_events[0]
-        
+
         # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
@@ -916,7 +916,7 @@ class RoundRobin(Preemptive):
                 event.timestamp = time
                 self.output_file.add_scheduler_event(event)
                 self.executing = event
-            
+
                 # Create deadline event
                 self.create_deadline_event(event)
                 # Restart quantum counter
@@ -1012,7 +1012,7 @@ class RoundRobin(Preemptive):
             time = new_task.activation
             pos = search_pos(self, time - 1)
 
-             # Restore the last snapshot that can be used to insert the new task
+            # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
             self.deadline_events = copy.deepcopy(
                 self.deadline_events_list[pos])
@@ -1023,7 +1023,7 @@ class RoundRobin(Preemptive):
 
             if self.executing:
                 self.executing = self.start_events[0]
-            
+
             # Add the new task and create the activation event
             self.tasks.append(new_task)
             new_task.init = new_task.activation
@@ -1066,7 +1066,7 @@ class RoundRobin(Preemptive):
         self.quantum_counter = self.quantum_counter_list[pos]
         if self.executing:
             self.executing = self.start_events[0]
-        
+
         # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
@@ -1077,12 +1077,18 @@ class RoundRobin(Preemptive):
     def terminate(self):
         self.output_file.terminate_write()
 
+
 class RateMonotonic(Preemptive):
     def __init__(self, output_file):
         super().__init__(output_file)
         self.name = 'RateMonotonic'
-    
+
     def choose_executed(self, time):
+        '''
+            The method chooses what task to execute at the passed time. \n
+            It evaluates the period of every task and executes the task based on its priority (shorter period = high priority)
+            @param time current time
+        '''
         if len(self.start_events) > 0:
             # No task is executed
             if self.executing is None:
@@ -1099,7 +1105,8 @@ class RateMonotonic(Preemptive):
             elif self.executing.period > self.start_events[0].period and self.executing.id != self.start_events[0].id:
                 # Create finish event of the current task in execution
                 finish_timestamp = time
-                finish_event = SchedEvent.ScheduleEvent(finish_timestamp, self.executing.task, SchedEvent.EventType.finish.value, self.executing.id)
+                finish_event = SchedEvent.ScheduleEvent(
+                    finish_timestamp, self.executing.task, SchedEvent.EventType.finish.value, self.executing.id)
                 finish_event.job = self.executing.job
                 self.output_file.add_scheduler_event(finish_event)
 
@@ -1112,9 +1119,35 @@ class RateMonotonic(Preemptive):
                 if event.task.first_time_executing:
                     self.create_deadline_event(event)
 
-
     def compute(self, time, count):
-        pass
+        '''
+            The function computes the scheduling actions starting from time and count
+            @param time starting time
+            @param count snapshot counter
+        '''
+        while time <= self.end:
+            self.find_finish_events(time)
+            self.find_deadline_events(time)
+            self.find_arrival_event(time)
+            # Select the next task to execute based on the priority
+            self.choose_executed(time)
+            if self.executing:
+                self.executing.executing_time += 1
+
+            # Save the new snapshot if count = sqrt(size)
+            count += 1
+            if count == self.size:
+                self.time_list.append(time)
+                self.finish_events_list.append(
+                    copy.deepcopy(self.finish_events))
+                self.deadline_events_list.append(
+                    copy.deepcopy(self.deadline_events))
+                self.arrival_events_list.append(
+                    copy.deepcopy(self.arrival_events))
+                self.start_events_list.append(copy.deepcopy(self.start_events))
+                self.executing_list.append(copy.deepcopy(self.executing))
+                count = 0
+            time += 1
 
     def execute(self):
         pass
