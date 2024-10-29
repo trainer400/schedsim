@@ -8,6 +8,7 @@
             <task real-time="true" type="periodic" id="1" period="20" deadline="50"  wcet="3" />
             <task real-time="true" type="periodic" id="2" period="5" deadline="30" wcet="2" />
             <task real-time="true" type="periodic" id="3" period="10" deadline="50"  wcet="2" />
+            <task real-time="false" type="sporadic" id="4" activation="1" wcet="2" />
         </tasks>
         <scheduler algorithm="RM"/>	<!-- add any relevant numbers, such as quantum time for RR -->
     </software>
