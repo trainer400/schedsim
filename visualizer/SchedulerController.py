@@ -6,24 +6,26 @@ import matplotlib
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
-matplotlib.use('Agg')  
-
+matplotlib.use('Agg')
+# autopep8: off
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import SchedIO
 import Task
 from Visualizer import create_graph
+# autopep8: on
 
 app = Flask(__name__)
+
 
 class SchedulerController:
     def __init__(self):
         self.scheduler = None
         self.temp_dir = tempfile.gettempdir()
-        self.output_file = os.path.join(self.temp_dir, 'out.csv')  
+        self.output_file = os.path.join(self.temp_dir, 'out.csv')
         self.input_file = None
         self.end = 0
         self.start = 0
-    
+
     def load_xml_file(self, file_path):
         self.input_file = file_path
         try:
@@ -48,9 +50,11 @@ class SchedulerController:
     def create_task(self, task_data):
         if self.scheduler:
             if task_data[1] == 'sporadic':
-                n_task = Task.Task(task_data[0], task_data[1], task_data[2], None, task_data[3], task_data[4], task_data[5])
+                n_task = Task.Task(
+                    task_data[0], task_data[1], task_data[2], None, task_data[3], task_data[4], task_data[5])
             elif task_data[1] == 'periodic':
-                n_task = Task.Task(task_data[0], task_data[1], task_data[2], task_data[3], None, task_data[4], task_data[5])
+                n_task = Task.Task(
+                    task_data[0], task_data[1], task_data[2], task_data[3], None, task_data[4], task_data[5])
             self.scheduler.new_task(n_task)
             self.scheduler.terminate()
             return True
@@ -68,10 +72,10 @@ class SchedulerController:
         else:
             print("Scheduler not loaded.")
             return False
-        
+
     def print_graph(self, start, end, fraction):
         try:
-            
+
             temp_dir = tempfile.gettempdir()
             csv_file_path = os.path.join(temp_dir, 'out.csv')
 
@@ -85,7 +89,7 @@ class SchedulerController:
             print(f"Error while printing the file: {str(e)}")
             return False
 
-    def create_xml(self, file_path, start, end, tasks, scheduling_algorithm, cpu_pe_id, cpu_speed,quantum):
+    def create_xml(self, file_path, start, end, tasks, scheduling_algorithm, cpu_pe_id, cpu_speed, quantum):
         try:
             # Creating the XML document
             doc = xml.dom.minidom.Document()
@@ -136,10 +140,11 @@ class SchedulerController:
 
             # Write the XML file in the temporany path
             with open(file_path, "w", encoding="utf-8") as xml_file:
-                doc.writexml(xml_file, indent="\t", newl="\n", addindent="\t", encoding="utf-8")
+                doc.writexml(xml_file, indent="\t", newl="\n",
+                             addindent="\t", encoding="utf-8")
 
             return file_path
-        
+
         except Exception as e:
             print(f"Error creating XML file: {str(e)}")
             return None
