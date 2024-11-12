@@ -31,3 +31,6 @@ class ScheduleEvent:
         self.executing_time = 0
         # RM facilities:
         self.period = self.task.period if hasattr(self.task, "period") else 0
+        # DM facilities:
+        self.deadline = self.task.deadline if hasattr(
+            self.task, "deadline") else 0

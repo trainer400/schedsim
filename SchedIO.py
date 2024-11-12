@@ -28,6 +28,8 @@ def import_file(file_path, output_file):
             scheduler = Scheduler.SRTF(output_file)
         elif algorithm == 'RM':
             scheduler = Scheduler.RateMonotonic(output_file)
+        elif algorithm == 'DM':
+            scheduler = Scheduler.DeadlineMonotonic(output_file)
         else:
             raise Exception(f'Invalid scheduler algorithm: {algorithm}')
 
