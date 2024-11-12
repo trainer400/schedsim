@@ -5,8 +5,9 @@
         <tasks>
         	<!-- A task can be periodic or sporadic. The deadline parameter is relevant only for
         	     real-time tasks -->
-            <task real-time="true" type="periodic" id="1" period="7" deadline="6"  wcet="2" />
+            <task real-time="true" type="periodic" id="1" period="20" deadline="7"  wcet="3" />
             <task real-time="true" type="periodic" id="2" period="5" deadline="4" wcet="2" />
+            <task real-time="true" type="periodic" id="3" period="10" deadline="9" wcet="2" />
         </tasks>
         <scheduler algorithm="DM"/>	<!-- add any relevant numbers, such as quantum time for RR -->
     </software>
