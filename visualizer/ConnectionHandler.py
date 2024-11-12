@@ -182,7 +182,7 @@ def download_xml():
 
         if os.path.exists(file_path):
 
-            return send_file(file_path, as_attachment=True, mimetype='application/xml')
+            return send_file(path_or_file=file_path, as_attachment=True, mimetype='text/plain')
         else:
             return jsonify({'error': 'File not found.'}), 404
 
@@ -198,7 +198,7 @@ def download_csv():
         file_path = os.path.join(temp_dir, filename)
         if os.path.exists(file_path):
 
-            return send_file(file_path, as_attachment=True, mimetype='text/csv')
+            return send_file(path_or_file=file_path, as_attachment=True, mimetype='text/csv')
         else:
             return jsonify({'error': 'File not found.'}), 404
 
