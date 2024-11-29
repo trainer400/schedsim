@@ -13,7 +13,7 @@ class Scheduler:
         self.tasks = []
         self.start = None
         self.end = None
-        self.server_scheduler: ServerScheduler = None
+        self.server_scheduler: ServerScheduler.ServerScheduler = None
 
         self.executing = None
 
@@ -1126,6 +1126,8 @@ class RateMonotonic(Preemptive):
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
+            self.event_id = self.server_scheduler.compute_and_add(
+                time, self.event_id, self.start_events, self.arrival_events)
             # Sort the tasks based on their period
             self.start_events.sort(key=lambda x: x.period)
 
