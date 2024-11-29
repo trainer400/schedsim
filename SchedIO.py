@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import ServerScheduler
 import Task
 import Scheduler
 import Cpu
@@ -28,6 +29,25 @@ def import_file(file_path, output_file):
             scheduler = Scheduler.SRTF(output_file)
         elif algorithm == 'RM':
             scheduler = Scheduler.RateMonotonic(output_file)
+
+            # Select the server algorithm for asynchronous tasks
+            server_algorithm = node.attrib.get("sever")
+            server_capacity = node.attrib.get("capacity")
+            server_period = node.attrib.get("period")
+
+            # Check server validity
+            if server_algorithm is None or server_capacity is None or server_period is None:
+                raise Exception(
+                    'No "server/capacity/period" attributes for asynchronous tasks')
+
+            # Create the server instance
+            if server_algorithm == "polling":
+                server = ServerScheduler.PollingServer(
+                    int(server_capacity), int(server_period))
+            else:
+                raise Exception(
+                    f"Invalid server algorithm: {server_algorithm}")
+
         elif algorithm == 'DM':
             scheduler = Scheduler.DeadlineMonotonic(output_file)
         else:
