@@ -169,6 +169,9 @@ class Scheduler:
                 helper_list.append(event)
         self.deadline_events = helper_list
 
+    def terminate(self):
+        self.output_file.terminate_write()
+
 
 class NonPreemptive(Scheduler):
 
@@ -452,9 +455,6 @@ class FIFO(NonPreemptive):
         self.output_file.clean(time)
         self.compute(time, self.start)
 
-    def terminate(self):
-        self.output_file.terminate_write()
-
 
 class SJF(NonPreemptive):
 
@@ -577,9 +577,6 @@ class SJF(NonPreemptive):
         delete(self, time)
         self.output_file.clean(time)
         self.compute(time, self.start)
-
-    def terminate(self):
-        self.output_file.terminate_write()
 
 
 class HRRN(NonPreemptive):
@@ -717,9 +714,6 @@ class HRRN(NonPreemptive):
         delete(self, time)
         self.output_file.clean(time)
         self.compute(time, self.start)
-
-    def terminate(self):
-        self.output_file.terminate_write()
 
 
 class SRTF(Preemptive):
@@ -894,9 +888,6 @@ class SRTF(Preemptive):
         delete(self, time)
         self.output_file.clean(time)
         self.compute(time, self.start)
-
-    def terminate(self):
-        self.output_file.terminate_write()
 
 
 class RoundRobin(Preemptive):
@@ -1080,9 +1071,6 @@ class RoundRobin(Preemptive):
         self.output_file.clean(time)
         self.compute(time, self.start)
 
-    def terminate(self):
-        self.output_file.terminate_write()
-
 
 class RateMonotonic(Preemptive):
     def __init__(self, output_file):
@@ -1253,9 +1241,6 @@ class RateMonotonic(Preemptive):
         self.output_file.clean(time)
         self.compute(time, self.start)
 
-    def terminate(self):
-        self.output_file.terminate_write()
-
 
 class DeadlineMonotonic(Preemptive):
     def __init__(self, output_file):
@@ -1422,6 +1407,3 @@ class DeadlineMonotonic(Preemptive):
         delete(self, time)
         self.output_file.clean(time)
         self.compute(time, self.start)
-
-    def terminate(self):
-        self.output_file.terminate_write()

@@ -5,7 +5,7 @@ import Scheduler
 import Cpu
 
 
-def import_file(file_path, output_file):
+def import_file(file_path, output_file) -> Scheduler.Scheduler:
     scheduler = None
     root_node = ET.parse(file_path).getroot()
 
