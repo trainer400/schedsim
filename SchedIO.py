@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-import ServerScheduler
+from ServerScheduler import *
 import Task
 import Scheduler
 import Cpu
@@ -31,7 +31,7 @@ def import_file(file_path, output_file):
             scheduler = Scheduler.RateMonotonic(output_file)
 
             # Select the server algorithm for asynchronous tasks
-            server_algorithm = node.attrib.get("sever")
+            server_algorithm = node.attrib.get("server")
             server_capacity = node.attrib.get("capacity")
             server_period = node.attrib.get("period")
 
@@ -41,12 +41,16 @@ def import_file(file_path, output_file):
                     'No "server/capacity/period" attributes for asynchronous tasks')
 
             # Create the server instance
+            server = None
             if server_algorithm == "polling":
-                server = ServerScheduler.PollingServer(
+                server = PollingServer(
                     int(server_capacity), int(server_period))
             else:
                 raise Exception(
                     f"Invalid server algorithm: {server_algorithm}")
+
+            # Set the server algorithm instance
+            scheduler.set_server_scheduler(server)
 
         elif algorithm == 'DM':
             scheduler = Scheduler.DeadlineMonotonic(output_file)
@@ -72,9 +76,15 @@ def import_file(file_path, output_file):
         if (_wcet > _period != -1) or (_deadline != -1 and _deadline < _wcet):
             raise Exception('Inconsistent values are saved in the file')
 
+        # Create the task with the parsed options
         task = Task.Task(_real_time, _type, _id, _period,
                          _activation, _deadline, _wcet)
-        scheduler.tasks.append(task)
+
+        # In case periodic server for async tasks is set, then add the task to the server instead of the scheduler
+        if scheduler.has_server_scheduler() and task.type == "sporadic":
+            scheduler.get_server_scheduler().add_task(task)
+        else:
+            scheduler.tasks.append(task)
 
     if not scheduler.tasks:
         raise Exception('No tasks recognized in the file')

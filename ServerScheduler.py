@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
 from SchedEvent import ScheduleEvent
+import Task
 
 
 class ServerScheduler:
@@ -11,7 +12,7 @@ class ServerScheduler:
         self.tasks = []
 
     @abstractmethod
-    def compute_and_add(time: int, start_events: list[ScheduleEvent], arrival_events: list[ScheduleEvent]):
+    def compute_and_add(self, time: int, start_events: list[ScheduleEvent], arrival_events: list[ScheduleEvent]):
         '''
             The method allows the server scheduler to modify the start/arrival events depending on the scheduling policy.
             If just a "periodic" start event has to be added, then this method does so. 
@@ -19,6 +20,10 @@ class ServerScheduler:
             THIS IS MODIFIER METHOD, start_events and arrival_events MUST BE CONSIDERED MUTED
         '''
         pass
+
+    def add_task(self, task: Task.Task):
+        if task not in self.tasks:
+            self.tasks.append(task)
 
 
 class PollingServer(ServerScheduler):
@@ -28,5 +33,5 @@ class PollingServer(ServerScheduler):
         self.capacity = capacity
         self.period = period
 
-    def compute_and_add(time: int, start_events: list[ScheduleEvent], arrival_events: list[ScheduleEvent]):
+    def compute_and_add(self, time: int, start_events: list[ScheduleEvent], arrival_events: list[ScheduleEvent]):
         pass

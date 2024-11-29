@@ -3,6 +3,7 @@ import copy
 from abc import *
 import SchedEvent
 import SchedIO
+import ServerScheduler
 
 
 class Scheduler:
@@ -12,6 +13,7 @@ class Scheduler:
         self.tasks = []
         self.start = None
         self.end = None
+        self.server_scheduler: ServerScheduler = None
 
         self.executing = None
 
@@ -41,8 +43,6 @@ class Scheduler:
 
         self.event_id = 0
 
-    # TODO: Why two?
-    @abstractmethod
     @abstractmethod
     def execute(self):
         pass
@@ -50,6 +50,12 @@ class Scheduler:
     @abstractmethod
     def find_finish_events(self, time):
         pass
+
+    def has_server_scheduler(self):
+        return False if self.server_scheduler is None else True
+
+    def get_server_scheduler(self) -> ServerScheduler.ServerScheduler:
+        return self.server_scheduler
 
     def get_all_arrivals(self):
         '''
@@ -1082,6 +1088,9 @@ class RateMonotonic(Preemptive):
     def __init__(self, output_file):
         super().__init__(output_file)
         self.name = 'RateMonotonic'
+
+    def set_server_scheduler(self, server: ServerScheduler):
+        self.server_scheduler = server
 
     def choose_executed(self, time):
         '''
