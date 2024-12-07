@@ -253,8 +253,8 @@ class Preemptive(Scheduler):
 
     def find_finish_events(self, time):
         '''
-            Finish events are events that are completing their execution.\n
-            The method logs when the events terminate\n
+            Finish events are events that have completed their execution.\n
+            The method finds them, removes them from the start_events list and logs when the events terminate\n
             @param time current time
         '''
         if self.executing:
