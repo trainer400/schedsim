@@ -169,6 +169,49 @@ class Scheduler:
                 helper_list.append(event)
         self.deadline_events = helper_list
 
+    def search_pos(self, time):
+        '''
+            Looks inside the snapshots list what is the last saved snapshot given the current time
+        '''
+        for i in range(len(self.time_list) - 1):
+            if self.time_list[i] <= time and self.time_list[i + 1] > time:
+                return i
+        return len(self.time_list) - 1
+
+
+    def delete(self, time):
+        if (self.time_list[-1] >= time):
+            self.time_list.pop()
+            self.arrival_events_list.pop()
+            self.finish_events_list.pop()
+            self.deadline_events_list.pop()
+            self.start_events_list.pop()
+            self.executing_list.pop()
+            if self.name == 'RoundRobin':
+                self.quantum_counter_list.pop()
+            self.delete(time)
+
+
+    def reset(self):
+        self.executing = None
+        self.finish_events = []
+        self.deadline_events = []
+        self.arrival_events = []
+        self.start_events = []
+        self.time_list = []
+        self.finish_events_list = []
+        self.deadline_events_list = []
+        self.arrival_events_list = []
+        self.start_events_list = []
+        self.executing_list = []
+        if self.name == 'ShortestRemainingTimeFirst' or self.name == 'RoundRobin':
+            for task in self.tasks:
+                task.first_time_executing = True
+                task.finish = False
+        if self.name == 'RoundRobin':
+            self.quantum_counter = 0
+            self.quantum_counter_list = []
+
     def terminate(self):
         self.output_file.terminate_write()
 
@@ -289,51 +332,6 @@ class Preemptive(Scheduler):
             self.deadline_events.append(deadline_event)
             event.task.first_time_executing = False
 
-
-def search_pos(self, time):
-    '''
-        Looks inside the snapshots list what is the last saved snapshot given the current time
-    '''
-    for i in range(len(self.time_list) - 1):
-        if self.time_list[i] <= time and self.time_list[i + 1] > time:
-            return i
-    return len(self.time_list) - 1
-
-
-def delete(self, time):
-    if (self.time_list[-1] >= time):
-        self.time_list.pop()
-        self.arrival_events_list.pop()
-        self.finish_events_list.pop()
-        self.deadline_events_list.pop()
-        self.start_events_list.pop()
-        self.executing_list.pop()
-        if self.name == 'RoundRobin':
-            self.quantum_counter_list.pop()
-        delete(self, time)
-
-
-def reset(self):
-    self.executing = None
-    self.finish_events = []
-    self.deadline_events = []
-    self.arrival_events = []
-    self.start_events = []
-    self.time_list = []
-    self.finish_events_list = []
-    self.deadline_events_list = []
-    self.arrival_events_list = []
-    self.start_events_list = []
-    self.executing_list = []
-    if self.name == 'ShortestRemainingTimeFirst' or self.name == 'RoundRobin':
-        for task in self.tasks:
-            task.first_time_executing = True
-            task.finish = False
-    if self.name == 'RoundRobin':
-        self.quantum_counter = 0
-        self.quantum_counter_list = []
-
-
 class FIFO(NonPreemptive):
 
     def __init__(self, output_file):
@@ -398,7 +396,7 @@ class FIFO(NonPreemptive):
         # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
-            pos = search_pos(self, time - 1)
+            pos = self.search_pos(time - 1)
 
             # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -423,9 +421,9 @@ class FIFO(NonPreemptive):
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
-            delete(self, time)
+            self.delete(time)
         else:
-            reset(self)
+            self.reset()
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
@@ -441,7 +439,7 @@ class FIFO(NonPreemptive):
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = search_pos(self, self.end - 1)
+        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -451,7 +449,7 @@ class FIFO(NonPreemptive):
 
         # Recompute with the new added time
         time = self.time_list[pos] + 1
-        delete(self, time)
+        self.delete(time)
         self.output_file.clean(time)
         self.compute(time, self.start)
 
@@ -521,7 +519,7 @@ class SJF(NonPreemptive):
         # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
-            pos = search_pos(self, time - 1)
+            pos = self.search_pos(time - 1)
 
             # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -546,9 +544,9 @@ class SJF(NonPreemptive):
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
-            delete(self, time)
+            self.delete(time)
         else:
-            reset(self)
+            self.reset()
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
@@ -564,7 +562,7 @@ class SJF(NonPreemptive):
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = search_pos(self, self.end - 1)
+        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -574,7 +572,7 @@ class SJF(NonPreemptive):
         # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
-        delete(self, time)
+        self.delete(time)
         self.output_file.clean(time)
         self.compute(time, self.start)
 
@@ -647,7 +645,7 @@ class HRRN(NonPreemptive):
         # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
-            pos = search_pos(self, time - 1)
+            pos = self.search_pos(time - 1)
 
             # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -672,9 +670,9 @@ class HRRN(NonPreemptive):
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
-            delete(self, time)
+            self.delete(time)
         else:
-            reset(self)
+            self.reset()
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
@@ -701,7 +699,7 @@ class HRRN(NonPreemptive):
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = search_pos(self, self.end - 1)
+        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -711,7 +709,7 @@ class HRRN(NonPreemptive):
         # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
-        delete(self, time)
+        self.delete(time)
         self.output_file.clean(time)
         self.compute(time, self.start)
 
@@ -827,7 +825,7 @@ class SRTF(Preemptive):
         # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
-            pos = search_pos(self, time - 1)
+            pos = self.search_pos(time - 1)
 
             # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -855,9 +853,9 @@ class SRTF(Preemptive):
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
-            delete(self, time)
+            self.delete(time)
         else:
-            reset(self)
+            self.reset()
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
@@ -873,7 +871,7 @@ class SRTF(Preemptive):
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = search_pos(self, self.end - 1)
+        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -885,7 +883,7 @@ class SRTF(Preemptive):
         # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
-        delete(self, time)
+        self.delete(time)
         self.output_file.clean(time)
         self.compute(time, self.start)
 
@@ -1007,7 +1005,7 @@ class RoundRobin(Preemptive):
         # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
-            pos = search_pos(self, time - 1)
+            pos = self.search_pos(time - 1)
 
             # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -1036,9 +1034,9 @@ class RoundRobin(Preemptive):
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
-            delete(self, time)
+            self.delete(time)
         else:
-            reset(self)
+            self.reset()
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
@@ -1054,7 +1052,7 @@ class RoundRobin(Preemptive):
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = search_pos(self, self.end - 1)
+        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -1067,7 +1065,7 @@ class RoundRobin(Preemptive):
         # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
-        delete(self, time)
+        self.delete(time)
         self.output_file.clean(time)
         self.compute(time, self.start)
 
@@ -1181,7 +1179,7 @@ class RateMonotonic(Preemptive):
         # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
-            pos = search_pos(self, time - 1)
+            pos = self.search_pos(time - 1)
 
             # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -1209,9 +1207,9 @@ class RateMonotonic(Preemptive):
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
-            delete(self, time)
+            self.delete(time)
         else:
-            reset(self)
+            self.reset()
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
@@ -1227,7 +1225,7 @@ class RateMonotonic(Preemptive):
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = search_pos(self, self.end - 1)
+        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -1239,7 +1237,7 @@ class RateMonotonic(Preemptive):
         # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
-        delete(self, time)
+        self.delete(time)
         self.output_file.clean(time)
         self.compute(time, self.start)
 
@@ -1348,7 +1346,7 @@ class DeadlineMonotonic(Preemptive):
         # ------------------------------- #
         if new_task.type == 'sporadic' and new_task.activation > self.start:
             time = new_task.activation
-            pos = search_pos(self, time - 1)
+            pos = self.search_pos(time - 1)
 
             # Restore the last snapshot that can be used to insert the new task
             self.finish_events = copy.deepcopy(self.finish_events_list[pos])
@@ -1376,9 +1374,9 @@ class DeadlineMonotonic(Preemptive):
             self.arrival_events.append(copy.deepcopy(event))
             self.arrival_events.sort(key=lambda x: x.timestamp)
             time = self.time_list[pos] + 1
-            delete(self, time)
+            self.delete(time)
         else:
-            reset(self)
+            self.reset()
             self.tasks.append(new_task)
             self.arrival_events = self.get_all_arrivals()
             count = self.size - 1
@@ -1394,7 +1392,7 @@ class DeadlineMonotonic(Preemptive):
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = search_pos(self, self.end - 1)
+        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -1406,6 +1404,6 @@ class DeadlineMonotonic(Preemptive):
         # Recompute with the new added time
         self.end += add_time
         time = self.time_list[pos] + 1
-        delete(self, time)
+        self.delete(time)
         self.output_file.clean(time)
         self.compute(time, self.start)
