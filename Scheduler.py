@@ -187,8 +187,6 @@ class Scheduler:
             self.deadline_events_list.pop()
             self.start_events_list.pop()
             self.executing_list.pop()
-            if self.name == 'RoundRobin':
-                self.quantum_counter_list.pop()
             self.delete(time)
 
 
@@ -204,13 +202,6 @@ class Scheduler:
         self.arrival_events_list = []
         self.start_events_list = []
         self.executing_list = []
-        if self.name == 'ShortestRemainingTimeFirst' or self.name == 'RoundRobin':
-            for task in self.tasks:
-                task.first_time_executing = True
-                task.finish = False
-        if self.name == 'RoundRobin':
-            self.quantum_counter = 0
-            self.quantum_counter_list = []
 
     def terminate(self):
         self.output_file.terminate_write()
@@ -720,6 +711,14 @@ class SRTF(Preemptive):
         super().__init__(output_file)
         self.name = 'ShortestRemainingTimeFirst'
 
+    def reset(self):
+        super().reset()
+        for task in self.tasks:
+            task.first_time_executing = True
+            task.finish = False
+        self.quantum_counter = 0
+        self.quantum_counter_list = []
+
     def calculate_remaining_time(self):
         for event in self.start_events:
             event.remaining_time = event.task.wcet - event.executing_time
@@ -895,6 +894,25 @@ class RoundRobin(Preemptive):
         self.name = 'RoundRobin'
         self.quantum = int(quantum)
         self.quantum_counter = 0
+
+    def delete(self, time):
+        if (self.time_list[-1] >= time):
+            self.time_list.pop()
+            self.arrival_events_list.pop()
+            self.finish_events_list.pop()
+            self.deadline_events_list.pop()
+            self.start_events_list.pop()
+            self.executing_list.pop()
+            self.quantum_counter_list.pop()
+            self.delete(time)
+
+    def reset(self):
+        super().reset()
+        for task in self.tasks:
+            task.first_time_executing = True
+            task.finish = False
+        self.quantum_counter = 0
+        self.quantum_counter_list = []
 
     def choose_executed(self, time):
         '''
