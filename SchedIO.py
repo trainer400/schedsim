@@ -80,11 +80,8 @@ def import_file(file_path, output_file) -> Scheduler.Scheduler:
         task = Task.Task(_real_time, _type, _id, _period,
                          _activation, _deadline, _wcet)
 
-        # In case periodic server for async tasks is set, then add the task to the server instead of the scheduler
-        if scheduler.has_server_scheduler() and task.type == "sporadic":
-            scheduler.get_server_scheduler().add_task(task)
-        else:
-            scheduler.tasks.append(task)
+        # Add the task to the scheduler list
+        scheduler.tasks.append(task)
 
     if not scheduler.tasks:
         raise Exception('No tasks recognized in the file')

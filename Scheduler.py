@@ -140,11 +140,15 @@ class Scheduler:
                 # Log the event
                 self.output_file.add_scheduler_event(event)
 
-                # Add it to the start events
-                start_event = SchedEvent.ScheduleEvent(
-                    event.timestamp, event.task, SchedEvent.EventType.start.value, event.id)
-                start_event.job = event.job
-                self.start_events.append(start_event)
+                # In case of server scheduler, add the event to the internal queue (the ready tasks to be executed)
+                if event.task.type == "sporadic" and self.has_server_scheduler():
+                    self.server_scheduler.add_arrival_event(event)
+                else:
+                    # Add it to the start events
+                    start_event = SchedEvent.ScheduleEvent(
+                        event.timestamp, event.task, SchedEvent.EventType.start.value, event.id)
+                    start_event.job = event.job
+                    self.start_events.append(start_event)
 
             # In case of future events, insert them again into the arrival_events without touching them
             elif event.timestamp > time:
@@ -1142,8 +1146,8 @@ class RateMonotonic(Preemptive):
             self.find_finish_events(time)
             self.find_deadline_events(time)
             self.find_arrival_event(time)
-            self.event_id = self.server_scheduler.compute_and_add(
-                time, self.event_id, self.start_events, self.arrival_events)
+            self.server_scheduler.compute_and_add(
+                time, self.start_events, self.arrival_events)
             # Sort the tasks based on their period
             self.start_events.sort(key=lambda x: x.period)
 
