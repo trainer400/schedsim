@@ -98,3 +98,22 @@ class DeferrableServer(ServerScheduler):
 
             # Remove the processed value from the
             self.events.remove(self.events[0])
+
+class PriorityExchangeServer(ServerScheduler):
+    def __init__(self, capacity, period) -> None:
+        super().__init__()
+        self.name = "PriorityExchange"
+        self.capacity = capacity
+        self.period = period
+        self.runtime_capacity = []
+
+    def compute_and_add(self, time, start_events, arrival_events):
+        # Add the capacity at multiples of the period
+        if time == 1 or time % self.period == 0:
+            # Append the new server capacity at its original priority (server period)
+            for i in range(self.capacity):
+                self.runtime_capacity.append(self.period)
+
+        # Priority Exchange
+        if len(self.events) == 0:
+            pass
