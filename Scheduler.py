@@ -182,7 +182,6 @@ class Scheduler:
                 return i
         return len(self.time_list) - 1
 
-
     def delete(self, time):
         if (self.time_list[-1] >= time):
             self.time_list.pop()
@@ -192,7 +191,6 @@ class Scheduler:
             self.start_events_list.pop()
             self.executing_list.pop()
             self.delete(time)
-
 
     def reset(self):
         self.executing = None
@@ -326,6 +324,7 @@ class Preemptive(Scheduler):
             # Append the event
             self.deadline_events.append(deadline_event)
             event.task.first_time_executing = False
+
 
 class FIFO(NonPreemptive):
 
@@ -1119,7 +1118,7 @@ class RateMonotonic(Preemptive):
                 self.create_deadline_event(event)
 
             # Change of task if another one has a higher priority (aka a smaller period)
-            elif self.executing.period > self.start_events[0].period and self.executing.id != self.start_events[0].id:
+            elif self.executing.period >= self.start_events[0].period and self.executing.id != self.start_events[0].id:
                 # Create finish event of the current task in execution
                 finish_timestamp = time
                 finish_event = SchedEvent.ScheduleEvent(
@@ -1148,8 +1147,9 @@ class RateMonotonic(Preemptive):
             self.find_arrival_event(time)
             self.server_scheduler.compute_and_add(
                 time, self.start_events, self.arrival_events)
-            # Sort the tasks based on their period
-            self.start_events.sort(key=lambda x: x.period)
+            # Sort the tasks based on their period (and ties are broken in favor of sporadic tasks)
+            self.start_events.sort(key=lambda x: (
+                x.period, x.task.type != "sporadic"))
 
             # Select the next task to execute based on the priority
             self.choose_executed(time)
@@ -1288,7 +1288,7 @@ class DeadlineMonotonic(Preemptive):
                 self.create_deadline_event(event)
 
             # Change of task if another one has a higher priority (aka a smaller relative deadline)
-            elif self.executing.deadline > self.start_events[0].deadline and self.executing.id != self.start_events[0].id:
+            elif self.executing.deadline >= self.start_events[0].deadline and self.executing.id != self.start_events[0].id:
                 # Create finish event of the current task in execution
                 finish_timestamp = time
                 finish_event = SchedEvent.ScheduleEvent(
