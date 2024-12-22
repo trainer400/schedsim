@@ -306,6 +306,7 @@ class Preemptive(Scheduler):
                 for event in self.start_events:
                     if event.id == self.executing.id:
                         self.start_events.remove(event)
+                        break
 
                 # Free execute
                 self.executing = None

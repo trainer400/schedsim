@@ -43,9 +43,14 @@ def import_file(file_path, output_file) -> Scheduler.Scheduler:
             # Create the server instance
             server = None
             if server_algorithm == "polling":
-                server = PollingServer(int(server_capacity), int(server_period))
+                server = PollingServer(
+                    int(server_capacity), int(server_period))
             elif server_algorithm == "deferrable":
-                server = DeferrableServer(int(server_capacity), int(server_period))
+                server = DeferrableServer(
+                    int(server_capacity), int(server_period))
+            elif server_algorithm == "priority_exchange":
+                server = PriorityExchangeServer(
+                    int(server_capacity), int(server_period))
             else:
                 raise Exception(
                     f"Invalid server algorithm: {server_algorithm}")
