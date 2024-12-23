@@ -225,7 +225,7 @@ class SporadicServer(ServerScheduler):
 
             # In case possible, add to the schedule a sporadic event
             self.events.sort(key=lambda x: x.timestamp)
-            if len(self.events) > 0 and self.events[0].task.wcet < self.runtime_capacity:
+            if len(self.events) > 0 and self.events[0].task.wcet <= self.runtime_capacity:
                 to_schedule_event = self.events[0]
 
                 # Add the start event into the list
