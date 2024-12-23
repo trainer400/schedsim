@@ -51,6 +51,9 @@ def import_file(file_path, output_file) -> Scheduler.Scheduler:
             elif server_algorithm == "priority_exchange":
                 server = PriorityExchangeServer(
                     int(server_capacity), int(server_period))
+            elif server_algorithm == "sporadic":
+                server = SporadicServer(
+                    int(server_capacity), int(server_period))
             else:
                 raise Exception(
                     f"Invalid server algorithm: {server_algorithm}")

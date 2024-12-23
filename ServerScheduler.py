@@ -175,3 +175,89 @@ class PriorityExchangeServer(ServerScheduler):
 
                 # Remove the just scheduled event
                 self.events.remove(next_event)
+
+
+class SporadicServer(ServerScheduler):
+
+    # Defines a single replenishment action
+    class Replenishment():
+        def __init__(self, time, amount) -> None:
+            self.time = time
+            self.amount = amount
+
+    def __init__(self, capacity, period) -> None:
+        super().__init__()
+        self.name = "Sporadic"
+        self.capacity = capacity
+        self.period = period
+        self.replenishments = [self.Replenishment(0, capacity)]
+        self.next_replenishment = None
+        self.used_capacity = 0
+        self.start_time = -1
+
+    def compute_and_add(self, time: int, start_events: list[ScheduleEvent], arrival_events: list[ScheduleEvent]):
+        self.replenishments.sort(key=lambda x: x.time)
+
+        # Replenish capacity if it is time to do so
+        if len(self.replenishments) > 0 and time == self.replenishments[0].time:
+            self.runtime_capacity += self.replenishments[0].amount
+            self.replenishments.remove(self.replenishments[0])
+
+        next_event = None
+        if len(start_events) > 0:
+            # Select the next task for Rate Monotonic (TODO: Remove this dependence)
+            start_events.sort(key=lambda x: (
+                x.period, x.task.type != "sporadic"))
+            next_event = start_events[0]
+
+        # Check if the server is active now
+        active = (next_event != None and next_event.period <
+                  self.period) or len(self.events) > 0
+        if active:
+            # Properly set the start time
+            if self.start_time == -1:
+                self.start_time = time
+
+            # Create the new replenishment if none
+            if self.next_replenishment == None:
+                self.next_replenishment = self.Replenishment(
+                    self.start_time + self.period, 0)
+
+            # In case possible, add to the schedule a sporadic event
+            self.events.sort(key=lambda x: x.timestamp)
+            if len(self.events) > 0 and self.events[0].task.wcet < self.runtime_capacity:
+                to_schedule_event = self.events[0]
+
+                # Add the start event into the list
+                start_event = SchedEvent.ScheduleEvent(
+                    to_schedule_event.task.activation, to_schedule_event.task, SchedEvent.EventType.start.value, to_schedule_event.id)
+                start_event.job = to_schedule_event.job
+
+                # The servers gives its priority to the async task
+                start_event.period = self.period
+
+                # Add the event to the start list to be scheduled
+                start_events.append(start_event)
+
+                # Update the used capacity
+                self.used_capacity += to_schedule_event.task.wcet
+                self.runtime_capacity -= to_schedule_event.task.wcet
+
+                # Remove the task from the ones to be scheduled
+                self.events.remove(to_schedule_event)
+
+        else:  # Not active
+            # Remove automatically the replenishments with 0 capacity added
+            if self.used_capacity == 0:
+                self.next_replenishment = None
+
+            # When deactivating, add the replenishment
+            if self.next_replenishment != None:
+                # Add the new replenishment
+                self.next_replenishment.amount = self.used_capacity
+                self.replenishments.append(self.next_replenishment)
+
+            # Reset the replenishment data
+            self.next_replenishment = None
+            self.used_capacity = 0
+            self.start_time = -1
