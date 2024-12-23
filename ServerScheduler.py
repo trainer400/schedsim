@@ -119,7 +119,8 @@ class PriorityExchangeServer(ServerScheduler):
         # Act with priority exchanges only if there are still tasks that can support change of priorities
         if len(start_events) > 0:
             # Sort the start events with respect to the period (TODO: Remove Rate Monotonic assumption)
-            start_events.sort(key=lambda x: x.period)
+            start_events.sort(key=lambda x: (
+                x.period, x.task.type != "sporadic"))
             next_event = start_events[0]
 
             # Priority Exchange if the server has the highest priority (TODO: Remove Rate Monotonic assumption)
