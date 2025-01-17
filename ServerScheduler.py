@@ -116,6 +116,14 @@ class PriorityExchangeServer(ServerScheduler):
             for i in range(self.capacity):
                 self.runtime_capacity.append(self.period)
 
+        # Check if it is a idle situation and in that case remove runtime capacity
+        if len(start_events) == 0 and len(self.events) == 0 and len(self.runtime_capacity) > 0:
+            # Order the runtime capacity such that the highest priority (aka lowest period is in first positions)
+            self.runtime_capacity.sort(key=lambda x: x)
+
+            # Remove the last element (aka lowest priority) cumulated
+            self.runtime_capacity.remove(self.runtime_capacity[len(self.runtime_capacity) - 1])
+
         # Act with priority exchanges only if there are still tasks that can support change of priorities
         if len(start_events) > 0:
             # Sort the start events with respect to the period (TODO: Remove Rate Monotonic assumption)
