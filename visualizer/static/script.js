@@ -30,13 +30,20 @@ document.addEventListener('DOMContentLoaded', function () {
     function toggleFieldsQuantum() {
         var schedulingAlgorithm = $('#schedulingAlgorithm').val();
         var quantumGroup = $('#quantumGroup');
+        var serverGroup = $('#serverGroup');
 
         if (schedulingAlgorithm === "RR") {
             console.log("Showing Quantum");
             quantumGroup.removeClass("hidden");
-        } else {
-            console.log("Hiding Quantum");
+            serverGroup.addClass("hidden");
+        } else if (schedulingAlgorithm === "RM") {
+            console.log("Showing Servers");
+            serverGroup.removeClass("hidden");
             quantumGroup.addClass("hidden");
+        } else {
+            console.log("Hiding Quantum and Server");
+            quantumGroup.addClass("hidden");
+            serverGroup.addClass("hidden");
         }
     }
     $('#schedulingAlgorithm').change(toggleFieldsQuantum);
