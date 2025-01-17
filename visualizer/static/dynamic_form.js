@@ -1,7 +1,7 @@
-$(document).ready(function() {
+$(document).ready(function () {
     let taskCount = 0;
 
-    $('#newTaskBtn').click(function() {
+    $('#newTaskBtn').click(function () {
         $('#newTaskForm').removeClass('hidden');
         $('#createXML').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -29,7 +29,7 @@ $(document).ready(function() {
         console.log("Activation Group hidden:", activationGroup.hasClass('hidden'));
     }
 
-    $('#createXMLBtn').click(function() {
+    $('#createXMLBtn').click(function () {
         $('#createXML').removeClass('hidden');
         $('#newTaskForm').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -37,7 +37,7 @@ $(document).ready(function() {
         $('#addTimeForm').addClass('hidden');
     });
 
-    $('#addTaskBtn').click(function() {
+    $('#addTaskBtn').click(function () {
         taskCount++;
         const formId = `dynamicTaskForm_${taskCount}`;
         const dynamicFormHtml = `
@@ -93,14 +93,14 @@ $(document).ready(function() {
         `;
         $('#dynamicTaskForm').append(dynamicFormHtml);
 
-        $(`#taskType_${taskCount}`).change(function() {
+        $(`#taskType_${taskCount}`).change(function () {
             toggleFields(taskCount);
         });
 
         toggleFields(taskCount);
     });
 
-    $('#submitAllTasksBtn').click(function() {
+    $('#submitAllTasksBtn').click(function () {
         const allTasksData = [];
         const start = parseInt($('#start').val());
         const end = parseInt($('#end').val());
@@ -159,7 +159,7 @@ $(document).ready(function() {
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(allTasksData),
-            success: function(response) {
+            success: function (response) {
                 alert('All tasks submitted successfully!');
                 $('#newTaskForm').addClass('hidden');
                 $('#createXML').addClass('hidden');
@@ -167,7 +167,7 @@ $(document).ready(function() {
                 $('.graph-execution').addClass('hidden');
                 $('#addTimeForm').addClass('hidden');
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 const errorMessage = xhr.responseJSON && xhr.responseJSON.error
                     ? xhr.responseJSON.error
                     : 'Error occurred while submitting tasks.';

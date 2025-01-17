@@ -27,7 +27,7 @@ body {
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    overflow: auto; 
+    overflow: auto;
 }
 
 /* Header */
@@ -48,7 +48,8 @@ h1 {
     margin-bottom: 30px;
 }
 
-.button-container button, .button-container label {
+.button-container button,
+.button-container label {
     flex-grow: 1;
     padding: 15px;
     background-color: #4CAF50;
@@ -62,12 +63,14 @@ h1 {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.button-container button:hover, .button-container label:hover {
+.button-container button:hover,
+.button-container label:hover {
     background-color: #45a049;
     transform: scale(1.01);
 }
 
-.button-container button:active, .button-container label:active {
+.button-container button:active,
+.button-container label:active {
     transform: scale(0.95);
 }
 
@@ -115,7 +118,7 @@ input[type="file"] {
     justify-content: center;
     align-items: center;
     max-width: 100%;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .graph-execution img {
@@ -146,7 +149,7 @@ input[type="file"] {
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     margin: 30px auto;
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
 
 #newTaskForm .form-group,
@@ -155,7 +158,7 @@ input[type="file"] {
 #printGraphForm .form-group,
 .styled-form .form-group {
     display: flex;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     let uploadedFilePath = '';
     $('.graph-execution').addClass('hidden');
 
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var taskType = $('#taskType').val();
         var periodGroup = $('#periodGroup');
         var activationGroup = $('#activationGroup');
-    
+
         if (taskType === "periodic") {
             console.log("Showing Period");
             periodGroup.removeClass("hidden");
@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#schedulingAlgorithm').change(toggleFieldsQuantum);
     toggleFieldsQuantum();
 
-    $('#newTaskBtn').click(function() {
-        $('#newTaskForm')[0].reset(); 
+    $('#newTaskBtn').click(function () {
+        $('#newTaskForm')[0].reset();
         $('#newTaskForm').removeClass('hidden');
         $('#createXML').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#addTimeForm').addClass('hidden');
     });
 
-    $('#createXMLBtn').click(function() {
-        $('#createXML')[0].reset(); 
+    $('#createXMLBtn').click(function () {
+        $('#createXML')[0].reset();
         $('#createXML').removeClass('hidden');
         $('#newTaskForm').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#addTimeForm').addClass('hidden');
     });
 
-    $('#newTaskForm').submit(function(event) {
+    $('#newTaskForm').submit(function (event) {
         event.preventDefault();
-    
+
         const formData = new FormData(this);
 
         $.ajax({
@@ -71,26 +71,26 @@ document.addEventListener('DOMContentLoaded', function() {
             data: formData,
             processData: false,
             contentType: false,
-            success: function(response) {
+            success: function (response) {
                 alert(response.message || 'Task created successfully!');
                 $('#newTaskForm').addClass('hidden');
             },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
-                                    ? xhr.responseJSON.error 
-                                    : 'Error occurred while creating task.';
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error
+                    ? xhr.responseJSON.error
+                    : 'Error occurred while creating task.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }
         });
     });
 
-    $('#createXML').submit(function(event) {
+    $('#createXML').submit(function (event) {
         event.preventDefault();
         $('#createXML').removeClass('hidden');
     });
-    
-    $('#xmlFile').change(function() {
+
+    $('#xmlFile').change(function () {
         if (this.files.length > 0) {
             $('.graph-execution').addClass('hidden');
             $('.graph-execution .large-image').addClass('hidden');
@@ -100,9 +100,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    $('#xmlForm').submit(function(event) {
+    $('#xmlForm').submit(function (event) {
         event.preventDefault();
-        
+
         const formData = new FormData(this);
 
         $.ajax({
@@ -111,23 +111,23 @@ document.addEventListener('DOMContentLoaded', function() {
             data: formData,
             processData: false,
             contentType: false,
-            success: function(response) {
+            success: function (response) {
                 alert('XML File uploaded successfully!');
                 uploadedFilePath = response.file_path;
                 $('.graph-execution').addClass('hidden');
                 $('.graph-execution .large-image').addClass('hidden');
             },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
-                                    ? xhr.responseJSON.error 
-                                    : 'Error occurred while uploading XML file.';
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error
+                    ? xhr.responseJSON.error
+                    : 'Error occurred while uploading XML file.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }
         });
     });
 
-    $('#executeBtn').click(function() {
+    $('#executeBtn').click(function () {
         $('#newTaskForm').addClass('hidden');
         $('#createXML').addClass('hidden');
         $('#printGraphForm').addClass('hidden');
@@ -144,13 +144,13 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ file_path: uploadedFilePath }),
-            success: function(response) {
+            success: function (response) {
                 alert(response.output || 'Execution completed successfully!');
             },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
-                                    ? xhr.responseJSON.error 
-                                    : 'Error occurred while executing command.';
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error
+                    ? xhr.responseJSON.error
+                    : 'Error occurred while executing command.';
                 console.error('XHR Status:', xhr.status);
                 console.error('Error:', xhr.statusText);
                 console.error('Response Text:', xhr.responseText);
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    $('#addTimeBtn').click(function() {
+    $('#addTimeBtn').click(function () {
         $('#addTimeForm')[0].reset(); // Reset the form
         $('#newTaskForm').addClass('hidden');
         $('#createXML').addClass('hidden');
@@ -169,85 +169,85 @@ document.addEventListener('DOMContentLoaded', function() {
         $('.graph-execution').addClass('hidden');
     });
 
-    $('#addTimeForm').submit(function(event) {
+    $('#addTimeForm').submit(function (event) {
         event.preventDefault();
         let n_time = $('#newTime').val();
-        
+
         if (n_time) {
             $.ajax({
                 url: '/add_time',
                 type: 'POST',
                 data: JSON.stringify({ new_time: parseInt(n_time) }),
                 contentType: 'application/json',
-                success: function(response) {
+                success: function (response) {
                     alert(response.message);
                     $('#addTimeForm').addClass('hidden');
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     alert("Error: " + xhr.responseJSON.error);
                 }
             });
         }
     });
 
-    $('#printGraphBtn').click(function() {
-        $('#printGraphForm')[0].reset(); 
+    $('#printGraphBtn').click(function () {
+        $('#printGraphForm')[0].reset();
 
         const fixedParams = {
             use_fixed_params: true
         };
-        
+
         $.ajax({
             url: '/print_graph',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(fixedParams),
-            success: function(response) {
+            success: function (response) {
                 alert(response.message || 'Graph printed successfully!');
                 $('.graph-execution').removeClass('hidden');
                 $('.graph-execution .large-image').removeClass('hidden');
                 // Refresh the image source to prevent caching issues
                 $('.graph-execution .large-image').attr('src', '/static/out.png?' + new Date().getTime());
             },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
-                                    ? xhr.responseJSON.error 
-                                    : 'Error occurred while printing graph.';
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error
+                    ? xhr.responseJSON.error
+                    : 'Error occurred while printing graph.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }
         });
-        
+
         $('#printGraphForm').removeClass('hidden');
         $('#newTaskForm').addClass('hidden');
         $('#createXML').addClass('hidden');
         $('#addTimeForm').addClass('hidden');
     });
-    
-    $('#printGraphForm').submit(function(event) {
+
+    $('#printGraphForm').submit(function (event) {
         event.preventDefault();
-    
+
         const startTime = $('#start_time').val();
         const endTime = $('#end_time').val();
         const fracTime = $('#frac_time').val();
-    
+
         if (startTime === '' || endTime === '' || fracTime === '') {
             alert('Please fill in all parameters.');
             return;
         }
-    
+
         const formData = {
             start_time: parseInt(startTime),
             end_time: parseInt(endTime),
             frac_time: parseInt(fracTime)
         };
-    
+
         $.ajax({
             url: '/print_graph',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
-            success: function(response) {
+            success: function (response) {
                 alert(response.message || 'Graph printed successfully!');
                 // Show the .graph-execution element and the graph image
                 $('.graph-execution').removeClass('hidden');
@@ -255,21 +255,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Refresh the image source to prevent caching issues
                 $('.graph-execution .large-image').attr('src', '/static/out.png?' + new Date().getTime());
             },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
-                                    ? xhr.responseJSON.error 
-                                    : 'Error occurred while printing graph.';
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error
+                    ? xhr.responseJSON.error
+                    : 'Error occurred while printing graph.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }
         });
     });
 
-    $('#downloadCsvBtn').click(function() {
+    $('#downloadCsvBtn').click(function () {
         $.ajax({
             url: '/download_csv',
             type: 'GET',
-            success: function(response) {
+            success: function (response) {
                 // Create a temporany URL to download the CSV file
                 const url = window.URL.createObjectURL(new Blob([response]));
                 const a = document.createElement('a');
@@ -279,38 +279,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 a.click();
                 // Release the memory after the operation
                 document.body.removeChild(a);
-                window.URL.revokeObjectURL(url); 
+                window.URL.revokeObjectURL(url);
             },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
-                                    ? xhr.responseJSON.error 
-                                    : 'Error occurred while downloading CSV file.';
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error
+                    ? xhr.responseJSON.error
+                    : 'Error occurred while downloading CSV file.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }
         });
     });
-    
-    $('#downloadXmlBtn').click(function() {
+
+    $('#downloadXmlBtn').click(function () {
         $.ajax({
             url: '/download_xml',
             type: 'GET',
-            success: function(response) {
+            success: function (response) {
                 // Create a temporany URL to download the XML file
                 const url = window.URL.createObjectURL(new Blob([response]));
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'data.xml'; 
+                a.download = 'data.xml';
                 document.body.appendChild(a);
                 a.click();
                 // Release the memory after the operation
                 document.body.removeChild(a);
-                window.URL.revokeObjectURL(url); 
+                window.URL.revokeObjectURL(url);
             },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON && xhr.responseJSON.error 
-                                    ? xhr.responseJSON.error 
-                                    : 'Error occurred while downloading XML file.';
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error
+                    ? xhr.responseJSON.error
+                    : 'Error occurred while downloading XML file.';
                 console.error(errorMessage);
                 alert(errorMessage);
             }

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCHEDSIM</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
     <div class="container">
         <div class="content">
@@ -31,7 +33,7 @@
                         <option value="false">False</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="taskType">Task Type (sporadic/periodic)</label>
                     <select id="taskType" name="taskType">
@@ -39,18 +41,18 @@
                         <option value="sporadic">Sporadic</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="taskId">Task ID</label>
                     <input type="number" id="taskId" name="taskId" min="1" step="1" required>
                 </div>
-                <div class= "hidden"  id="periodGroup">
+                <div class="hidden" id="periodGroup">
                     <div class="form-group ">
                         <label for="period">Period</label>
                         <input type="number" id="period" name="period">
                     </div>
                 </div>
-                <div class= "hidden"  id="activationGroup">
+                <div class="hidden" id="activationGroup">
                     <div class="form-group" id="activationGroup">
                         <label for="activation">Activation</label>
                         <input type="number" id="activation" name="activation">
@@ -60,32 +62,32 @@
                     <label for="deadline">Deadline</label>
                     <input type="number" id="deadline" name="deadline" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="wcet">WCET</label>
                     <input type="number" id="wcet" name="wcet" required>
                 </div>
-                
+
                 <button type="submit">Create Task</button>
             </form>
-            
-            
-            
-            
+
+
+
+
             <form id="createXML" class="hidden">
                 <div class="form-group">
                     <label for="start">Start</label>
                     <input type="number" id="start" name="start" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="end">End</label>
                     <input type="number" id="end" name="end" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="schedulingAlgorithm">Scheduling Algorithm</label>
-                        <select id="schedulingAlgorithm" name="schedulingAlgorithm" required>
+                    <select id="schedulingAlgorithm" name="schedulingAlgorithm" required>
                         <option value="FIFO">FIFO</option>
                         <option value="SRTF">SRTF</option>
                         <option value="SJF">SJF</option>
@@ -93,29 +95,29 @@
                         <option value="HRRN">HRRN</option>
                     </select>
                 </div>
-                <div class= "hidden"  id="quantumGroup">
+                <div class="hidden" id="quantumGroup">
                     <div class="form-group" id="quantumGroup">
                         <label for="quantum">Quantum</label>
-                        <input type="number" id="quantum" name="quantum" >
+                        <input type="number" id="quantum" name="quantum">
                     </div>
                 </div>
-                
+
 
                 <button id="addTaskBtn">Add New Task</button>
                 <div id="dynamicTaskForm"></div>
                 <button id="submitAllTasksBtn">Submit All Tasks</button>
-                
+
             </form>
-            
+
             <form id="addTimeForm" class="hidden">
                 <div class="form-group">
                     <label for="newTime">Enter New Time:</label>
-                    <input type="number" id="newTime" name="newTime" required>  
+                    <input type="number" id="newTime" name="newTime" required>
                 </div>
                 <button type="submit">Submit</button>
             </form>
-            
-            <div class="execution_block" >
+
+            <div class="execution_block">
                 <form id="xmlForm" enctype="multipart/form-data">
                     <input type="file" name="xmlFile" id="xmlFile" accept=".xml">
                 </form>
@@ -124,8 +126,8 @@
                     <img src="{{ url_for('static', filename='out.png') }}" alt="Graph Image" class="large-image">
                 </div>
 
-                
-                <form id="printGraphForm" class ='hidden'>
+
+                <form id="printGraphForm" class='hidden'>
                     <div class="form-group">
                         <label for="startTime">Start Time:</label>
                         <input type="number" id="start_time" name="start_Time">
@@ -147,6 +149,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='dynamic_form.js') }}"></script>
-    
+
 </body>
+
 </html>
