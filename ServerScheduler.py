@@ -109,35 +109,74 @@ class PriorityExchangeServer(ServerScheduler):
         self.period = period
         self.runtime_capacity = []
 
+    def __exchange_priority(self, priority: int):
+        '''
+            The method exchanges all the high cumulated priority with the lower passed priority.
+        '''
+        # For every runtime capacity point, if it is greater, change it to the next task priority
+        for i in range(len(self.runtime_capacity)):
+            if self.runtime_capacity[i] < priority:
+                self.runtime_capacity[i] = priority
+                
+    def __schedule_new_event(self, next_event: ScheduleEvent, start_events: list[ScheduleEvent]):
+        '''
+            Given a sporadic event to schedule and the list of ready to schedule events, the method 
+            creates for every priority change (it can happen that within the same sporadic task to execute)
+            its priority changes (due to heterogeneous runtime capacity) a start event to insert into
+            the list of ready to schedule events with a specific runtime priority.
+            Then the method removes the used capacity from runtime capacity and adds the events into the list.
+        '''
+        previous_priority = -1
+        start_event = None
+        for i in range(next_event.task.wcet):
+            if self.runtime_capacity[i] != previous_priority:
+                # Register the so far created start_event
+                if start_event != None:
+                    start_events.append(start_event)
+
+                previous_priority = self.runtime_capacity[i]
+
+                # Add the start event into the list
+                start_event = SchedEvent.ScheduleEvent(
+                    next_event.task.activation, next_event.task, SchedEvent.EventType.start.value, next_event.id)
+                start_event.job = next_event.job
+
+                # The servers gives its priority to the async task
+                start_event.period = self.runtime_capacity[i]
+                start_event.task.wcet = 1
+            else:
+                start_event.task.wcet += 1
+
+        # Append the final event
+        start_events.append(start_event)
+
+        # Remove the first N (wcet) runtime capacity
+        for i in range(next_event.task.wcet):
+            self.runtime_capacity.remove(self.runtime_capacity[0])
+
+        # Remove the just scheduled event
+        self.events.remove(next_event)
+
+    # TODO: Remove Rate Monotonic assumption when sorting and evaluating priorities (maybe passing a compare method as argument)
     def compute_and_add(self, time: int, start_events: list[ScheduleEvent], arrival_events: list[ScheduleEvent]):
-        # Add the capacity at multiples of the period
+        # Append the new server capacity at its original priority (server period)
         if time % self.period == 0:
-            # Append the new server capacity at its original priority (server period)
             for i in range(self.capacity):
                 self.runtime_capacity.append(self.period)
 
         # Check if it is a idle situation and in that case remove runtime capacity
         if len(start_events) == 0 and len(self.events) == 0 and len(self.runtime_capacity) > 0:
-            # Order the runtime capacity such that the highest priority (aka lowest period is in first positions)
             self.runtime_capacity.sort(key=lambda x: x)
-
-            # Remove the last element (aka lowest priority) cumulated
             self.runtime_capacity.remove(self.runtime_capacity[len(self.runtime_capacity) - 1])
 
         # Act with priority exchanges only if there are still tasks that can support change of priorities
         if len(start_events) > 0:
-            # Sort the start events with respect to the period (TODO: Remove Rate Monotonic assumption)
-            start_events.sort(key=lambda x: (
-                x.period, x.task.type != "sporadic"))
+            start_events.sort(key=lambda x: (x.period, x.task.type != "sporadic"))
             next_event = start_events[0]
 
-            # Priority Exchange if the server has the highest priority (TODO: Remove Rate Monotonic assumption)
+            # Priority Exchange with the next task only for priorities that are higher than it
             if len(self.events) == 0 and self.period < next_event.period and next_event.task.type != "sporadic":
-                # For every runtime capacity point, if it is greater, change it to the next task priority
-                for i in range(len(self.runtime_capacity)):
-                    if self.runtime_capacity[i] < next_event.period:
-                        self.runtime_capacity[i] = next_event.period
-
+                self.__exchange_priority(next_event.period)
                 # TODO: Define if this instruction is needed
                 # next_event.period = self.period
 
@@ -151,38 +190,7 @@ class PriorityExchangeServer(ServerScheduler):
 
             # Schedule the event only if there is enough capacity
             if len(self.runtime_capacity) > next_event.task.wcet:
-                # Because the capacity priority can change within the same task
-                # we create a different start event for each priority change
-                previous_priority = -1
-                start_event = None
-                for i in range(next_event.task.wcet):
-                    if self.runtime_capacity[i] != previous_priority:
-                        # Register the so far created start_event
-                        if start_event != None:
-                            start_events.append(start_event)
-
-                        previous_priority = self.runtime_capacity[i]
-
-                        # Add the start event into the list
-                        start_event = SchedEvent.ScheduleEvent(
-                            next_event.task.activation, next_event.task, SchedEvent.EventType.start.value, next_event.id)
-                        start_event.job = next_event.job
-
-                        # The servers gives its priority to the async task
-                        start_event.period = self.runtime_capacity[i]
-                        start_event.task.wcet = 1
-                    else:
-                        start_event.task.wcet += 1
-
-                # Append the final event
-                start_events.append(start_event)
-
-                # Remove the first N (wcet) runtime capacity
-                for i in range(next_event.task.wcet):
-                    self.runtime_capacity.remove(self.runtime_capacity[0])
-
-                # Remove the just scheduled event
-                self.events.remove(next_event)
+                self.__schedule_new_event(next_event, start_events)
 
 
 class SporadicServer(ServerScheduler):
