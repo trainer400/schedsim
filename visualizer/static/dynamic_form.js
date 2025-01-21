@@ -105,31 +105,43 @@ $(document).ready(function () {
             startTime: 0,
             endTime: 0,
             schedulingAlgorithm: "",
+            serverAlgorithm: "",
             quantum: 0,
+            serverCapacity: 0,
+            serverPeriod: 0,
             tasks: []
         };
 
         const start = parseInt($('#start').val());
         const end = parseInt($('#end').val());
         const schedulingAlgorithm = $('#schedulingAlgorithm').val();
+        let serverAlgorithm = $('#serverAlgorithm').val();
+        let serverCapacity = $('#serverCapacity').val();
+        let serverPeriod = $('#serverPeriod').val();
         let quantum = parseInt($('#quantum').val());
-        if (isNaN(quantum)) {
-            quantum = 0;
-        }
+        if (isNaN(quantum)) { quantum = 0; }
+        if (isNaN(serverCapacity)) { serverCapacity = 0; }
+        if (isNaN(serverPeriod)) { serverPeriod = 0; }
         if (isNaN(start) || isNaN(end) || start >= end || start < 0 || end <= 0) {
             alert('Start time must be less than end time and greater than 0.');
             return;
         }
-
         if (schedulingAlgorithm === 'RR' && quantum <= 0) {
             alert('Quantum must be greater than 0.');
+            return;
+        }
+        if (schedulingAlgorithm === 'RM' && (serverCapacity <= 0 || serverPeriod <= 0)) {
+            alert('Server capacity and server period must be greater than 0');
             return;
         }
 
         jsonObject.startTime = start;
         jsonObject.endTime = end;
         jsonObject.schedulingAlgorithm = schedulingAlgorithm;
+        jsonObject.serverAlgorithm = serverAlgorithm;
         jsonObject.quantum = quantum;
+        jsonObject.serverCapacity = serverCapacity;
+        jsonObject.serverPeriod = serverPeriod;
 
         for (let i = 1; i <= taskCount; i++) {
             taskObject = {
