@@ -89,7 +89,7 @@ class SchedulerController:
             print(f"Error while printing the file: {str(e)}")
             return False
 
-    def create_xml(self, file_path, start, end, tasks, scheduling_algorithm, cpu_pe_id, cpu_speed, quantum):
+    def create_xml(self, file_path, data, cpu_pe_id, cpu_speed):
         try:
             # Creating the XML document
             doc = xml.dom.minidom.Document()
@@ -98,8 +98,8 @@ class SchedulerController:
 
             # Adding the node for simulation time
             time = doc.createElement("time")
-            time.setAttribute("start", str(start))
-            time.setAttribute("end", str(end))
+            time.setAttribute("start", str(data['startTime']))
+            time.setAttribute("end", str(data['endTime']))
             simulation.appendChild(time)
 
             # Adding the node for software( tasks and scheduler)
@@ -110,7 +110,7 @@ class SchedulerController:
             software.appendChild(tasks_node)
 
             # Adding nodes for each task
-            for task_data in tasks:
+            for task_data in data['tasks']:
                 task = doc.createElement("task")
                 for key, value in task_data.items():
                     if value is not None:
@@ -119,9 +119,13 @@ class SchedulerController:
 
             # Adding the node for scheduler
             scheduler = doc.createElement("scheduler")
-            scheduler.setAttribute("algorithm", scheduling_algorithm)
-            if scheduling_algorithm == "RR":
-                scheduler.setAttribute("quantum", str(quantum))
+            scheduler.setAttribute("algorithm", data['schedulingAlgorithm'])
+            if data['schedulingAlgorithm'] == "RR":
+                scheduler.setAttribute("quantum", str(data['quantum']))
+            if data['schedulingAlgorithm'] == "RM":
+                scheduler.setAttribute("server", data['serverAlgorithm'])
+                scheduler.setAttribute("capacity", data['serverCapacity'])
+                scheduler.setAttribute("period", data['serverPeriod'])
             software.appendChild(scheduler)
 
             # Adding the node for hardware

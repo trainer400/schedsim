@@ -215,8 +215,10 @@ def submit_all_tasks():
         start = data['startTime']
         end = data['endTime']
         scheduling_algorithm = data['schedulingAlgorithm']
+        server_algorithm = data['serverAlgorithm']
         quantum = data['quantum'] if scheduling_algorithm == "RR" else 0
-        tasks = []
+        server_capacity = data['serverCapacity'] if scheduling_algorithm == "RM" else 0
+        server_period = data['serverPeriod'] if scheduling_algorithm == "RM" else 0
 
         for t in data['tasks']:
             real_time = t['realTime']
@@ -226,8 +228,6 @@ def submit_all_tasks():
             activation = t['activation']
             deadline = t['deadline']
             wcet = t['wcet']
-
-            print(task_type)
 
             # Check the presence of all fields
             if task_type == 'periodic':
@@ -272,34 +272,12 @@ def submit_all_tasks():
             if end < 0 and start > end:
                 return jsonify({'error': 'End must be greater than 0 and higher than start.'}), 400
 
-            if task_type == 'periodic':
-                task = {
-                    "real_time": real_time,
-                    "type": task_type,
-                    "id": task_id,
-                    "period": period,
-                    "deadline": deadline,
-                    "wcet": wcet
-                }
-            elif task_type == 'sporadic':
-                task = {
-                    "real_time": real_time,
-                    "type": task_type,
-                    "id": task_id,
-                    "activation": activation,
-                    "deadline": deadline,
-                    "wcet": wcet
-                }
-            tasks.append(task)
-
         # Get the temporary directory path
         temp_dir = tempfile.gettempdir()
-
         # Add the file name "temp.xml" to the temporary directory path
         temp_file_path = os.path.join(temp_dir, "temp.xml")
         # Execute XML file creation using SchedulerController's create_xml method
-        xml_path = scheduler_controller.create_xml(temp_file_path, int(
-            start), int(end), tasks, scheduling_algorithm, 0, 1, quantum)
+        xml_path = scheduler_controller.create_xml(temp_file_path, data, 0, 1)
 
         if xml_path:
             return jsonify({'message': 'XML file created successfully!', 'xml_path': xml_path}), 200
