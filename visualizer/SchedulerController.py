@@ -114,7 +114,7 @@ class SchedulerController:
                 task = doc.createElement("task")
                 for key, value in task_data.items():
                     if value is not None:
-                        task.setAttribute(key, str(value))
+                        task.setAttribute(key, str(value).lower())
                 tasks_node.appendChild(task)
 
             # Adding the node for scheduler

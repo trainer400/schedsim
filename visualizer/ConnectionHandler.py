@@ -221,9 +221,9 @@ def submit_all_tasks():
         server_period = data['serverPeriod'] if scheduling_algorithm == "RM" else 0
 
         for t in data['tasks']:
-            real_time = t['realTime']
-            task_type = t['taskType']
-            task_id = t['taskId']
+            real_time = t['real_time']
+            task_type = t['type']
+            task_id = t['id']
             period = t['period']
             activation = t['activation']
             deadline = t['deadline']
@@ -271,6 +271,12 @@ def submit_all_tasks():
                 return jsonify({'error': 'Start must be greater than 0.'}), 400
             if end < 0 and start > end:
                 return jsonify({'error': 'End must be greater than 0 and higher than start.'}), 400
+
+            # Remove useless fields for periodic/sporadic
+            if task_type == 'periodic':
+                del t['activation']
+            elif task_type == 'sporadic':
+                del t['period']
 
         # Get the temporary directory path
         temp_dir = tempfile.gettempdir()

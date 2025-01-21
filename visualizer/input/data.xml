@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<simulation>
+	<time start="0" end="20"/>
+	<software>
+		<tasks>
+			<task real_time="true" type="periodic" id="1" period="5" deadline="50" wcet="1"/>
+			<task real_time="true" type="periodic" id="2" period="10" deadline="50" wcet="3"/>
+			<task real_time="false" type="sporadic" id="3" activation="4" deadline="50" wcet="3"/>
+		</tasks>
+		<scheduler algorithm="RM" server="priority_exchange" capacity="2" period="5"/>
+	</software>
+	<hardware>
+		<cpus>
+			<pe id="0" speed="1"/>
+		</cpus>
+	</hardware>
+</simulation>

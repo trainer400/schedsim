@@ -5,10 +5,10 @@
         <tasks>
         	<!-- A task can be periodic or sporadic. The deadline parameter is relevant only for
         	     real-time tasks -->
-            <task real-time="true" type="periodic" id="1" period="5" deadline="50"  wcet="1" />
-            <task real-time="true" type="periodic" id="2" period="15" deadline="30" wcet="4" />
-            <task real-time="false" type="sporadic" id="3" activation="4" wcet="2" />
-            <task real-time="false" type="sporadic" id="4" activation="8" wcet="2" />
+            <task real_time="true" type="periodic" id="1" period="5" deadline="50"  wcet="1" />
+            <task real_time="true" type="periodic" id="2" period="15" deadline="30" wcet="4" />
+            <task real_time="false" type="sporadic" id="3" activation="4" wcet="2" />
+            <task real_time="false" type="sporadic" id="4" activation="8" wcet="2" />
         </tasks>
         <scheduler algorithm="RM" server="sporadic" capacity="5" period="10"/>	<!-- add any relevant numbers, such as quantum time for RR -->
     </software>

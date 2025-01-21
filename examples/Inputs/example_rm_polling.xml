@@ -5,12 +5,12 @@
         <tasks>
         	<!-- A task can be periodic or sporadic. The deadline parameter is relevant only for
         	     real-time tasks -->
-            <task real-time="true" type="periodic" id="1" period="4" deadline="50"  wcet="1" />
-            <task real-time="true" type="periodic" id="2" period="6" deadline="30" wcet="2" />
-            <task real-time="false" type="sporadic" id="3" activation="2" wcet="2" />
-            <task real-time="false" type="sporadic" id="4" activation="8" wcet="1" />
-            <task real-time="false" type="sporadic" id="5" activation="12" wcet="2" />
-            <task real-time="false" type="sporadic" id="6" activation="19" wcet="1" />
+            <task real_time="true" type="periodic" id="1" period="4" deadline="50"  wcet="1" />
+            <task real_time="true" type="periodic" id="2" period="6" deadline="30" wcet="2" />
+            <task real_time="false" type="sporadic" id="3" activation="2" wcet="2" />
+            <task real_time="false" type="sporadic" id="4" activation="8" wcet="1" />
+            <task real_time="false" type="sporadic" id="5" activation="12" wcet="2" />
+            <task real_time="false" type="sporadic" id="6" activation="19" wcet="1" />
         </tasks>
         <scheduler algorithm="RM" server="polling" capacity="2" period="5"/>	<!-- add any relevant numbers, such as quantum time for RR -->
     </software>

@@ -145,9 +145,9 @@ $(document).ready(function () {
 
         for (let i = 1; i <= taskCount; i++) {
             taskObject = {
-                realTime: false,
-                taskType: "",
-                taskId: 0,
+                real_time: false,
+                type: "",
+                id: 0,
                 period: 0,
                 activation: 0,
                 deadline: 0,
@@ -174,9 +174,9 @@ $(document).ready(function () {
                 return;
             }
 
-            taskObject.realTime = parseBool(realTime);
-            taskObject.taskType = taskType;
-            taskObject.taskId = taskId;
+            taskObject.real_time = parseBool(realTime);
+            taskObject.type = taskType;
+            taskObject.id = taskId;
             taskObject.period = period;
             taskObject.activation = activation;
             taskObject.deadline = deadline;
