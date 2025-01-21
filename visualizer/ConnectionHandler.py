@@ -210,35 +210,33 @@ def download_csv():
 def submit_all_tasks():
     try:
         data = request.get_json()
-        print(len(data))
-        total_task = int((len(data)-4)/7)
 
-        start = int(data[0])
-        end = int(data[1])
-        scheduling_algorithm = data[2]
-        if scheduling_algorithm == "RR":
-            quantum = int(data[3])
-        else:
-            quantum = 0
-        pos = 4
+        # Get the overall configs
+        start = data['startTime']
+        end = data['endTime']
+        scheduling_algorithm = data['schedulingAlgorithm']
+        quantum = data['quantum'] if scheduling_algorithm == "RR" else 0
         tasks = []
 
-        for i in range(total_task):
-            real_time = data[pos]
-            task_type = data[pos+1]
-            task_id = data[pos+2]
-            period = data[pos+3]
-            activation = data[pos+4]
-            deadline = data[pos+5]
-            wcet = data[pos+6]
-            pos += 7
+        for t in data['tasks']:
+            real_time = t['realTime']
+            task_type = t['taskType']
+            task_id = t['taskId']
+            period = t['period']
+            activation = t['activation']
+            deadline = t['deadline']
+            wcet = t['wcet']
 
+            print(task_type)
+
+            # Check the presence of all fields
             if task_type == 'periodic':
-                if not all([real_time, task_type, task_id, period, deadline, wcet]):
+                if any(v is None for v in [start, end, real_time, task_type, task_id, period, deadline, wcet]):
                     return jsonify({'error': 'All fields are required.'}), 400
             elif task_type == 'sporadic':
-                if not all([real_time, task_type, task_id, activation, deadline, wcet]):
+                if any(v is None for v in [start, end, real_time, task_type, task_id, activation, deadline, wcet]):
                     return jsonify({'error': 'All fields are required.'}), 400
+                
             # Convert values to appropriate types
             try:
                 task_id = int(task_id)

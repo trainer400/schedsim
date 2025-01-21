@@ -101,7 +101,14 @@ $(document).ready(function () {
     });
 
     $('#submitAllTasksBtn').click(function () {
-        const allTasksData = [];
+        jsonObject = {
+            startTime: 0,
+            endTime: 0,
+            schedulingAlgorithm: "",
+            quantum: 0,
+            tasks: []
+        };
+
         const start = parseInt($('#start').val());
         const end = parseInt($('#end').val());
         const schedulingAlgorithm = $('#schedulingAlgorithm').val();
@@ -119,12 +126,22 @@ $(document).ready(function () {
             return;
         }
 
-        allTasksData.push(start);
-        allTasksData.push(end);
-        allTasksData.push(schedulingAlgorithm);
-        allTasksData.push(quantum);
+        jsonObject.startTime = start;
+        jsonObject.endTime = end;
+        jsonObject.schedulingAlgorithm = schedulingAlgorithm;
+        jsonObject.quantum = quantum;
 
         for (let i = 1; i <= taskCount; i++) {
+            taskObject = {
+                realTime: false,
+                taskType: "",
+                taskId: 0,
+                period: 0,
+                activation: 0,
+                deadline: 0,
+                wcet: 0
+            };
+
             const realTime = $(`#realTime_${i}`).val();
             const taskType = $(`#taskType_${i}`).val();
             const taskId = parseInt($(`#taskId_${i}`).val());
@@ -145,20 +162,24 @@ $(document).ready(function () {
                 return;
             }
 
-            allTasksData.push(parseBool(realTime));
-            allTasksData.push(taskType);
-            allTasksData.push(taskId);
-            allTasksData.push(period);
-            allTasksData.push(activation);
-            allTasksData.push(deadline);
-            allTasksData.push(wcet);
+            taskObject.realTime = parseBool(realTime);
+            taskObject.taskType = taskType;
+            taskObject.taskId = taskId;
+            taskObject.period = period;
+            taskObject.activation = activation;
+            taskObject.deadline = deadline;
+            taskObject.wcet = wcet;
+
+            jsonObject.tasks.push(taskObject);
         }
+
+        console.log(JSON.stringify(jsonObject))
 
         $.ajax({
             url: '/submit_all_tasks',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify(allTasksData),
+            data: JSON.stringify(jsonObject),
             success: function (response) {
                 alert('All tasks submitted successfully!');
                 $('#newTaskForm').addClass('hidden');
