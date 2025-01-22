@@ -199,6 +199,7 @@ $(document).ready(function () {
                 $('#printGraphForm').addClass('hidden');
                 $('.graph-execution').addClass('hidden');
                 $('#addTimeForm').addClass('hidden');
+                $('#serverGroup').addClass("hidden");
             },
             error: function (xhr) {
                 const errorMessage = xhr.responseJSON && xhr.responseJSON.error
