@@ -59,11 +59,6 @@ $(document).ready(function () {
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="taskId_${taskCount}">Task ID</label>
-                    <input type="number" id="taskId_${taskCount}" name="taskId_${taskCount}" min="1" step="1" required>
-                </div>
-
                 <div class=" hidden" id="periodGroup_${taskCount}">
                     <div class="form-group" >
                         <label for="period_${taskCount}">Period</label>
@@ -71,7 +66,6 @@ $(document).ready(function () {
                     </div>
                     
                 </div>
-                
 
                 <div class=" hidden" id="activationGroup_${taskCount}">
                     <div class="form-group ">
@@ -156,13 +150,12 @@ $(document).ready(function () {
 
             const realTime = $(`#realTime_${i}`).val();
             const taskType = $(`#taskType_${i}`).val();
-            const taskId = parseInt($(`#taskId_${i}`).val());
             const period = parseInt($(`#period_${i}`).val()) || 0;
             const activation = parseInt($(`#activation_${i}`).val()) || 0;
             const deadline = parseInt($(`#deadline_${i}`).val());
             const wcet = parseInt($(`#wcet_${i}`).val());
 
-            if (taskId <= 0 || wcet <= 0 || deadline <= 0) {
+            if (wcet <= 0 || deadline <= 0) {
                 alert(`Invalid inputs for task ${i}.`);
                 return;
             }
@@ -176,7 +169,7 @@ $(document).ready(function () {
 
             taskObject.real_time = parseBool(realTime);
             taskObject.type = taskType;
-            taskObject.id = taskId;
+            taskObject.id = i;
             taskObject.period = period;
             taskObject.activation = activation;
             taskObject.deadline = deadline;
