@@ -47,7 +47,7 @@ def create_xml_structure():
     return (doc, time, tasks, scheduler, pe)
 
 if __name__ == "__main__":
-    algorithms = ["FIFO", "SJF", "HRRN", "SRFT", "RR", "RM", "DM"]
+    algorithms = ["FIFO", "SJF", "HRRN", "SRTF", "RR"]
 
     # Test equality for all the scheduling algorithms
     for alg in algorithms:
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
         # Set the computed times
         time1.setAttribute("start", str(start_time))
-        time1.setAttribute("end", str(end_time))
+        time1.setAttribute("end", str(end_time + add_time))
         time2.setAttribute("start", str(start_time))
         time2.setAttribute("end", str(end_time))
 
@@ -127,44 +127,37 @@ if __name__ == "__main__":
                 new_task = Task.Task(real_time, type, task_id, period if not sporadic_task else None, activation if sporadic_task else None, deadline, wcet)
                 new_tasks.append(new_task)
     
-        # if alg != "RR":
-        #     scheduler1 = ET.SubElement(software1, "scheduler", algorithm=alg)
-        #     scheduler1.tail = "\n"
-        #     scheduler2 = ET.SubElement(software2, "scheduler", algorithm=alg)
-        #     scheduler2.tail = "\n"
-        # else:
-        #     quantum = random.randint(1, MAX_QUANTUM)
-        #     scheduler1 = ET.SubElement(software1, "scheduler", algorithm=alg, quantum=str(quantum))
-        #     scheduler1.tail = "\n"
-        #     scheduler2 = ET.SubElement(software2, "scheduler", algorithm=alg, quantum=str(quantum))
-        #     scheduler2.tail = "\n"
-        # hardware1 = ET.SubElement(simulation1, "hardware")
-        # hardware2 = ET.SubElement(simulation2, "hardware")
-        # cpus1 = ET.SubElement(hardware1, "cpus")
-        # cpus1.tail = "\n"
-        # cpus2 = ET.SubElement(hardware2, "cpus")
-        # cpus2.tail = "\n"
-        # pe1 = ET.SubElement(cpus1, "pe", id="0", speed="1")
-        # pe1.tail = "\n"
-        # pe2 = ET.SubElement(cpus2, "pe", id="0", speed="1")
-        # pe2.tail = "\n"
-        # tree1 = ET.ElementTree(simulation1)
-        # tree1.write("examples/Inputs/test_input1.xml", encoding="UTF-8", xml_declaration=True)
-        # tree2 = ET.ElementTree(simulation2)
-        # tree2.write("examples/Inputs/test_input2.xml", encoding="UTF-8", xml_declaration=True)
+        scheduler1.setAttribute("algorithm", alg)
+        scheduler2.setAttribute("algorithm", alg)
+        
+        # In case of round robin, add the quantum
+        if alg == "RR":
+            quantum = random.randint(1, MAX_QUANTUM)
+            scheduler1.setAttribute("quantum", str(quantum))
+            scheduler2.setAttribute("quantum", str(quantum))
+        
+        # Write the test files
+        with open("examples/Inputs/test_input1.xml", "w", encoding="utf-8") as xml_file:
+            doc1.writexml(xml_file, indent="\t", newl="\n",
+                             addindent="\t", encoding="utf-8")
+        with open("examples/Inputs/test_input2.xml", "w", encoding="utf-8") as xml_file:
+            doc2.writexml(xml_file, indent="\t", newl="\n",
+                             addindent="\t", encoding="utf-8")
 
-        # test_scheduler1 = SchedIO.import_file("examples/Inputs/test_input1.xml", "examples/Outputs/test_output1.csv")
-        # test_scheduler1.execute()
-        # test_scheduler1.terminate()
-        # test_scheduler2 = SchedIO.import_file("examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.csv")
-        # test_scheduler2.execute()
+        # Execute the scheduling
+        test_scheduler1 = SchedIO.import_file("examples/Inputs/test_input1.xml", "examples/Outputs/test_output1.csv")
+        test_scheduler1.execute()
+        test_scheduler1.terminate()
+        test_scheduler2 = SchedIO.import_file("examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.csv")
+        test_scheduler2.execute()
 
-        # count = 0
-        # for new_task in new_tasks:
-        #     test_scheduler2.new_task(new_task)
-        #     test_scheduler2.terminate()
-        #     count += 1
-        # test_scheduler2.add_time(add_time)
-        # test_scheduler2.terminate()
-
-        # compare_files("examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")
+        # Add the new tasks into the scheduling for the second execution
+        count = 0
+        for new_task in new_tasks:
+            test_scheduler2.new_task(new_task)
+            test_scheduler2.terminate()
+            count += 1
+        test_scheduler2.add_time(add_time)
+        test_scheduler2.terminate()
+    
+        compare_files("examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")
