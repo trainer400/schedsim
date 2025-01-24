@@ -124,7 +124,9 @@ if __name__ == "__main__":
             
             # In case not, add it to the list of tasks that are then added at runtime
             else:
-                new_task = Task.Task(real_time, type, task_id, period if not sporadic_task else None, activation if sporadic_task else None, deadline, wcet)
+                new_task = Task.Task(real_time, type, task_id, period if not sporadic_task else None,
+                                    activation if sporadic_task else None, 
+                                    deadline if real_time or not sporadic_task else -1, wcet)
                 new_tasks.append(new_task)
     
         scheduler1.setAttribute("algorithm", alg)
@@ -151,7 +153,6 @@ if __name__ == "__main__":
             scheduler2.setAttribute("server", server)
             scheduler2.setAttribute("period", str(period))
             scheduler2.setAttribute("capacity", str(capacity))
-
         
         # Write the test files
         with open("examples/Inputs/test_input1.xml", "w", encoding="utf-8") as xml_file:
