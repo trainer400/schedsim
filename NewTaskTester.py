@@ -47,7 +47,7 @@ def create_xml_structure():
     return (doc, time, tasks, scheduler, pe)
 
 if __name__ == "__main__":
-    algorithms = ["FIFO", "SJF", "HRRN", "SRTF", "RR"]
+    algorithms = ["FIFO", "SJF", "HRRN", "SRTF", "RR", "RM", "DM"]
 
     # Test equality for all the scheduling algorithms
     for alg in algorithms:
@@ -135,6 +135,23 @@ if __name__ == "__main__":
             quantum = random.randint(1, MAX_QUANTUM)
             scheduler1.setAttribute("quantum", str(quantum))
             scheduler2.setAttribute("quantum", str(quantum))
+        
+        # In case of rate monotonic, add the server and the capacity/period
+        elif alg == "RM":
+            servers = ["polling", "deferrable", "priority_exchange", "sporadic"]
+            server = servers[random.randint(0, len(servers)-1)]
+
+            # Extract capacity and period with capacity < period
+            period = random.randint(1, MAX_PERIOD)
+            capacity = random.randint(1, period)
+
+            scheduler1.setAttribute("server", server)
+            scheduler1.setAttribute("period", str(period))
+            scheduler1.setAttribute("capacity", str(capacity))
+            scheduler2.setAttribute("server", server)
+            scheduler2.setAttribute("period", str(period))
+            scheduler2.setAttribute("capacity", str(capacity))
+
         
         # Write the test files
         with open("examples/Inputs/test_input1.xml", "w", encoding="utf-8") as xml_file:
