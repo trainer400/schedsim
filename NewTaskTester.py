@@ -1,3 +1,5 @@
+import logging
+import sys
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 import SchedIO
@@ -12,14 +14,48 @@ MAX_QUANTUM = 10
 TASKS_NUMS = 10
 NEW_TASKS_NUMS = 4
 
-def compare_files(file1, file2):
+logger = logging.getLogger(__name__)
+
+# Custom formatter for logging purposes (colored levelname and integer unix timestamp)
+class CustomFormatter(logging.Formatter):
+    COLORS = {
+        'ERROR': '\033[91m',    # Red
+        'DEBUG': '\033[93m',    # Yellow
+        'INFO': '\033[92m',     # Green
+    }
+    RESET = '\033[0m'  # Reset color
+
+    def format(self, record):
+        # Truncate the timestamp to integer
+        record.unix_time = int(record.created)
+
+        # Change color between DEBUG and INFO
+        level_name = record.levelname
+        if level_name in self.COLORS:
+            record.levelname = f"{self.COLORS[level_name]}{level_name}{self.RESET}"
+        return super().format(record)
+
+def configure_logger(verbose: bool):
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
+
+    # Create a handler that outputs logs to stdout
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG if verbose else logging.INFO)
+
+    # Define a logging format
+    formatter = CustomFormatter('[%(unix_time)s][%(levelname)s] %(message)s')
+    handler.setFormatter(formatter)
+
+    # Add the handler to the logger
+    logger.addHandler(handler)
+
+def compare_files(file1, file2) -> bool:
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
         content_file1 = f1.read()
         content_file2 = f2.read()
     if content_file1 == content_file2:
-        print("Correct")
-    else:
-        print("Not correct")
+        return True
+    return False
 
 def create_xml_structure():
     doc = xml.dom.minidom.Document()
@@ -47,10 +83,15 @@ def create_xml_structure():
     return (doc, time, tasks, scheduler, pe)
 
 if __name__ == "__main__":
+    # Set the logger to display verbose messages
+    configure_logger(True)
+
     algorithms = ["FIFO", "SJF", "HRRN", "SRTF", "RR", "RM", "DM"]
 
     # Test equality for all the scheduling algorithms
     for alg in algorithms:
+        logger.info("---------------------------------------------------------------")
+        logger.info(f"Testing algorithm: {alg}")
 
         # Create the two XML documents
         (doc1, time1, tasks1, scheduler1, pe1) = create_xml_structure()
@@ -137,11 +178,15 @@ if __name__ == "__main__":
             quantum = random.randint(1, MAX_QUANTUM)
             scheduler1.setAttribute("quantum", str(quantum))
             scheduler2.setAttribute("quantum", str(quantum))
+
+            logger.debug(f"Set quantum parameter for RR algorithm: {quantum}")
         
         # In case of rate monotonic, add the server and the capacity/period
         elif alg == "RM":
             servers = ["polling", "deferrable", "priority_exchange", "sporadic"]
             server = servers[random.randint(0, len(servers)-1)]
+
+            logger.debug(f"Selecting Server Algorithm for RM scheduling: {server}")
 
             # Extract capacity and period with capacity < period
             period = random.randint(1, MAX_PERIOD)
@@ -178,4 +223,10 @@ if __name__ == "__main__":
         test_scheduler2.add_time(add_time)
         test_scheduler2.terminate()
     
-        compare_files("examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")
+        logger.debug(f"Testing output files matching")
+        result = compare_files("examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")
+
+        if not result:
+            logger.error("Output file mismatch!")
+            break
+
