@@ -32,10 +32,10 @@ class Scheduler:
         self.deadline_events_list = []
         self.start_events_list = []
         self.executing_list = []
+        self.quantum_counter_list = []
+        self.server_list = []
 
         self.quantum_counter_at_time = []
-
-        self.quantum_counter_list = []
 
         self.output_file = SchedIO.SchedulerEventWriter(output_file)
 
@@ -190,6 +190,8 @@ class Scheduler:
             self.deadline_events_list.pop()
             self.start_events_list.pop()
             self.executing_list.pop()
+            if self.has_server_scheduler():
+                self.server_list.pop()
             self.delete(time)
 
     def reset(self):
@@ -204,6 +206,10 @@ class Scheduler:
         self.arrival_events_list = []
         self.start_events_list = []
         self.executing_list = []
+        self.server_list = []
+
+        if self.has_server_scheduler():
+            self.server_scheduler.reset()
 
     def terminate(self):
         self.output_file.terminate_write()
@@ -1169,6 +1175,7 @@ class RateMonotonic(Preemptive):
                     copy.deepcopy(self.arrival_events))
                 self.start_events_list.append(copy.deepcopy(self.start_events))
                 self.executing_list.append(copy.deepcopy(self.executing))
+                self.server_list.append(copy.deepcopy(self.server_scheduler))
                 count = 0
             time += 1
 
@@ -1211,6 +1218,7 @@ class RateMonotonic(Preemptive):
             self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
             self.start_events = copy.deepcopy(self.start_events_list[pos])
             self.executing = copy.deepcopy(self.executing_list[pos])
+            self.server_scheduler = copy.deepcopy(self.server_list[pos])
 
             if self.executing:
                 self.executing = self.start_events[0]
@@ -1254,6 +1262,7 @@ class RateMonotonic(Preemptive):
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
         self.start_events = copy.deepcopy(self.start_events_list[pos])
         self.executing = copy.deepcopy(self.executing_list[pos])
+        self.server_scheduler = copy.deepcopy(self.server_list[pos])
         if self.executing:
             self.executing = self.start_events[0]
 

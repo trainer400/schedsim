@@ -22,6 +22,14 @@ class ServerScheduler:
             THIS IS A MODIFIER METHOD, start_events and arrival_events MUST BE CONSIDERED MUTED.
         '''
         pass
+    
+    def reset(self):
+        '''
+            The method allows to reset all the stateful info of the server scheduler. It empties the lists and 
+            resets the original values as if the scheduler has just been created.
+        '''
+        self.runtime_capacity = 0
+        self.events = []
 
     def add_arrival_event(self, event: SchedEvent.ScheduleEvent):
         if event not in self.events:
@@ -107,6 +115,10 @@ class PriorityExchangeServer(ServerScheduler):
         self.name = "PriorityExchange"
         self.capacity = capacity
         self.period = period
+        self.runtime_capacity = []
+    
+    def reset(self):
+        super().reset()
         self.runtime_capacity = []
 
     def __exchange_priority(self, priority: int):
@@ -207,6 +219,13 @@ class SporadicServer(ServerScheduler):
         self.capacity = capacity
         self.period = period
         self.replenishments = [self.Replenishment(0, capacity)]
+        self.next_replenishment = None
+        self.used_capacity = 0
+        self.start_time = -1
+
+    def reset(self):
+        super().reset()
+        self.replenishments = [self.Replenishment(0, self.capacity)]
         self.next_replenishment = None
         self.used_capacity = 0
         self.start_time = -1
