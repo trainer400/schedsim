@@ -1,5 +1,7 @@
 import logging
+import os
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 import SchedIO
@@ -210,21 +212,25 @@ if __name__ == "__main__":
             scheduler2.setAttribute("period", str(period))
             scheduler2.setAttribute("capacity", str(capacity))
 
+        temp_dir = tempfile.gettempdir()
+        file_in_test1 = os.path.join(temp_dir, "test_input1.xml")
+        file_in_test2 = os.path.join(temp_dir, "test_input2.xml")
+        file_out_test1 = os.path.join(temp_dir, "test_output1.csv")
+        file_out_test2 = os.path.join(temp_dir, "test_output2.csv")
+
         # Write the test files
-        with open("examples/Inputs/test_input1.xml", "w", encoding="utf-8") as xml_file:
+        with open(file_in_test1, "w", encoding="utf-8") as xml_file:
             doc1.writexml(xml_file, indent="\t", newl="\n",
                           addindent="\t", encoding="utf-8")
-        with open("examples/Inputs/test_input2.xml", "w", encoding="utf-8") as xml_file:
+        with open(file_in_test2, "w", encoding="utf-8") as xml_file:
             doc2.writexml(xml_file, indent="\t", newl="\n",
                           addindent="\t", encoding="utf-8")
 
         # Execute the scheduling
-        test_scheduler1 = SchedIO.import_file(
-            "examples/Inputs/test_input1.xml", "examples/Outputs/test_output1.csv")
+        test_scheduler1 = SchedIO.import_file(file_in_test1, file_out_test1)
         test_scheduler1.execute()
         test_scheduler1.terminate()
-        test_scheduler2 = SchedIO.import_file(
-            "examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.csv")
+        test_scheduler2 = SchedIO.import_file(file_in_test2, file_out_test2)
         test_scheduler2.execute()
 
         # Add the new tasks into the scheduling for the second execution
@@ -237,8 +243,7 @@ if __name__ == "__main__":
         test_scheduler2.terminate()
 
         logger.debug(f"Testing output files matching")
-        result = compare_files(
-            "examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")
+        result = compare_files(file_out_test1, file_out_test2)
 
         if not result:
             logger.error("Output file mismatch!")
