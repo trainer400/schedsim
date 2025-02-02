@@ -14,7 +14,7 @@ def create_graph(output_image, start_time, end_time, fraction, plot_graph=False)
         if fraction is not None:
             fraction = int(fraction)
 
-        # Get the temporary directory path and path to temporany CSV file
+        # Get the temporary directory path and path to temporary CSV file
         temp_dir = tempfile.gettempdir()
         input_csv = os.path.join(temp_dir, 'out.csv')
 

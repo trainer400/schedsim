@@ -35,63 +35,36 @@ The algorithm processes each time instant, from the start to the end of the simu
 
 ### Non Preemptive
 
-In Non-Preemptive algorithms, for each time instant, if no task is currently executing, the events in
-the Arrival Events list are sorted according to the chosen scheduling algorithm. The algorithm then
-selects the first task in the list to be fully executed without interruption.
+In Non-Preemptive algorithms, for each time instant, if no task is currently executing, the events in the Arrival Events list are sorted according to the chosen scheduling algorithm. The algorithm then selects the first task in the list to be fully executed without interruption.
 
 ### Preemptive
 
 In Preemptive algorithms, tasks can be started, interrupted, and then resumed. In SRTF, at each
 time instant, the task within the Start Events list that has the shortest remaining execution time is
-selected for execution. In RR, at each quantum time instant, the task to be executed is switched in a
-cyclic manner, following a repeated round of the tasks in the Start Events list.
+selected for execution. In RR, at each quantum time instant, the task to be executed is switched in a cyclic manner, following a repeated round of the tasks in the Start Events list.
 
-## Adding functionalities
-
-The scope of the project is to add the following functionalities:
-
-- Adding Tasks and Time: Support the insertion of tasks after the execution has started, without
-  the need to recalculate everything, and provide the ability to extend the simulation’s end time;
-- Graphical Interface: Implement a GUI that allows users to interact with the scheduling algorithm and provides a visual representation of the tasks being executed throughout the simulation;
-
-Here we present the web software architecture scheme, showcasing how the user interface connects
-and interacts with various system components. The following diagram highlights the seamless communication between the frontend and backend.
-
-TODO: ADD DIAGRAM
-
-### Adding task and time
+## Adding task and time
 
 To support the addition of a new task after the execution has started, various solutions have been
-considered. For periodic tasks, it is impossible to add a task without recalculating everything from the
-beginning, as the start time of each periodic task is tied to the start time of the scheduling. Therefore,
-the optimizations described below focus on the addition of sporadic tasks.
+considered. For periodic tasks, it is impossible to add a new task without recalculating everything from the beginning, as the start time of each periodic task is tied to the start time of the scheduling.
+Therefore,the optimizations described below focus on the addition of sporadic tasks.
 
 ### Basic solution
 
 The basic solution involves saving a copy of the four lists (_Arrival Events_, _Finish Events_, _Deadline Events_, _Start Events_) at each time instant. When a new task is added, the algorithm would return to
 the state corresponding to the start time of the new task and continue the execution from that point.
-However, this solution is not optimal because saving a copy of the four lists at each time instant is
-computationally expensive. Therefore, a more efficient solution is needed-one that does not require
-saving the state of the lists at every time instant, but only at certain intervals.
+However, this solution is not optimal because saving a copy of the four lists at each time instant is computationally expensive. Therefore, a more efficient solution that does not require saving the state at every time instant is needed.
 
 ### Balanced binary search tree solution
 
-An alternative solution is to use a Balanced Binary Search Tree (BBST) to save a copy of the four
-lists only at time instants when a new task begins execution. With this data structure, fewer copies of
-the lists are needed, and when a new task is added, the time to restart the execution can be found in
-O(log(total time)). However, this solution is less effective when tasks have short durations, or when
-the quantum value in Round Robin scheduling is low, leading to frequent updates of the BBST and,
-consequently, too many copies of the lists.
+An alternative solution is to use a Balanced Binary Search Tree (BBST) to save a copy of the four lists only at time instants when a new task begins execution. With this data structure, fewer copies of the lists are needed, and when a new task is added, the time to restart the execution can be found in O(log(total time)). However, this solution is less effective when tasks have short durations, or when the quantum value in Round Robin scheduling is low, which lead to frequent copies.
 
 **Example**:<br/>
 Time = 10<br/>
 We suppose that at the following time instants {2, 3, 5, 7, 9}, the tasks in ”execution” change, and the tree is updated before continuing execution.
-Now, consider a new task that starts at time 4. The system finds the largest element in the BBST
-(Balanced Binary Search Tree) that is smaller than or equal to 4, which is 3.
-The system updates the BBST structure, restores the state from time 3, and resumes the simulation
-from that point until the end.
-If we consider round-robin execution, the tree size remains constant at one, as the tree is updated with
-each time slice.
+Now, consider a new task that starts at time 4. The system finds the largest element in the BBST that is smaller than or equal to 4, which is 3.
+The system updates the BBST structure, restores the state from time 3, and resumes the simulation from that point until the end.
+If we consider round-robin execution, the tree size remains constant at one, as the tree is updated with each time slice.
 
 TODO: add graph
 
@@ -111,31 +84,32 @@ TODO: add graph
 
 ### Implementation
 
-When the algorithm starts executing, the interval size is calculated as the square root of the total execution time of the simulation, determining how often the states of the lists will be saved. The algorithm then simulates the tasks from the input file, saving the state of the four lists starting at time 0 and at each interval determined by the size. For example, if the total duration is 10, the size will be 3, and the positions that will be saved are 0, 3, 6, and 9. When a new task arrives, if it is sporadic, the time instant at which the execution will be restarted is calculated. This time is the latest saved time instant that is smaller than or equal to the start time of the new task. The execution is then restarted from that time instant and proceeds as before. If additional time is added to the total duration, the list containing the arrival events needs to be updated. The new arrival events are calculated similarly to the initial ones and saved from the previous end time up to the new end time, which is equal to the previous end time plus the added time.
+When the algorithm starts executing, the interval size is calculated as the square root of the total execution time of the simulation, determining how often the states will be saved. The algorithm then simulates the tasks from the input file, saving the state of the four lists starting at time 0 and at each interval determined by the size. When a new task arrives, if it is sporadic, the time instant at which the execution will be restarted is calculated.
+This time is the latest saved time instant that is smaller than or equal to the start time of the new task. The execution is then restarted from that time and proceeds as before. If additional time is added to the total duration, the list containing the arrival events needs to be updated. The new arrival events are calculated similarly to the initial ones and saved from the previous end time up to the new end time, which is equal to the previous end time plus the added time.
 
 ### Test implementation correctness
 
-To test the correctness of the implementation, we created a script that generates two input files. The second file contains a subset of the information from the first one, with a shorter time duration and fewer tasks. The missing tasks in the second file are then added, and the total time is extended to match that of the first file. This approach is used to verify the correct functioning of the method for adding tasks and time. After execution, the two output files are compared, and our implementation consistently passed the test, producing identical files each time.
+To test the correctness of the implementation, we created a script that generates two input files. The second file contains a subset of the information from the first one, with a shorter time duration and fewer tasks. The missing tasks in the second file are then added, and the total time is extended to match that of the first file. This approach is used to verify the correct functioning of the method for adding tasks and time. After execution, the two output files are then compared.
 
 ## Graphical interface
 
-The goal of this project is to create a new user interface (UI) that allows for easy access to and utilization of the newly implemented functionalities. We have developed a web-based UI that can be launched using the **ConnectionHandler.py** script.
+We have developed a web-based UI that can be launched using the **ConnectionHandler.py** script.
 
 ### Running the application
 
 To run the application, follow these steps:
 
-1. Open the Schedsim3 folder on your device;
+1. Open the Schedsim folder on your device;
 2. Navigate to the visualizer directory using your terminal or command prompt;
-3. Compile and run the Connection Handler.py file using Python. This will start the server that hosts the web interface;
+3. Run the `Connection_Handler.py` file using Python3. This will start the server that hosts the web interface;
 4. Open a web browser and go to the URL http://127.0.0.1:5001/ to access the user interface;
-5. Interact with the ”Schedsim3” GUI to utilize the scheduling features and visualize task execution;
+5. Interact with the Schedsim GUI to utilize the scheduling features and visualize task execution.
 
 The homepage of the UI looks like this:
 
 TODO: add graph
 
-We have created several buttons linked to the key features of Schedsim.
+Several buttons linked to the key features of Schedsim were created.
 
 ### Start button
 
@@ -143,19 +117,18 @@ This button allows you to execute the code using the **execute** function of the
 
 ### New task button
 
-This button allows you to create a new task using the new task function of the Scheduler class, which
-requires several parameters defined in the Task class. There are two types of tasks:
+This button allows you to create a new task using the new task function of the Scheduler class, which requires several parameters defined in the Task class. There are two types of tasks:
 
-- **Sporadic**: Requires the parameters (real time, task type, task id, activation, deadline, wcet);
-- **Periodic**: Requires the parameters (real time, task type, task id, period, deadline, wcet);
+- **Sporadic**: Requires the parameters (real_time, task_type, task_id, activation, deadline, wcet);
+- **Periodic**: Requires the parameters (real_time, task_type, task_id, period, deadline, wcet).
 
-There are several controls:
+There are several checks:
 
-- **Task ID Check**: Verify that task id is a positive integer. This ensures that only valid tasks are processed;
+- **Task ID Check**: Verify that task_id is a positive integer. This ensures that only valid tasks are processed;
 - **WCET Check**: Confirm that wcet (Worst-Case Execution Time) is a positive integer. This check ensures that the execution time provided is valid and non-zero;
 - **Period and Activation Check**: For periodic tasks, ensure period is a positive integer. For sporadic tasks, ensure activation is non-negative. This prevents invalid or nonsensical timing values from being used;
 - **Deadline Check**: Ensure deadline is a positive integer. This ensures that deadlines are set correctly and are valid;
-- **WCET vs Period Check**: For periodic tasks, ensure wcet is less than or equal to period. This ensures that the execution time fits within the period allocated for the task;
+- **WCET vs Period Check**: For periodic tasks, ensure wcet is less than or equal to period. This ensures that the execution time fits within the allocated period for the task;
 - **Deadline vs WCET Check**: Ensure deadline is greater than wcet. This guarantees that the task has enough time to complete before its deadline;
 
 TODO: add graph
@@ -168,7 +141,7 @@ TODO: add graph
 
 ### Print graph button
 
-This button allows you to use the **create_graph** function, which automatically prints the graph with default parameters: fraction set to one, and start and end set to the respective parameters of the **scheduler** instance. An additional functionality allows you to define the following parameters (**start**, **end**, **fraction**) to print the graph for a specific interval (usually the most significant). The fraction is a number in the range (1,5), while the start and end are allowed only in the range [**scheduler.start**, **scheduler.end**]. The graph displays four types of data:
+This button allows you to use the **create_graph** function, which automatically prints the graph with default parameters: fraction set to one, start and end set to the respective parameters of the **scheduler** instance. An additional functionality allows you to define the following parameters (**start**, **end**, **fraction**) to print the graph for a specific interval (usually the most significant). The fraction is a number in the range (1,5), while the start and end are only allowed in the range [**scheduler.start**, **scheduler.end**]. The graph displays four types of data:
 
 - Red for the **arrival** of tasks;
 - Blue for the **completion** of tasks;
@@ -179,11 +152,11 @@ TODO: add graphs
 
 ### Select and upload XML file button
 
-This button allows you to select and upload an XML file from your device to the temporary directory of the project. Controls are in place to prevent uploading files that are not in XML format.
+This button allows you to select and upload an XML file from your device to the temporary directory of the project. Checks are in place to prevent uploading files that are not in XML format.
 
 ### Create XML button
 
-This button allows you to create a new XML file based on the input parameters (**start**, **end**, **scheduler algorithm**). The **RR** algorithm also requires an additional parameter, **quantum**, which defines the time to assign to each task during each cycle.
+This button allows you to create a new XML file based on the input parameters (**start**, **end**, **scheduler_algorithm**). The **RR** algorithm also requires an additional parameter, **quantum**, which defines the time to assign to each task during each cycle. The **RM** algorithm requires also the server algorithm (and its parameters) for sporadic task execution.
 
 TODO: add graph
 
@@ -193,7 +166,7 @@ TODO: correct section reference with MD
 
 ### Download CSV button
 
-This button allows you to download the output of the execution in CSV format. You can only download the file if you have executed the code beforehand.
+This button allows you to download the execution output in CSV format. You can only download the file if you have executed the scheduler beforehand.
 
 TODO: add graph
 
@@ -205,7 +178,7 @@ TODO: add graph
 
 ## Support file
 
-For use well the GUI we have develop many support file.
+To wrap a GUI around the Schedsim simulator, different modules have been implemented.
 
 ### SchedulerController
 
@@ -236,10 +209,6 @@ The **script.js** file contains JavaScript code that handles various interaction
 ### Dynamic form
 
 The **dynamic_form.js** file manages the dynamic behavior of the form used for creating XML files. It adjusts the visibility of form fields based on user selections (e.g., task type or scheduling algorithm) to present only relevant options. This script ensures that the form adapts in realtime to user input, improving usability and streamlining the process of configuring XML files.
-
-## Conclusion
-
-With our project, users can now easily interact with the Schedsim Simulator through the web interface we developed, allowing them to visualize a graphical representation of the results. Additionally, the system supports the addition of new tasks and the extension of the total duration without requiring a full recalculation.
 
 ## References
 
