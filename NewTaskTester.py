@@ -17,6 +17,8 @@ NEW_TASKS_NUMS = 4
 logger = logging.getLogger(__name__)
 
 # Custom formatter for logging purposes (colored levelname and integer unix timestamp)
+
+
 class CustomFormatter(logging.Formatter):
     COLORS = {
         'ERROR': '\033[91m',    # Red
@@ -35,6 +37,7 @@ class CustomFormatter(logging.Formatter):
             record.levelname = f"{self.COLORS[level_name]}{level_name}{self.RESET}"
         return super().format(record)
 
+
 def configure_logger(verbose: bool):
     logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
@@ -49,6 +52,7 @@ def configure_logger(verbose: bool):
     # Add the handler to the logger
     logger.addHandler(handler)
 
+
 def compare_files(file1, file2) -> bool:
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
         content_file1 = f1.read()
@@ -56,6 +60,7 @@ def compare_files(file1, file2) -> bool:
     if content_file1 == content_file2:
         return True
     return False
+
 
 def create_xml_structure():
     doc = xml.dom.minidom.Document()
@@ -82,6 +87,7 @@ def create_xml_structure():
 
     return (doc, time, tasks, scheduler, pe)
 
+
 if __name__ == "__main__":
     # Set the logger to display verbose messages
     configure_logger(True)
@@ -90,7 +96,8 @@ if __name__ == "__main__":
 
     # Test equality for all the scheduling algorithms
     for alg in algorithms:
-        logger.info("---------------------------------------------------------------")
+        logger.info(
+            "---------------------------------------------------------------")
         logger.info(f"Testing algorithm: {alg}")
 
         # Create the two XML documents
@@ -102,7 +109,7 @@ if __name__ == "__main__":
         pe1.setAttribute("speed", "1")
         pe2.setAttribute("id", "0")
         pe2.setAttribute("speed", "1")
-        
+
         # Select random times for the simulation
         start_time = random.randint(0, MAX_TIME_START)
         end_time = random.randint(start_time + 1, MAX_TIME_END)
@@ -145,11 +152,12 @@ if __name__ == "__main__":
             task1.setAttribute("real_time", real_time_str)
             task1.setAttribute("type", type)
             task1.setAttribute("id", str(task_id))
-            task1.setAttribute("activation" if sporadic_task else "period", str(activation) if sporadic_task else str(period))
+            task1.setAttribute("activation" if sporadic_task else "period", str(
+                activation) if sporadic_task else str(period))
             task1.setAttribute("wcet", str(wcet))
             if real_time or not sporadic_task:
                 task1.setAttribute("deadline", str(deadline))
-            
+
             # If the task2 is one of the XML ones, add it
             if task_id <= TASKS_NUMS - NEW_TASKS_NUMS:
                 task2 = doc1.createElement("task")
@@ -158,21 +166,22 @@ if __name__ == "__main__":
                 task2.setAttribute("real_time", real_time_str)
                 task2.setAttribute("type", type)
                 task2.setAttribute("id", str(task_id))
-                task2.setAttribute("activation" if sporadic_task else "period", str(activation) if sporadic_task else str(period))
+                task2.setAttribute("activation" if sporadic_task else "period", str(
+                    activation) if sporadic_task else str(period))
                 task2.setAttribute("wcet", str(wcet))
                 if real_time or not sporadic_task:
                     task2.setAttribute("deadline", str(deadline))
-            
+
             # In case not, add it to the list of tasks that are then added at runtime
             else:
                 new_task = Task.Task(real_time, type, task_id, period if not sporadic_task else None,
-                                    activation if sporadic_task else None, 
-                                    deadline if real_time or not sporadic_task else -1, wcet)
+                                     activation if sporadic_task else None,
+                                     deadline if real_time or not sporadic_task else -1, wcet)
                 new_tasks.append(new_task)
-    
+
         scheduler1.setAttribute("algorithm", alg)
         scheduler2.setAttribute("algorithm", alg)
-        
+
         # In case of round robin, add the quantum
         if alg == "RR":
             quantum = random.randint(1, MAX_QUANTUM)
@@ -180,13 +189,15 @@ if __name__ == "__main__":
             scheduler2.setAttribute("quantum", str(quantum))
 
             logger.debug(f"Set quantum parameter for RR algorithm: {quantum}")
-        
+
         # In case of rate monotonic, add the server and the capacity/period
         elif alg == "RM":
-            servers = ["polling", "deferrable", "priority_exchange", "sporadic"]
+            servers = ["polling", "deferrable",
+                       "priority_exchange", "sporadic"]
             server = servers[random.randint(0, len(servers)-1)]
 
-            logger.debug(f"Selecting Server Algorithm for RM scheduling: {server}")
+            logger.debug(
+                f"Selecting Server Algorithm for RM scheduling: {server}")
 
             # Extract capacity and period with capacity < period
             period = random.randint(1, MAX_PERIOD)
@@ -198,20 +209,22 @@ if __name__ == "__main__":
             scheduler2.setAttribute("server", server)
             scheduler2.setAttribute("period", str(period))
             scheduler2.setAttribute("capacity", str(capacity))
-        
+
         # Write the test files
         with open("examples/Inputs/test_input1.xml", "w", encoding="utf-8") as xml_file:
             doc1.writexml(xml_file, indent="\t", newl="\n",
-                             addindent="\t", encoding="utf-8")
+                          addindent="\t", encoding="utf-8")
         with open("examples/Inputs/test_input2.xml", "w", encoding="utf-8") as xml_file:
             doc2.writexml(xml_file, indent="\t", newl="\n",
-                             addindent="\t", encoding="utf-8")
+                          addindent="\t", encoding="utf-8")
 
         # Execute the scheduling
-        test_scheduler1 = SchedIO.import_file("examples/Inputs/test_input1.xml", "examples/Outputs/test_output1.csv")
+        test_scheduler1 = SchedIO.import_file(
+            "examples/Inputs/test_input1.xml", "examples/Outputs/test_output1.csv")
         test_scheduler1.execute()
         test_scheduler1.terminate()
-        test_scheduler2 = SchedIO.import_file("examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.csv")
+        test_scheduler2 = SchedIO.import_file(
+            "examples/Inputs/test_input2.xml", "examples/Outputs/test_output2.csv")
         test_scheduler2.execute()
 
         # Add the new tasks into the scheduling for the second execution
@@ -222,11 +235,11 @@ if __name__ == "__main__":
             count += 1
         test_scheduler2.add_time(add_time)
         test_scheduler2.terminate()
-    
+
         logger.debug(f"Testing output files matching")
-        result = compare_files("examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")
+        result = compare_files(
+            "examples/Outputs/test_output1.csv", "examples/Outputs/test_output2.csv")
 
         if not result:
             logger.error("Output file mismatch!")
             break
-
