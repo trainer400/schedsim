@@ -52,7 +52,7 @@ class PollingServer(ServerScheduler):
         self.events.sort(key=lambda x: x.task.activation)
 
         # Add events such that the overall capacity is met
-        while len(self.events) > 0 and self.runtime_capacity > 0:
+        while len(self.events) > 0 and self.runtime_capacity >= self.events[0].task.wcet:
             # Add the start event into the list
             start_event = SchedEvent.ScheduleEvent(
                 self.events[0].task.activation, self.events[0].task, SchedEvent.EventType.start.value, self.events[0].id)
@@ -64,7 +64,7 @@ class PollingServer(ServerScheduler):
             # Add the event to the start list to be scheduled
             start_events.append(start_event)
 
-            # TODO: Check that the wcet of the task may be greater than the server capacity
+            # Remove the required capacity for execution
             self.runtime_capacity -= self.events[0].task.wcet
 
             # Remove the processed value from the
