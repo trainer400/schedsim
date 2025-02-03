@@ -210,6 +210,17 @@ The **script.js** file contains JavaScript code that handles various interaction
 
 The **dynamic_form.js** file manages the dynamic behavior of the form used for creating XML files. It adjusts the visibility of form fields based on user selections (e.g., task type or scheduling algorithm) to present only relevant options. This script ensures that the form adapts in realtime to user input, improving usability and streamlining the process of configuring XML files.
 
+## Server scheduling algorithms
+Using the Rate Monotonic (RM) scheduling algorithm, the comparison between tasks is done at period level. This means that theoretically the only type of admissible tasks to be scheduled by this algorithm is periodic. To avoid this limit, server scheduling algorithms are implemented. The server is considered by RM to be a simple periodic task and, instead of performing a periodic load, it schedules the sporadic tasks with different level of priorities (depending on the implemented algorithm).
+
+### Available algorithms
+Schedsim offers four different types of server schedulers, only applicable to Rate Monotonic.<br/>
+These algorithms are:
+ - **Polling**: At every period, it checks if there are sporadic tasks to schedule. In case the list is not empty, the scheduler assigns its priority (period) to the sporadic task and adds it to the start_events list. The runtime capacity is then replenished every period;
+ - **Deferrable**: Similar to the polling approach, but instead of emptying the capacity in case of no tasks to schedule during wake-up, it preserves it until it is replenished at every period. This way a sporadic task that arrives in the middle of the period could be scheduled immediately without having to wait for the server to restore its capacity at the next period; 
+ - **Priority Exchange**: At each period the runtime capacity is replenished with the correct priority, but when no sporadic tasks are in queue to be executed, the priority is exchanged for the one of the highest priority task that will execute. If sporadic tasks need to be executed, the server assigns its priority (which may vary) to the tasks;
+ - **Sporadic**: Instead of replenishing its capacity every fixed amount of time, it replenishes its capacity at a particular time (activation time + period) and of a particular amount (the amount of capacity used during its activation period).
+
 ## References
 
 1. HEAPLab, Schedsim GitHub Repository, https://github.com/HEAPLab/schedsim, 28 April 2022.
