@@ -177,10 +177,10 @@ class Scheduler:
         '''
             Looks inside the snapshots list what is the last saved snapshot given the current time
         '''
-        for i in range(len(self.time_list) - 1):
+        for i in range(len(self.time_list)):
             if self.time_list[i] <= time and self.time_list[i + 1] > time:
                 return i
-        return len(self.time_list) - 1
+        return -1
 
     def delete(self, time):
         if (self.time_list[-1] >= time):
@@ -437,10 +437,13 @@ class FIFO(NonPreemptive):
             Adds time to the simulation restoring the last available snapshot
             @param add_time the simulation time to be added at the end
         '''
+        pos = self.search_pos(self.end - 1)
+        if pos == -1:
+            raise Exception("No saved snapshot to restore, maybe the scheduler has not been run yet")
+
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -560,10 +563,13 @@ class SJF(NonPreemptive):
             Adds time to the simulation restoring the last available snapshot
             @param add_time the simulation time to be added at the end
         '''
+        pos = self.search_pos(self.end - 1)
+        if pos == -1:
+            raise Exception("No saved snapshot to restore, maybe the scheduler has not been run yet")
+
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -697,10 +703,12 @@ class HRRN(NonPreemptive):
             Adds time to the simulation restoring the last available snapshot
             @param add_time the simulation time to be added at the end
         '''
+        pos = self.search_pos(self.end - 1)
+        if pos == -1:
+            raise Exception("No saved snapshot to restore, maybe the scheduler has not been run yet")
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -877,10 +885,13 @@ class SRTF(Preemptive):
             Adds time to the simulation restoring the last available snapshot
             @param add_time the simulation time to be added at the end
         '''
+        pos = self.search_pos(self.end - 1)
+        if pos == -1:
+            raise Exception("No saved snapshot to restore, maybe the scheduler has not been run yet")
+        
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -1077,10 +1088,13 @@ class RoundRobin(Preemptive):
             Adds time to the simulation restoring the last available snapshot
             @param add_time the simulation time to be added at the end
         '''
+        pos = self.search_pos(self.end - 1)
+        if pos == -1:
+            raise Exception("No saved snapshot to restore, maybe the scheduler has not been run yet")
+        
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -1253,10 +1267,13 @@ class RateMonotonic(Preemptive):
             Adds time to the simulation restoring the last available snapshot
             @param add_time the simulation time to be added at the end
         '''
+        pos = self.search_pos(self.end - 1)
+        if pos == -1:
+            raise Exception("No saved snapshot to restore, maybe the scheduler has not been run yet")
+        
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])
@@ -1421,10 +1438,13 @@ class DeadlineMonotonic(Preemptive):
             Adds time to the simulation restoring the last available snapshot
             @param add_time the simulation time to be added at the end
         '''
+        pos = self.search_pos(self.end - 1)
+        if pos == -1:
+            raise Exception("No saved snapshot to restore, maybe the scheduler has not been run yet")
+        
         self.add_arrivals(self.end, self.end + add_time)
 
         # Restore the last available snapshot
-        pos = self.search_pos(self.end - 1)
         self.finish_events = copy.deepcopy(self.finish_events_list[pos])
         self.deadline_events = copy.deepcopy(self.deadline_events_list[pos])
         self.arrival_events = copy.deepcopy(self.arrival_events_list[pos])

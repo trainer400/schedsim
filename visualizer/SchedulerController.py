@@ -35,7 +35,6 @@ class SchedulerController:
 
             return True
         except FileNotFoundError:
-            print("File not found.")
             return False
 
     def execute_scheduler(self):
@@ -44,7 +43,6 @@ class SchedulerController:
             self.scheduler.terminate()
             return True
         else:
-            print("Scheduler not loaded.")
             return False
 
     def create_task(self, task_data):
@@ -59,7 +57,6 @@ class SchedulerController:
             self.scheduler.terminate()
             return True
         else:
-            print("Scheduler not loaded.")
             return False
 
     def add_new_time(self, n_time):
@@ -70,7 +67,6 @@ class SchedulerController:
             self.scheduler.terminate()
             return True
         else:
-            print("Scheduler not loaded.")
             return False
 
     def print_graph(self, start, end, fraction):
@@ -86,7 +82,6 @@ class SchedulerController:
 
             return True
         except Exception as e:
-            print(f"Error while printing the file: {str(e)}")
             return False
 
     def create_xml(self, file_path, data, cpu_pe_id, cpu_speed):
@@ -150,5 +145,4 @@ class SchedulerController:
             return file_path
 
         except Exception as e:
-            print(f"Error creating XML file: {str(e)}")
             return None
