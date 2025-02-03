@@ -246,8 +246,9 @@ class SporadicServer(ServerScheduler):
             next_event = start_events[0]
 
         # Check if the server is active now
-        active = (next_event != None and next_event.period <
-                  self.period) or len(self.events) > 0
+        active = ((next_event != None and next_event.period <
+                  self.period) or len(self.events) > 0) and self.runtime_capacity > 0
+        
         if active:
             # Properly set the start time
             if self.start_time == -1:
