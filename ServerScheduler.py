@@ -22,7 +22,7 @@ class ServerScheduler:
             THIS IS A MODIFIER METHOD, start_events and arrival_events MUST BE CONSIDERED MUTED.
         '''
         pass
-    
+
     def reset(self):
         '''
             The method allows to reset all the stateful info of the server scheduler. It empties the lists and 
@@ -116,7 +116,7 @@ class PriorityExchangeServer(ServerScheduler):
         self.capacity = capacity
         self.period = period
         self.runtime_capacity = []
-    
+
     def reset(self):
         super().reset()
         self.runtime_capacity = []
@@ -129,7 +129,7 @@ class PriorityExchangeServer(ServerScheduler):
         for i in range(len(self.runtime_capacity)):
             if self.runtime_capacity[i] < priority:
                 self.runtime_capacity[i] = priority
-                
+
     def __schedule_new_event(self, next_event: ScheduleEvent, start_events: list[ScheduleEvent]):
         '''
             Given a sporadic event to schedule and the list of ready to schedule events, the method 
@@ -179,18 +179,18 @@ class PriorityExchangeServer(ServerScheduler):
         # Check if it is a idle situation and in that case remove runtime capacity
         if len(start_events) == 0 and len(self.events) == 0 and len(self.runtime_capacity) > 0:
             self.runtime_capacity.sort(key=lambda x: x)
-            self.runtime_capacity.remove(self.runtime_capacity[len(self.runtime_capacity) - 1])
+            self.runtime_capacity.remove(
+                self.runtime_capacity[len(self.runtime_capacity) - 1])
 
         # Act with priority exchanges only if there are still tasks that can support change of priorities
         if len(start_events) > 0:
-            start_events.sort(key=lambda x: (x.period, x.task.type != "sporadic"))
+            start_events.sort(key=lambda x: (
+                x.period, x.task.type != "sporadic"))
             next_event = start_events[0]
 
             # Priority Exchange with the next task only for priorities that are higher than it
             if len(self.events) == 0 and self.period < next_event.period and next_event.task.type != "sporadic":
                 self.__exchange_priority(next_event.period)
-                # TODO: Define if this instruction is needed
-                # next_event.period = self.period
 
         # Sort the runtime capacity such that the lower period (aka. highest priority) tokens are the first
         self.runtime_capacity.sort(key=lambda x: x)
@@ -248,7 +248,7 @@ class SporadicServer(ServerScheduler):
         # Check if the server is active now
         active = ((next_event != None and next_event.period <
                   self.period) or len(self.events) > 0) and self.runtime_capacity > 0
-        
+
         if active:
             # Properly set the start time
             if self.start_time == -1:
