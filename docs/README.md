@@ -221,6 +221,9 @@ These algorithms are:
  - **Priority Exchange**: At each period the runtime capacity is replenished with the correct priority, but when no sporadic tasks are in queue to be executed, the priority is exchanged for the one of the highest priority task that will execute. If sporadic tasks need to be executed, the server assigns its priority (which may vary) to the tasks;
  - **Sporadic**: Instead of replenishing its capacity every fixed amount of time, it replenishes its capacity at a particular time (activation time + period) and of a particular amount (the amount of capacity used during its activation period).
 
+### Main Assumption
+The main assumption that makes the server algorithms work is that the first level scheduling algorithm is Rate Monotonic. It may not seem much of an assumption, but it impacts heavily on the portability/scalability of the servers' code. This is because, the algorithms classify the tasks using the "period" parameter, which is indeed used in Rate Monotonic. A possible way to make the code be reusable for other first level scheduling algorithms, is to use lambda function as task classification.
+
 ## References
 
 1. HEAPLab, Schedsim GitHub Repository, https://github.com/HEAPLab/schedsim, 28 April 2022.
