@@ -66,7 +66,8 @@ Now, consider a new task that starts at time 4. The system finds the largest ele
 The system updates the BBST structure, restores the state from time 3, and resumes the simulation from that point until the end.
 If we consider round-robin execution, the tree size remains constant at one, as the tree is updated with each time slice.
 
-TODO: add graph
+![](gfx/BBSTExample.png)
+<p align="center">Figure 1: Example of BBST structure</p>
 
 ### SQRT decomposition solution
 
@@ -79,8 +80,6 @@ events_list = {events[0], events[3], events[6], events[9]}, where each events li
 At time 4, a new task is introduced.
 The most recent saved state before time 4 is at time 3.
 The system restores the state at time 3 and resumes the simulation from there until the end.
-
-TODO: add graph
 
 ### Implementation
 
@@ -95,6 +94,9 @@ To test the correctness of the implementation, we created a script that generate
 
 We have developed a web-based UI that can be launched using the **ConnectionHandler.py** script.
 
+![](gfx/WebAppScheme.png)
+<p align="center">Figure 2: Web application architecture scheme</p>
+
 ### Running the application
 
 To run the application, follow these steps:
@@ -107,9 +109,8 @@ To run the application, follow these steps:
 
 The homepage of the UI looks like this:
 
-TODO: add graph
-
-Several buttons linked to the key features of Schedsim were created.
+<p align="center"><img src="gfx/SchedsimPage.png"></p>
+<p align="center">Figure 3: The Schedsim interface</p>
 
 ### Start button
 
@@ -131,13 +132,15 @@ There are several checks:
 - **WCET vs Period Check**: For periodic tasks, ensure wcet is less than or equal to period. This ensures that the execution time fits within the allocated period for the task;
 - **Deadline vs WCET Check**: Ensure deadline is greater than wcet. This guarantees that the task has enough time to complete before its deadline;
 
-TODO: add graph
+![](gfx/SchedsimNewTask.png)
+<p align="center">Figure 4: New Task button interface</p>
 
 ### Add time button
 
 This button allows you to use the **add_time** function of the **Scheduler** class. This function requires a numerical input, which adds the specified amount of time to the **scheduler.end** parameter. When this function is activated, the scheduler implicitly calls the **start** function.
 
-TODO: add graph
+![](gfx/SchedsimAddTime.png)
+<p align="center">Figure 5: Add Time button interface</p>
 
 ### Print graph button
 
@@ -148,7 +151,8 @@ This button allows you to use the **create_graph** function, which automatically
 - Green for the **execution** of tasks;
 - Orange for the **deadline** of tasks;
 
-TODO: add graphs
+![](gfx/SchedsimGraphExample.png)
+<p align="center">Figure 6: Graph example</p>
 
 ### Select and upload XML file button
 
@@ -158,9 +162,13 @@ This button allows you to select and upload an XML file from your device to the 
 
 This button allows you to create a new XML file based on the input parameters (**start**, **end**, **scheduler_algorithm**). The **RR** algorithm also requires an additional parameter, **quantum**, which defines the time to assign to each task during each cycle. The **RM** algorithm requires also the server algorithm (and its parameters) for sporadic task execution.
 
-TODO: add graph
+![](gfx/SchedsimCreateXML.png)
+<p align="center">Figure 7: Create XML button interface</p>
 
 Through the dynamic **Add New Task** button, you can add as many tasks as needed, following the same concept as the **New Task** functionality. The **Submit All Tasks** button finalizes the creation of the XML file, which you can then download using the **Download XML** button. To verify the validity and relationships among the tasks, we use the checks detailed in Section 3.2.3.
+
+![](gfx/SchedsimAddNewTask.png)
+<p align="center">Figure 8: Create XML interface with an example task</p>
 
 TODO: correct section reference with MD
 
@@ -168,13 +176,9 @@ TODO: correct section reference with MD
 
 This button allows you to download the execution output in CSV format. You can only download the file if you have executed the scheduler beforehand.
 
-TODO: add graph
-
 ### Download XML button
 
 This button allows you to download the created XML file. You can only download the file if it was previously created using the Create XML button.
-
-TODO: add graph
 
 ## Support file
 
