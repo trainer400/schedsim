@@ -165,12 +165,10 @@ This button allows you to create a new XML file based on the input parameters (*
 ![](gfx/SchedsimCreateXML.png)
 <p align="center">Figure 7: Create XML button interface</p>
 
-Through the dynamic **Add New Task** button, you can add as many tasks as needed, following the same concept as the **New Task** functionality. The **Submit All Tasks** button finalizes the creation of the XML file, which you can then download using the **Download XML** button. To verify the validity and relationships among the tasks, we use the checks detailed in Section 3.2.3.
+Through the dynamic **Add New Task** button, you can add as many tasks as needed, following the same concept as the **New Task** functionality. The **Submit All Tasks** button finalizes the creation of the XML file, which you can then download using the **Download XML** button. To verify the validity and relationships among the tasks, we use the checks detailed in [New Task Button](#new-task-button)
 
 ![](gfx/SchedsimAddNewTask.png)
 <p align="center">Figure 8: Create XML interface with an example task</p>
-
-TODO: correct section reference with MD
 
 ### Download CSV button
 
