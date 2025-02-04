@@ -234,3 +234,4 @@ The main assumption that makes the server algorithms work is that the first leve
 4. GeeksforGeeks, Square Root (Sqrt) Decomposition Algorithm, https://www.geeksforgeeks.org/square-root-sqrt-decomposition-algorithm/, Accessed September 2024.
 5. GeeksforGeeks, Python Lists, https://www.geeksforgeeks.org/python-lists/, Accessed September 2024.
 6. GeeksforGeeks, Process Schedulers in Operating System, https://www.geeksforgeeks.org/process-schedulers-in-operating-system/, Accessed September 2024.
+7. Giorgio C. Buttazzo, Hard Real-Time Computing Systems, Third edition
