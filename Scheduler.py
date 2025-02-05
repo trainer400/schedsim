@@ -181,10 +181,10 @@ class Scheduler:
         '''
             Looks inside the snapshots list what is the last saved snapshot given the current time
         '''
-        for i in range(len(self.time_list)):
+        for i in range(len(self.time_list) - 1):
             if self.time_list[i] <= time and self.time_list[i + 1] > time:
                 return i
-        return -1
+        return len(self.time_list) - 1  # -1 if the list is empty
 
     def delete(self, time):
         if (self.time_list[-1] >= time):
